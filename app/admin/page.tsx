@@ -6,6 +6,14 @@ import { approveAvatar, rejectAvatar } from './actions'
 import { ShieldCheck, Check, X, ArrowLeft, Clock } from 'lucide-react'
 import Link from 'next/link'
 
+type PendingUser = {
+  id: string
+  username: string | null
+  email: string | null
+  pending_avatar_url: string
+  avatar_url: string | null
+}
+
 export default async function AdminDashboard(props: { searchParams: Promise<{ success?: string, error?: string }> }) {
   const searchParams = await props.searchParams;
   const supabase = await createClient()
@@ -78,7 +86,7 @@ export default async function AdminDashboard(props: { searchParams: Promise<{ su
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {pendingUsers.map((u: any) => (
+              {pendingUsers.map((u: PendingUser) => (
                 <div key={u.id} className="border border-gray-200 rounded-2xl p-5 bg-gray-50/50 shadow-sm flex flex-col hover:border-gray-300 transition-all">
                   
                   <div className="flex justify-between items-start mb-4">
