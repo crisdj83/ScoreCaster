@@ -1,9 +1,9 @@
 import { createClient } from '../lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { signOut } from './actions'
-import { Trophy, ChevronRight, ShieldCheck, User as UserIcon, LogOut, Home as HomeIcon } from 'lucide-react'
+import { Trophy, ChevronRight, ShieldCheck } from 'lucide-react'
 import HeroBanner from './components/HeroBanner'
+import ScoreCasterLogo from './components/ScoreCasterLogo'
 
 const TEAMS = [
   { name: 'Arsenal', crest: 'https://a.espncdn.com/i/teamlogos/soccer/500/359.png' },
@@ -114,51 +114,8 @@ export default async function Home() {
   return (
     <div className="space-y-8 pb-12">
       
-      {/* NEW CENTERED PILL NAVIGATION HEADER */}
-      <div className="flex flex-col items-center gap-6 pt-4 pb-2">
-        <h1 className="text-4xl md:text-5xl font-black text-gray-900 tracking-tighter uppercase">
-          ScoreCaster
-        </h1>
-        
-        <div className="flex flex-wrap items-center justify-center gap-3">
-          <Link 
-            href="/" 
-            className="flex items-center gap-2 bg-gray-900 text-white px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider hover:bg-gray-800 transition-colors shadow-sm"
-          >
-            <HomeIcon className="h-4 w-4" /> Dashboard
-          </Link>
-          
-          <Link 
-            href="/contests" 
-            className="flex items-center gap-2 bg-white text-gray-800 border border-gray-200 px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm"
-          >
-            <Trophy className="h-4 w-4" /> Contests
-          </Link>
-          
-          <Link 
-            href="/profile" 
-            className="flex items-center gap-2 bg-white text-gray-800 border border-gray-200 px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm"
-          >
-            <UserIcon className="h-4 w-4" /> Profile
-          </Link>
-          
-          {profile?.is_global_admin && (
-            <Link 
-              href="/admin" 
-              className="flex items-center gap-2 bg-purple-100 text-purple-800 border border-purple-200 px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider hover:bg-purple-200 transition-colors shadow-sm"
-            >
-              <ShieldCheck className="h-4 w-4" /> Admin
-            </Link>
-          )}
-          
-          <form action={signOut}>
-            <button 
-              className="flex items-center gap-2 bg-red-50 text-red-600 border border-red-100 px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider hover:bg-red-100 transition-colors shadow-sm"
-            >
-              <LogOut className="h-4 w-4" /> Sign Out
-            </button>
-          </form>
-        </div>
+      <div className="flex flex-col items-center gap-5 pt-2 pb-2">
+        <ScoreCasterLogo />
       </div>
 
       {/* HeroBanner is fully driven by the real API */}

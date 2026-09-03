@@ -48,14 +48,14 @@ export default function ProfileForm({ user, profile, messages }: any) {
   }, [])
 
   return (
-    <div className="bg-scorecaster-card p-6 md:p-8 rounded-xl shadow-sm border border-gray-100">
+    <div className="bg-white p-6 md:p-8 rounded-2xl shadow-xl border border-gray-200">
       {messages.success && (
-        <div className="mb-6 p-4 bg-green-50 text-green-700 border border-green-200 rounded-md text-sm font-medium">
+        <div className="mb-6 p-4 bg-green-50 text-green-700 border border-green-200 rounded-xl text-sm font-medium">
           {messages.success}
         </div>
       )}
       {messages.error && (
-        <div className="mb-6 p-4 bg-red-50 text-red-700 border border-red-200 rounded-md text-sm font-medium">
+        <div className="mb-6 p-4 bg-red-50 text-red-700 border border-red-200 rounded-xl text-sm font-medium">
           {messages.error}
         </div>
       )}
@@ -66,7 +66,7 @@ export default function ProfileForm({ user, profile, messages }: any) {
         {/* Email Address */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-          <input type="text" disabled value={user.email} className="w-full rounded-md px-4 py-2 bg-gray-50 border border-gray-200 text-gray-500 cursor-not-allowed" />
+          <input type="text" disabled value={user.email} className="w-full rounded-xl px-4 py-3 bg-gray-50 border border-gray-200 text-gray-500 cursor-not-allowed" />
         </div>
 
         {/* Username */}
@@ -74,7 +74,7 @@ export default function ProfileForm({ user, profile, messages }: any) {
           <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
             <User className="h-4 w-4 text-gray-400" /> Username
           </label>
-          <input type="text" name="username" defaultValue={profile?.username || ''} placeholder="e.g. Dracula's Revenge FC" className="w-full rounded-md px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-scorecaster-green" />
+          <input type="text" name="username" defaultValue={profile?.username || ''} placeholder="e.g. Dracula's Revenge FC" className="w-full rounded-xl px-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-scorecaster-green" />
         </div>
 
         {/* Custom Team Dropdown */}
@@ -131,7 +131,7 @@ export default function ProfileForm({ user, profile, messages }: any) {
         </div>
 
         <div className="pt-4 border-t border-gray-100 flex justify-end">
-          <button type="submit" className="bg-scorecaster-green hover:bg-green-700 text-white rounded-md px-6 py-2.5 font-medium transition-colors shadow-sm">
+          <button type="submit" className="bg-gray-900 hover:bg-gray-800 text-white rounded-xl px-6 py-3 font-black uppercase tracking-wider text-xs transition-colors shadow-sm">
             Save Profile Changes
           </button>
         </div>

@@ -1,18 +1,23 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { Plus, Minus, Clock } from 'lucide-react'
+import { Plus, Minus, Clock, Eye } from 'lucide-react'
 import { savePrediction } from './actions'
+import Link from 'next/link'
 
-export default function PredictionCard({ match, contestId, existingPrediction }: any) {
+export default function PredictionCard({ match, contestId, existingPrediction, revealedPredictions = [] }: any) {
   const [homeScore, setHomeScore] = useState(existingPrediction?.predicted_home_score ?? 0)
   const [awayScore, setAwayScore] = useState(existingPrediction?.predicted_away_score ?? 0)
   const [isPending, startTransition] = useTransition()
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saved'>('idle')
+  const [saveError, setSaveError] = useState('')
 
   // Check if the match has already started (lock the inputs)
   const kickoffTime = new Date(match.utcDate)
-  const hasStarted = new Date() > kickoffTime
+  const isLocked = Date.now() >= kickoffTime.getTime() - 60 * 60 * 1000
+  const canReveal = Date.now() >= kickoffTime.getTime() - 30 * 60 * 1000
+  const [showPredictions, setShowPredictions] = useState(false)
+  const togglePredictions = () => setShowPredictions((visible) => !visible)
 
   // Format the date nicely
   const dateFormatted = new Intl.DateTimeFormat('en-GB', {
@@ -20,7 +25,7 @@ export default function PredictionCard({ match, contestId, existingPrediction }:
   }).format(kickoffTime)
 
   const handleScoreChange = (team: 'home' | 'away', change: number) => {
-    if (hasStarted) return
+    if (isLocked) return
 
     let newHome = homeScore
     let newAway = awayScore
@@ -35,15 +40,20 @@ export default function PredictionCard({ match, contestId, existingPrediction }:
 
     // Save to database in the background without freezing the UI
     setSaveStatus('idle')
+    setSaveError('')
     startTransition(async () => {
-      await savePrediction(contestId, match.id, newHome, newAway)
-      setSaveStatus('saved')
-      setTimeout(() => setSaveStatus('idle'), 2000) // Clear the saved checkmark after 2 seconds
+      try {
+        await savePrediction(contestId, match.id, newHome, newAway)
+        setSaveStatus('saved')
+        setTimeout(() => setSaveStatus('idle'), 2000)
+      } catch (error) {
+        setSaveError(error instanceof Error ? error.message : 'Unable to save prediction.')
+      }
     })
   }
 
   return (
-    <div className={`p-4 md:p-6 border rounded-xl flex flex-col transition-all ${hasStarted ? 'bg-gray-50 border-gray-200' : 'bg-white border-gray-200 hover:border-scorecaster-green hover:shadow-md'}`}>
+    <div className={`p-4 md:p-6 border rounded-xl flex flex-col transition-all ${isLocked ? 'bg-gray-50 border-gray-200' : 'bg-white border-gray-200 hover:border-scorecaster-green hover:shadow-md'}`}>
       
       {/* Top Bar: Date & Status */}
       <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-100 text-sm">
@@ -51,12 +61,14 @@ export default function PredictionCard({ match, contestId, existingPrediction }:
           <Clock className="h-4 w-4 mr-2" />
           {dateFormatted}
         </div>
-        {hasStarted ? (
+        {isLocked ? (
           <span className="text-red-600 font-bold bg-red-50 px-3 py-1 rounded-full text-xs">LOCKED</span>
         ) : (
           <div className="h-6 flex items-center">
              {isPending ? (
                <span className="text-gray-400 text-xs italic animate-pulse">Saving...</span>
+             ) : saveError ? (
+               <span className="text-red-600 text-xs font-bold">{saveError}</span>
              ) : saveStatus === 'saved' ? (
                <span className="text-scorecaster-green text-xs font-bold">✓ Saved</span>
              ) : null}
@@ -65,11 +77,24 @@ export default function PredictionCard({ match, contestId, existingPrediction }:
       </div>
 
       {/* Main Row: Teams and Score Stepper */}
-      <div className="flex flex-col md:flex-row items-center justify-between gap-6 md:gap-4">
+      <div
+        className="flex cursor-pointer flex-col rounded-xl p-1 transition-colors hover:bg-gray-50 md:flex-row items-center justify-between gap-6 md:gap-4"
+        role="button"
+        tabIndex={0}
+        aria-expanded={showPredictions}
+        aria-label={`View predictions for ${match.homeTeam.name} versus ${match.awayTeam.name}`}
+        onClick={togglePredictions}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault()
+            togglePredictions()
+          }
+        }}
+      >
         
         {/* Home Team */}
         <div className="flex flex-col items-center flex-1 text-center w-full">
-          <img src={match.homeTeam.crest} alt={match.homeTeam.name} className={`h-16 w-16 object-contain mb-3 ${hasStarted ? 'opacity-50' : ''}`} />
+          <img src={match.homeTeam.crest} alt={match.homeTeam.name} className={`h-16 w-16 object-contain mb-3 ${isLocked ? 'opacity-50' : ''}`} />
           <span className="font-bold text-gray-800 text-lg">{match.homeTeam.shortName || match.homeTeam.name}</span>
           <span className="text-xs text-gray-500 uppercase tracking-wider font-semibold mt-1">Home</span>
         </div>
@@ -79,13 +104,13 @@ export default function PredictionCard({ match, contestId, existingPrediction }:
           
           {/* Home Controls */}
           <div className="flex flex-col gap-2">
-            <button disabled={hasStarted} onClick={() => handleScoreChange('home', 1)} className="p-2 bg-white rounded-lg border border-gray-200 text-gray-600 hover:text-scorecaster-green hover:border-scorecaster-green disabled:opacity-50 transition-colors shadow-sm">
+            <button type="button" disabled={isLocked || isPending} onClick={() => handleScoreChange('home', 1)} className="p-2 bg-white rounded-lg border border-gray-200 text-gray-600 hover:text-scorecaster-green hover:border-scorecaster-green disabled:opacity-50 transition-colors shadow-sm">
               <Plus className="h-5 w-5" />
             </button>
             <div className="w-12 h-14 bg-white border border-gray-200 rounded-lg flex items-center justify-center text-2xl font-black text-gray-800 shadow-inner">
               {homeScore}
             </div>
-            <button disabled={hasStarted} onClick={() => handleScoreChange('home', -1)} className="p-2 bg-white rounded-lg border border-gray-200 text-gray-600 hover:text-red-500 hover:border-red-500 disabled:opacity-50 transition-colors shadow-sm">
+            <button type="button" disabled={isLocked || isPending} onClick={() => handleScoreChange('home', -1)} className="p-2 bg-white rounded-lg border border-gray-200 text-gray-600 hover:text-red-500 hover:border-red-500 disabled:opacity-50 transition-colors shadow-sm">
               <Minus className="h-5 w-5" />
             </button>
           </div>
@@ -94,13 +119,13 @@ export default function PredictionCard({ match, contestId, existingPrediction }:
 
           {/* Away Controls */}
           <div className="flex flex-col gap-2">
-            <button disabled={hasStarted} onClick={() => handleScoreChange('away', 1)} className="p-2 bg-white rounded-lg border border-gray-200 text-gray-600 hover:text-scorecaster-green hover:border-scorecaster-green disabled:opacity-50 transition-colors shadow-sm">
+            <button type="button" disabled={isLocked || isPending} onClick={() => handleScoreChange('away', 1)} className="p-2 bg-white rounded-lg border border-gray-200 text-gray-600 hover:text-scorecaster-green hover:border-scorecaster-green disabled:opacity-50 transition-colors shadow-sm">
               <Plus className="h-5 w-5" />
             </button>
             <div className="w-12 h-14 bg-white border border-gray-200 rounded-lg flex items-center justify-center text-2xl font-black text-gray-800 shadow-inner">
               {awayScore}
             </div>
-            <button disabled={hasStarted} onClick={() => handleScoreChange('away', -1)} className="p-2 bg-white rounded-lg border border-gray-200 text-gray-600 hover:text-red-500 hover:border-red-500 disabled:opacity-50 transition-colors shadow-sm">
+            <button type="button" disabled={isLocked || isPending} onClick={() => handleScoreChange('away', -1)} className="p-2 bg-white rounded-lg border border-gray-200 text-gray-600 hover:text-red-500 hover:border-red-500 disabled:opacity-50 transition-colors shadow-sm">
               <Minus className="h-5 w-5" />
             </button>
           </div>
@@ -108,11 +133,37 @@ export default function PredictionCard({ match, contestId, existingPrediction }:
 
         {/* Away Team */}
         <div className="flex flex-col items-center flex-1 text-center w-full">
-          <img src={match.awayTeam.crest} alt={match.awayTeam.name} className={`h-16 w-16 object-contain mb-3 ${hasStarted ? 'opacity-50' : ''}`} />
+          <img src={match.awayTeam.crest} alt={match.awayTeam.name} className={`h-16 w-16 object-contain mb-3 ${isLocked ? 'opacity-50' : ''}`} />
           <span className="font-bold text-gray-800 text-lg">{match.awayTeam.shortName || match.awayTeam.name}</span>
           <span className="text-xs text-gray-500 uppercase tracking-wider font-semibold mt-1">Away</span>
         </div>
-
+      </div>
+      <div className="mt-6 border-t border-gray-100 pt-4">
+        <button type="button" onClick={togglePredictions} className={`flex w-full items-center justify-between rounded-xl px-4 py-3 text-left text-xs font-black uppercase tracking-wider transition-colors ${canReveal ? 'bg-gray-950 text-white' : 'bg-gray-100 text-gray-400'}`}>
+          <span className="flex items-center gap-2"><Eye className={`h-4 w-4 ${canReveal ? 'text-[#d4ff00]' : 'text-gray-400'}`} /> {canReveal ? `${showPredictions ? 'Hide' : 'View'} everyone&apos;s predictions` : 'Predictions hidden until 30 minutes before kickoff'}</span>
+          {canReveal && <span className="text-[#d4ff00]">{revealedPredictions.length}</span>}
+        </button>
+        {showPredictions && canReveal && (
+          <div className="mt-3 space-y-2">
+            {revealedPredictions.length ? revealedPredictions.map((prediction: any) => (
+              <div key={`${prediction.user_id}-${prediction.match_id}`} className="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2 text-sm">
+                <span className="font-semibold text-gray-800">{prediction.users?.username || prediction.users?.email?.split('@')[0] || 'Player'}</span>
+                <span className="flex items-center gap-3 font-black text-gray-900">
+                  {prediction.predicted_home_score} : {prediction.predicted_away_score}
+                  {match.status === 'FINISHED' && prediction.points_earned !== null && prediction.points_earned !== undefined && (
+                    <span className="rounded-full bg-[#d4ff00] px-2 py-1 text-xs text-black">+{prediction.points_earned} pts</span>
+                  )}
+                </span>
+              </div>
+            )) : <p className="text-sm text-gray-500">No predictions submitted yet.</p>}
+          </div>
+        )}
+        <Link
+          href={`/contests/${contestId}/predictions/${match.id}`}
+          className="mt-5 flex items-center justify-center rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-xs font-black uppercase tracking-wider text-gray-700 transition-colors hover:border-gray-900 hover:text-gray-950"
+        >
+          Open match page
+        </Link>
       </div>
     </div>
   )

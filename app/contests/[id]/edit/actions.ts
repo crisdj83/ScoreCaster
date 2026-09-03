@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '../../../../lib/supabase/server'
+import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
@@ -122,4 +123,40 @@ export async function updateScoringSettings(formData: FormData) {
   revalidatePath(`/contests/${contestId}`, 'layout')
   
   redirect(`/contests/${contestId}/edit?success=Scoring system updated successfully.`)
+}
+
+export async function deleteContest(formData: FormData) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
+  const contestId = formData.get('contest_id') as string
+  const { data: membership, error: membershipError } = await supabase
+    .from('contest_members')
+    .select('role')
+    .eq('contest_id', contestId)
+    .eq('user_id', user.id)
+    .single()
+
+  if (membershipError || membership?.role !== 'admin') {
+    redirect(`/contests/${contestId}/edit?error=Unauthorized. Only the league admin can delete this league.`)
+  }
+
+  const serviceSupabase = createServiceClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+
+  const { error: predictionsError } = await serviceSupabase.from('predictions').delete().eq('contest_id', contestId)
+  if (predictionsError) redirect(`/contests/${contestId}/edit?error=${encodeURIComponent(predictionsError.message)}`)
+
+  const { error: membersError } = await serviceSupabase.from('contest_members').delete().eq('contest_id', contestId)
+  if (membersError) redirect(`/contests/${contestId}/edit?error=${encodeURIComponent(membersError.message)}`)
+
+  const { error: contestError } = await serviceSupabase.from('contests').delete().eq('id', contestId)
+  if (contestError) redirect(`/contests/${contestId}/edit?error=${encodeURIComponent(contestError.message)}`)
+
+  revalidatePath('/contests', 'page')
+  revalidatePath('/', 'page')
+  redirect('/contests')
 }

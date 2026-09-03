@@ -100,6 +100,12 @@ export default function HeroBanner({
       {/* LEFT SIDE: Countdown & Next Match */}
       <div className="w-full lg:w-1/2 bg-gradient-to-br from-purple-900 via-purple-800 to-orange-600 p-6 sm:p-10 flex flex-col justify-between text-white relative">
         <div>
+          <p className="mb-3 max-w-md text-3xl font-black uppercase leading-none tracking-tight text-white sm:text-5xl">
+            Call the scores.<br /><span className="text-[#d4ff00]">Own the table.</span>
+          </p>
+          <p className="mb-6 max-w-md text-sm leading-6 text-purple-100 sm:text-base">
+            Predict match outcomes, compete with your league, and climb the leaderboard every matchweek.
+          </p>
           <div className="flex items-center gap-2 mb-3">
             <span className="text-lg">⚽</span>
             <span className="font-extrabold tracking-widest text-xs uppercase text-orange-200">Upcoming Match</span>

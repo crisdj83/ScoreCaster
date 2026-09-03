@@ -17,12 +17,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.className} bg-gray-100 min-h-screen flex flex-col`}>
+      <body className={`${inter.className} bg-gray-50 min-h-screen flex flex-col`}>
         {/* Persistent Global Navigation */}
         <Navbar />
 
         {/* Main Content Area */}
-        <main className="flex-grow container mx-auto px-4 py-8">
+        <main className="flex-grow container mx-auto px-4 py-6 md:py-8">
           {children}
         </main>
       </body>

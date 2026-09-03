@@ -1,38 +1,64 @@
-'use client'
+import { LogOut } from 'lucide-react'
+import { createClient } from '../../lib/supabase/server'
+import { signOut } from '../actions'
+import NavLinks from './NavLinks'
 
-import Link from 'next/link'
-import { Bell, HelpCircle, Mail, LogOut } from 'lucide-react'
+export default async function Navbar() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  const { data: profile } = user
+    ? await supabase.from('users').select('is_global_admin').eq('id', user.id).single()
+    : { data: null }
+  let hasUnreadNews = false
+  if (user) {
+    const [{ data: latestPost }, { data: latestReply }, { data: readState }] = await Promise.all([
+      supabase.from('news_posts').select('created_at').order('created_at', { ascending: false }).limit(1).maybeSingle(),
+      supabase.from('news_replies').select('created_at').order('created_at', { ascending: false }).limit(1).maybeSingle(),
+      supabase.from('news_reads').select('last_read_at').eq('user_id', user.id).maybeSingle(),
+    ])
+    const lastRead = readState?.last_read_at ? new Date(readState.last_read_at).getTime() : 0
+    hasUnreadNews = [latestPost?.created_at, latestReply?.created_at]
+      .some(createdAt => createdAt && new Date(createdAt).getTime() > lastRead)
+  }
 
-export default function Navbar() {
   return (
-    <div className="sticky top-4 z-50 flex justify-center px-4">
-      <nav className="bg-gray-950 text-white shadow-2xl rounded-full border border-gray-800 px-6 py-3 flex items-center justify-between gap-8 backdrop-blur-md bg-opacity-90 max-w-4xl w-full">
-        
-        {/* Left: Home Navigation link */}
-        <Link href="/" className="font-black text-xs uppercase tracking-widest text-gray-300 hover:text-orange-400 transition-colors">
-          Home
-        </Link>
-
-        {/* Center/Right: Actions & Sign Out */}
-        <div className="flex items-center space-x-5">
-          <div className="relative cursor-pointer text-gray-400 hover:text-white transition-colors">
-            <Bell className="h-4 w-4" />
-            <span className="absolute -top-1 -right-1 bg-orange-600 text-white text-[9px] font-black h-3.5 w-3.5 rounded-full flex items-center justify-center shadow">
-              3
-            </span>
-          </div>
-
-          <div className="hidden md:flex items-center space-x-3 text-gray-400">
-            <Link href="/help" className="hover:text-white transition-colors"><HelpCircle className="h-4 w-4" /></Link>
-            <Link href="/contact" className="hover:text-white transition-colors"><Mail className="h-4 w-4" /></Link>
-          </div>
-
-          <Link href="/logout" className="flex items-center space-x-1.5 bg-red-950/60 hover:bg-red-900 text-red-200 px-3.5 py-1.5 rounded-full transition-all shadow-sm border border-red-800/50">
-            <LogOut className="h-3.5 w-3.5 text-red-400" />
-            <span className="text-[11px] font-black uppercase tracking-wider hidden sm:block">Sign Out</span>
-          </Link>
+    <div className="flex justify-center px-4 pt-5">
+      <nav className="flex w-full max-w-5xl flex-wrap items-center justify-center gap-2.5">
+        <NavLinks isAdmin={profile?.is_global_admin === true} isLoggedIn={Boolean(user)} hasUnreadNews={hasUnreadNews} />
+        {user && (
+          <form action={signOut}>
+            <button className="flex items-center gap-2 rounded-full border border-red-100 bg-red-50 px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-red-600 shadow-sm transition-colors hover:bg-red-100">
+              <LogOut className="h-4 w-4" /> Sign Out
+            </button>
+          </form>
+        )}
+        <div className="flex items-center gap-2 px-1">
+          <a
+            href="https://instagram.com/cristiansfariac"
+            target="_blank"
+            rel="noreferrer"
+            aria-label="Instagram"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-pink-200 bg-pink-50 text-pink-600 shadow-sm transition-all hover:border-pink-300 hover:bg-pink-100 hover:text-pink-700"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5 fill-none stroke-current" strokeWidth="1.75">
+              <rect x="3" y="3" width="18" height="18" rx="5" />
+              <circle cx="12" cy="12" r="4" />
+              <circle cx="17.5" cy="6.5" r="0.75" className="fill-current stroke-none" />
+            </svg>
+          </a>
+          <a
+            href="https://youtube.com/@SyntiX-Dj"
+            target="_blank"
+            rel="noreferrer"
+            aria-label="YouTube"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-red-200 bg-red-50 text-red-600 shadow-sm transition-all hover:border-red-300 hover:bg-red-100 hover:text-red-700"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5 fill-none stroke-current" strokeWidth="1.75">
+              <rect x="3" y="6" width="18" height="12" rx="3" />
+              <path d="m10 9 5 3-5 3z" className="fill-current stroke-none" />
+            </svg>
+          </a>
         </div>
-
       </nav>
     </div>
   )

@@ -8,20 +8,23 @@ export default async function LoginPage(props: { searchParams: Promise<{ message
   const isSuccessMessage = searchParams?.message?.includes('Check your email');
 
   return (
-    <div className="flex-1 flex flex-col w-full px-8 sm:max-w-md justify-center gap-2 mx-auto mt-12">
-      <div className="flex flex-col items-center mb-8">
-        <Trophy className="h-12 w-12 text-scorecaster-green mb-2" />
-        <h1 className="text-2xl font-bold text-scorecaster-text">Welcome to ScoreCaster</h1>
-        <p className="text-gray-500">Sign in to predict and compete</p>
-      </div>
+    <div className="flex-1 flex flex-col w-full max-w-md justify-center mx-auto py-8">
+      <div className="bg-white border border-gray-200 rounded-2xl shadow-xl p-6 md:p-8">
+        <div className="flex flex-col items-center mb-8">
+          <div className="rounded-2xl bg-gray-900 p-3 mb-3">
+            <Trophy className="h-8 w-8 text-[#d4ff00]" />
+          </div>
+          <h1 className="text-2xl font-black uppercase tracking-tight text-gray-900">Welcome to ScoreCaster</h1>
+          <p className="text-gray-500 text-sm mt-1">Sign in to predict and compete</p>
+        </div>
 
-      <form className="flex-1 flex flex-col w-full justify-center gap-4 text-scorecaster-text">
+      <form className="flex flex-col w-full gap-4 text-scorecaster-text">
         <div className="flex flex-col gap-1">
           <label className="text-sm font-medium" htmlFor="email">
             Email
           </label>
           <input
-            className="rounded-md px-4 py-2 bg-inherit border border-gray-300 focus:outline-none focus:ring-2 focus:ring-scorecaster-green"
+            className="rounded-xl px-4 py-3 bg-gray-50 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-scorecaster-green"
             name="email"
             placeholder="you@example.com"
             required
@@ -34,7 +37,7 @@ export default async function LoginPage(props: { searchParams: Promise<{ message
             Password
           </label>
           <input
-            className="rounded-md px-4 py-2 bg-inherit border border-gray-300 focus:outline-none focus:ring-2 focus:ring-scorecaster-green"
+            className="rounded-xl px-4 py-3 bg-gray-50 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-scorecaster-green"
             type="password"
             name="password"
             placeholder="••••••••"
@@ -47,7 +50,7 @@ export default async function LoginPage(props: { searchParams: Promise<{ message
         
         {/* Error / Success Message Display */}
         {searchParams?.message && (
-          <div className={`p-3 rounded-md text-sm text-center ${isSuccessMessage ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-700'}`}>
+          <div           className={`p-3 rounded-xl text-sm text-center ${isSuccessMessage ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
             {searchParams.message}
           </div>
         )}
@@ -55,13 +58,13 @@ export default async function LoginPage(props: { searchParams: Promise<{ message
         <div className="flex flex-col gap-2 mt-4">
           <button
             formAction={login}
-            className="bg-scorecaster-green hover:bg-green-700 text-white rounded-md px-4 py-2 font-medium transition-colors"
+            className="bg-gray-900 hover:bg-gray-800 text-white rounded-xl px-4 py-3 font-black uppercase tracking-wider text-xs transition-colors"
           >
             Sign In
           </button>
           <button
             formAction={signup}
-            className="border border-scorecaster-green text-scorecaster-green hover:bg-green-50 rounded-md px-4 py-2 font-medium transition-colors"
+            className="border border-scorecaster-green text-scorecaster-green hover:bg-green-50 rounded-xl px-4 py-3 font-black uppercase tracking-wider text-xs transition-colors"
           >
             Sign Up
           </button>
@@ -78,6 +81,7 @@ export default async function LoginPage(props: { searchParams: Promise<{ message
           </button>
         </div>
       </form>
+      </div>
     </div>
   )
 }

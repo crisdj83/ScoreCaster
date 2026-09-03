@@ -1,5 +1,6 @@
 // Fixed both imports to go up 4 folders instead of 5!
 import { createClient } from '../../../../lib/supabase/server'
+import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { getPLMatches } from '../../../../lib/football'
 import PredictionCard from './PredictionCard'
 
@@ -32,12 +33,27 @@ export default async function PredictionsPage(props: { params: Promise<{ id: str
     .eq('contest_id', params.id)
     .eq('user_id', user.id)
 
+  const revealableMatchIds = matchdayFixtures
+    .filter((match: any) => Date.now() >= new Date(match.utcDate).getTime() - 30 * 60 * 1000)
+    .map((match: any) => match.id)
+  const serviceSupabase = createServiceClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+  const { data: revealedPredictions } = revealableMatchIds.length
+    ? await serviceSupabase
+      .from('predictions')
+      .select('match_id, user_id, predicted_home_score, predicted_away_score, points_earned, users(username, email)')
+      .eq('contest_id', params.id)
+      .in('match_id', revealableMatchIds)
+    : { data: [] }
+
   return (
     <div className="p-6 md:p-8 bg-gray-50/50 rounded-b-xl">
       <div className="flex justify-between items-center mb-8">
         <div>
           <h2 className="text-2xl font-bold text-scorecaster-text">Matchday {currentMatchday}</h2>
-          <p className="text-gray-500 text-sm mt-1">Make your predictions before kickoff.</p>
+          <p className="text-gray-500 text-sm mt-1">Predictions lock one hour before kickoff. Results are revealed 30 minutes before each game.</p>
         </div>
       </div>
       
@@ -53,6 +69,7 @@ export default async function PredictionsPage(props: { params: Promise<{ id: str
               match={match} 
               contestId={params.id} 
               existingPrediction={existingPrediction} 
+              revealedPredictions={revealedPredictions?.filter((prediction: any) => prediction.match_id === match.id) || []}
             />
           )
         })}

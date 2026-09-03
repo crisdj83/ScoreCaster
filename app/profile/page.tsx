@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { updateProfile } from './actions'
 import { User, Shield, Image as ImageIcon, RefreshCw, ArrowLeft, Clock, ChevronDown } from 'lucide-react'
 import Link from 'next/link'
@@ -31,7 +32,9 @@ const TEAMS = [
 ]
 
 export default function ProfilePage() {
+  const router = useRouter()
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState('')
   const [profile, setProfile] = useState<any>(null)
   const [avatarUrl, setAvatarUrl] = useState('')
   const [isPending, setIsPending] = useState(false)
@@ -41,24 +44,39 @@ export default function ProfilePage() {
 
   useEffect(() => {
     async function loadProfile() {
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user) {
-        const { data } = await supabase.from('users').select('*').eq('id', user.id).single()
+      try {
+        const supabase = createClient()
+        const { data: { user }, error: authError } = await supabase.auth.getUser()
+        if (authError) throw authError
+        if (!user) {
+          router.replace('/login')
+          return
+        }
+
+        const { data, error: profileError } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', user.id)
+          .single()
+        if (profileError) throw profileError
+
         setProfile(data)
         setFavoriteTeam(data?.favorite_team || '')
-        
         if (data?.pending_avatar_url) {
           setAvatarUrl(data.pending_avatar_url)
           setIsPending(true)
         } else {
           setAvatarUrl(data?.avatar_url || '')
         }
+      } catch (error) {
+        console.error('Profile load error:', error)
+        setLoadError(error instanceof Error ? error.message : 'Unable to load your profile.')
+      } finally {
+        setLoading(false)
       }
-      setLoading(false)
     }
     loadProfile()
-  }, [])
+  }, [router])
 
   const generateRandomAvatar = () => {
     const randomSeed = Math.random().toString(36).substring(7)
@@ -70,17 +88,28 @@ export default function ProfilePage() {
   const selectedTeamData = TEAMS.find(t => t.name === favoriteTeam)
 
   if (loading) return <div className="p-8 text-center text-gray-500">Loading profile...</div>
+  if (loadError) {
+    return (
+      <div className="mx-auto mt-8 max-w-md rounded-2xl border border-red-200 bg-red-50 p-6 text-center text-red-700">
+        <p className="font-bold">Could not load your profile</p>
+        <p className="mt-1 text-sm">{loadError}</p>
+        <button onClick={() => window.location.reload()} className="mt-4 rounded-xl bg-gray-900 px-5 py-2.5 text-xs font-black uppercase tracking-wider text-white">
+          Try Again
+        </button>
+      </div>
+    )
+  }
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6 mt-6 pb-12">
+    <div className="max-w-3xl mx-auto space-y-6 pt-2 pb-12">
       
       <div className="flex items-center justify-between mb-8">
         <div>
-          <Link href="/" className="text-scorecaster-green hover:underline text-sm flex items-center gap-1 mb-2">
+          <Link href="/" className="text-gray-500 hover:text-gray-900 transition-colors text-xs font-bold uppercase tracking-wider flex items-center gap-1 mb-2">
             <ArrowLeft className="h-4 w-4" /> Back to Dashboard
           </Link>
-          <h1 className="text-3xl font-bold text-scorecaster-text flex items-center gap-3">
-            <User className="h-8 w-8 text-gray-400" />
+          <h1 className="text-3xl md:text-4xl font-black uppercase tracking-tight text-gray-900 flex items-center gap-3">
+            <User className="h-8 w-8 text-scorecaster-green" />
             Your Profile
           </h1>
         </div>
@@ -88,13 +117,13 @@ export default function ProfilePage() {
 
       <div className="mb-4">
         {typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('success') && (
-          <div className="p-4 bg-green-50 text-green-700 border border-green-200 rounded-md text-sm font-medium">
+          <div className="p-4 bg-green-50 text-green-700 border border-green-200 rounded-xl text-sm font-medium">
             {new URLSearchParams(window.location.search).get('success')}
           </div>
         )}
       </div>
 
-      <div className="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-gray-200">
+      <div className="bg-white p-6 md:p-8 rounded-2xl shadow-xl border border-gray-200">
         <form action={updateProfile} className="space-y-8">
           
           <div>
@@ -133,14 +162,14 @@ export default function ProfilePage() {
                       setIsPending(false);
                     }}
                     placeholder="Paste a link to an image..."
-                    className="w-full rounded-md px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-scorecaster-green"
+                    className="w-full rounded-xl px-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-scorecaster-green"
                   />
                 </div>
                 
                 <button 
                   type="button" 
                   onClick={generateRandomAvatar}
-                  className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md px-4 py-2 text-sm font-medium transition-colors border border-gray-200"
+                  className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl px-4 py-2.5 text-sm font-medium transition-colors border border-gray-200"
                 >
                   <RefreshCw className="h-4 w-4" /> Auto-Generate Avatar
                 </button>
@@ -159,7 +188,7 @@ export default function ProfilePage() {
                 defaultValue={profile?.username || ''}
                 required
                 placeholder="ScoreMaster99"
-                className="w-full rounded-md px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-scorecaster-green"
+                className="w-full rounded-xl px-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-scorecaster-green"
               />
             </div>
             
@@ -173,7 +202,7 @@ export default function ProfilePage() {
               <button
                 type="button"
                 onClick={() => setShowDropdown(!showDropdown)}
-                className="w-full bg-white text-left rounded-md px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-scorecaster-green flex justify-between items-center"
+                className="w-full bg-white text-left rounded-xl px-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-scorecaster-green flex justify-between items-center"
               >
                 <div className="flex items-center gap-3">
                   {selectedTeamData ? (
@@ -198,7 +227,7 @@ export default function ProfilePage() {
                 <>
                   <div className="fixed inset-0 z-10" onClick={() => setShowDropdown(false)}></div>
                   
-                  <div className="absolute z-20 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                  <div className="absolute z-20 mt-1 w-full bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto">
                     <div 
                       className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 cursor-pointer text-gray-500 border-b border-gray-100"
                       onClick={() => { setFavoriteTeam(''); setShowDropdown(false); }}
@@ -230,7 +259,7 @@ export default function ProfilePage() {
           <div className="flex justify-end pt-4 border-t border-gray-100">
             <button 
               type="submit" 
-              className="bg-scorecaster-green hover:bg-green-700 text-white rounded-md px-8 py-3 font-bold transition-colors shadow-sm z-0 relative"
+              className="bg-gray-900 hover:bg-gray-800 text-white rounded-xl px-8 py-3 font-black uppercase tracking-wider text-xs transition-colors shadow-sm z-0 relative"
             >
               Save Profile
             </button>

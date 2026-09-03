@@ -1,7 +1,8 @@
 import { createClient } from '../../../lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { Trophy, BarChart2, BookOpen, Shield, MessageSquare, ArrowLeft } from 'lucide-react'
+import { Trophy, ArrowLeft } from 'lucide-react'
+import ContestNav from './ContestNav'
 
 export default async function ContestLayout(props: { 
   children: React.ReactNode;
@@ -78,40 +79,7 @@ export default async function ContestLayout(props: {
       </div>
 
       {/* Sub-Navigation Tabs - Modern Dark Capsule Bar */}
-      <div className="bg-gray-950 p-2 rounded-2xl shadow-lg flex overflow-x-auto hide-scrollbar gap-1 border border-gray-800">
-        <Link 
-          href={`/contests/${contest.id}/predictions`} 
-          className="flex items-center gap-2 px-5 py-3 text-xs md:text-sm font-bold uppercase tracking-wider rounded-xl transition-all bg-[#d4ff00] text-black shadow-sm whitespace-nowrap"
-        >
-          <Trophy className="h-4 w-4" /> Predictions
-        </Link>
-        <Link 
-          href={`/contests/${contest.id}/ranking`} 
-          className="flex items-center gap-2 px-5 py-3 text-xs md:text-sm font-bold uppercase tracking-wider rounded-xl transition-all text-gray-400 hover:text-white hover:bg-gray-900 whitespace-nowrap"
-        >
-          <BarChart2 className="h-4 w-4" /> Ranking
-        </Link>
-        <Link 
-          href={`/contests/${contest.id}/championship`} 
-          className="flex items-center gap-2 px-5 py-3 text-xs md:text-sm font-bold uppercase tracking-wider rounded-xl transition-all text-gray-400 hover:text-white hover:bg-gray-900 whitespace-nowrap"
-        >
-          <Shield className="h-4 w-4" /> PL Standings
-        </Link>
-        <Link 
-          href={`/contests/${contest.id}/rules`} 
-          className="flex items-center gap-2 px-5 py-3 text-xs md:text-sm font-bold uppercase tracking-wider rounded-xl transition-all text-gray-400 hover:text-white hover:bg-gray-900 whitespace-nowrap"
-        >
-          <BookOpen className="h-4 w-4" /> Rules
-        </Link>
-        {isAdmin && (
-          <Link 
-            href={`/contests/${contest.id}/edit`} 
-            className="flex items-center gap-2 px-5 py-3 text-xs md:text-sm font-bold uppercase tracking-wider rounded-xl transition-all text-purple-300 hover:text-white hover:bg-purple-950 whitespace-nowrap ml-auto"
-          >
-            ⚙️ Settings
-          </Link>
-        )}
-      </div>
+      <ContestNav contestId={contest.id} isAdmin={isAdmin} />
 
       {/* Page Content Container */}
       <div className="bg-white rounded-2xl shadow-xl border border-gray-100 min-h-[400px] overflow-hidden p-6 md:p-8">

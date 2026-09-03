@@ -1,6 +1,8 @@
 'use server'
 
 import { createClient } from '../../../../lib/supabase/server'
+import { createClient as createServiceClient } from '@supabase/supabase-js'
+import { getPLMatches } from '../../../../lib/football'
 import { revalidatePath } from 'next/cache'
 
 export async function savePrediction(
@@ -13,6 +15,26 @@ export async function savePrediction(
   
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('You must be logged in to save a prediction.')
+
+  const { data: membership, error: membershipError } = await supabase
+    .from('contest_members')
+    .select('user_id')
+    .eq('contest_id', contestId)
+    .eq('user_id', user.id)
+    .single()
+  if (membershipError || !membership) throw new Error('You are not a member of this contest.')
+
+  const matchData = await getPLMatches()
+  const match = matchData.matches.find((item: { id: number | string; utcDate: string }) => String(item.id) === String(matchId))
+  if (!match) throw new Error('This match could not be verified. Please refresh and try again.')
+  if (!match.utcDate || Date.now() >= new Date(match.utcDate).getTime() - 60 * 60 * 1000) {
+    throw new Error('Predictions are locked one hour before kickoff.')
+  }
+
+  const serviceSupabase = createServiceClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
 
   if (homeScoreRaw === undefined || homeScoreRaw === null || homeScoreRaw === '') {
     throw new Error('Missing Home Score. Please enter a valid number.')
@@ -28,7 +50,7 @@ export async function savePrediction(
     throw new Error('Scores must be valid numbers.')
   }
 
-  const { data: existingPrediction } = await supabase
+  const { data: existingPrediction } = await serviceSupabase
     .from('predictions')
     .select('id')
     .eq('user_id', user.id)
@@ -37,7 +59,7 @@ export async function savePrediction(
     .single()
 
   if (existingPrediction) {
-    const { error: updateError } = await supabase
+    const { error: updateError } = await serviceSupabase
       .from('predictions')
       .update({ 
         predicted_home_score: homeScore,   // FIXED COLUMN NAME
@@ -50,7 +72,7 @@ export async function savePrediction(
       throw new Error(`Supabase Update Error: ${updateError.message}`)
     }
   } else {
-    const { error: insertError } = await supabase
+    const { error: insertError } = await serviceSupabase
       .from('predictions')
       .insert({
         user_id: user.id,

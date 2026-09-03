@@ -24,11 +24,14 @@ export default async function UpdatePasswordPage(props: { searchParams: Promise<
   }
 
   return (
-    <div className="flex-1 flex flex-col w-full px-8 sm:max-w-md justify-center gap-2 mx-auto mt-12">
+    <div className="flex-1 flex flex-col w-full max-w-md justify-center mx-auto py-8">
+      <div className="bg-white border border-gray-200 rounded-2xl shadow-xl p-6 md:p-8">
       <div className="flex flex-col items-center mb-8">
-        <Trophy className="h-12 w-12 text-scorecaster-green mb-2" />
-        <h1 className="text-2xl font-bold text-scorecaster-text">Reset Password</h1>
-        <p className="text-gray-500">Enter your new secure password below</p>
+        <div className="rounded-2xl bg-gray-900 p-3 mb-3">
+          <Trophy className="h-8 w-8 text-[#d4ff00]" />
+        </div>
+        <h1 className="text-2xl font-black uppercase tracking-tight text-gray-900">Reset Password</h1>
+        <p className="text-gray-500 text-sm mt-1">Enter your new secure password below</p>
       </div>
 
       <form action={updatePassword} className="flex-1 flex flex-col w-full justify-center gap-4 text-scorecaster-text">
@@ -53,11 +56,12 @@ export default async function UpdatePasswordPage(props: { searchParams: Promise<
         )}
 
         <button
-          className="bg-scorecaster-green hover:bg-green-700 text-white rounded-md px-4 py-2 font-medium transition-colors mt-4"
+          className="bg-gray-900 hover:bg-gray-800 text-white rounded-xl px-4 py-3 font-black uppercase tracking-wider text-xs transition-colors mt-4"
         >
           Update Password
         </button>
       </form>
+      </div>
     </div>
   )
 }

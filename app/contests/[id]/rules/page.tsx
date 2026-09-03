@@ -1,6 +1,18 @@
 import { Target, Activity, CheckCircle2, Clock, AlertCircle } from 'lucide-react'
+import { createClient } from '../../../../lib/supabase/server'
 
-export default async function RulesPage() {
+export default async function RulesPage(props: { params: Promise<{ id: string }> }) {
+  const { id } = await props.params
+  const supabase = await createClient()
+  const { data: contest } = await supabase
+    .from('contests')
+    .select('points_exact, points_close, points_result')
+    .eq('id', id)
+    .single()
+
+  const pointsExact = Number(contest?.points_exact ?? 3)
+  const pointsClose = Number(contest?.points_close ?? 1.5)
+  const pointsResult = Number(contest?.points_result ?? 1)
   return (
     <div className="space-y-6 max-w-4xl">
       <div className="mb-2">
@@ -43,7 +55,7 @@ export default async function RulesPage() {
             {/* Exact Card */}
             <div className="bg-gray-50/70 p-5 rounded-2xl border border-gray-200 shadow-sm relative overflow-hidden group hover:border-orange-500 transition-all flex flex-col">
               <div className="absolute top-0 right-0 bg-orange-600 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-bl-xl shadow">
-                +3 PTS
+                +{pointsExact} PTS
               </div>
               <Target className="h-7 w-7 text-orange-600 mb-3" />
               <h4 className="font-extrabold uppercase tracking-tight text-gray-900 mb-1.5">Exact Score</h4>
@@ -60,7 +72,7 @@ export default async function RulesPage() {
             {/* Close Card */}
             <div className="bg-gray-50/70 p-5 rounded-2xl border border-gray-200 shadow-sm relative overflow-hidden group hover:border-purple-600 transition-all flex flex-col">
               <div className="absolute top-0 right-0 bg-purple-800 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-bl-xl shadow">
-                +1.5 PTS
+                +{pointsClose} PTS
               </div>
               <Activity className="h-7 w-7 text-purple-700 mb-3" />
               <h4 className="font-extrabold uppercase tracking-tight text-gray-900 mb-1.5">Close Prediction</h4>
@@ -77,7 +89,7 @@ export default async function RulesPage() {
             {/* Result Card */}
             <div className="bg-gray-50/70 p-5 rounded-2xl border border-gray-200 shadow-sm relative overflow-hidden group hover:border-gray-500 transition-all flex flex-col">
               <div className="absolute top-0 right-0 bg-gray-700 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-bl-xl shadow">
-                +1 PT
+                +{pointsResult} PT{pointsResult === 1 ? '' : 'S'}
               </div>
               <CheckCircle2 className="h-7 w-7 text-gray-700 mb-3" />
               <h4 className="font-extrabold uppercase tracking-tight text-gray-900 mb-1.5">Correct Result</h4>
@@ -104,8 +116,8 @@ export default async function RulesPage() {
           </h3>
           <p className="text-gray-500 text-sm mb-4">If two or more players have the exact same Total Points, the leaderboard will rank them based on:</p>
           <ol className="space-y-2 text-sm text-gray-700 ml-7 list-decimal marker:text-orange-600 font-bold">
-            <li>Highest number of Exact Scores (+3 pts)</li>
-            <li>Highest number of Close Predictions (+1.5 pts)</li>
+            <li>Highest number of Exact Scores (+{pointsExact} pts)</li>
+            <li>Highest number of Close Predictions (+{pointsClose} pts)</li>
             <li>Highest overall prediction accuracy percentage</li>
           </ol>
         </div>

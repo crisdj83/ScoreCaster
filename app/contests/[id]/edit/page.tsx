@@ -1,8 +1,8 @@
 import { createClient } from '../../../../lib/supabase/server'
-import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { redirect } from 'next/navigation'
-import { updateContestSettings, generateNewInviteKey, updateScoringSettings } from './actions'
-import { Settings, Shield, Key, RefreshCw, Target } from 'lucide-react'
+import { updateContestSettings, generateNewInviteKey, updateScoringSettings, deleteContest } from './actions'
+import DeleteLeagueButton from '../DeleteLeagueButton'
+import { Settings, Shield, Key, RefreshCw, Target, Trash2 } from 'lucide-react'
 
 export default async function EditContestPage(props: { 
   params: Promise<{ id: string }>, 
@@ -157,6 +157,19 @@ export default async function EditContestPage(props: {
               </button>
             </div>
           </form>
+        </div>
+
+        <div className="bg-red-50 p-6 md:p-8 rounded-2xl border border-red-200">
+          <div className="flex items-center gap-2 mb-2">
+            <Trash2 className="h-5 w-5 text-red-600" />
+            <h3 className="text-lg font-extrabold uppercase tracking-tight text-red-900">Danger Zone</h3>
+          </div>
+          <p className="text-xs text-red-700 mb-5">
+            Permanently delete this league and all of its members, predictions, and settings. This cannot be undone.
+          </p>
+          <div className="flex justify-end">
+            <DeleteLeagueButton action={deleteContest} contestId={contest.id} />
+          </div>
         </div>
 
       </div>

@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '../../lib/supabase/server'
+import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
@@ -17,9 +18,13 @@ export async function createContest(formData: FormData) {
 
   const name = formData.get('name') as string
   const contestKey = generateContestKey()
+  const serviceSupabase = createServiceClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
 
   // 1. Create the contest
-  const { data: newContest, error: contestError } = await supabase
+  const { data: newContest, error: contestError } = await serviceSupabase
     .from('contests')
     .insert({
       admin_id: user.id,
@@ -34,7 +39,7 @@ export async function createContest(formData: FormData) {
   }
 
   // 2. Automatically add the creator as the 'admin' in the members table
-  const { error: memberError } = await supabase
+  const { error: memberError } = await serviceSupabase
     .from('contest_members')
     .insert({
       contest_id: newContest.id,
