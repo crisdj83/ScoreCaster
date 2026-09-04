@@ -73,9 +73,9 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
         </p>
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden min-w-[900px]">
+      <div className="bg-[#242424] border border-gray-200 rounded-xl shadow-sm overflow-hidden min-w-[900px]">
         <table className="w-full text-sm text-left">
-          <thead className="bg-gray-50 border-b border-gray-200 text-gray-500 font-semibold uppercase tracking-wider text-xs">
+          <thead className="bg-[#1b1b1b] border-b border-gray-200 text-gray-300 font-semibold uppercase tracking-wider text-xs">
             <tr>
               <th className="px-6 py-4 text-center w-16">Rank</th>
               <th className="px-6 py-4">Player</th>
@@ -108,7 +108,7 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
               leaderboard.map((player, index) => {
                 const rank = index + 1;
                 return (
-                  <tr key={player.id} className="hover:bg-gray-50 transition-colors">
+                  <tr key={player.id} className="hover:bg-[#2d2d2d] transition-colors">
                     <td className="px-6 py-4 text-center font-bold text-gray-900 text-lg">
                       {rank === 1 ? <Trophy className="h-6 w-6 text-yellow-400 mx-auto" /> : 
                        rank === 2 ? <Medal className="h-6 w-6 text-gray-400 mx-auto" /> : 
@@ -123,13 +123,13 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
                       {player.totalPoints}
                     </td>
                     
-                    <td className="px-6 py-4 text-center font-medium text-gray-700">
+                    <td className="px-6 py-4 text-center font-medium text-gray-200">
                       {player.exactResults}
                     </td>
-                    <td className="px-6 py-4 text-center font-medium text-gray-700">
+                    <td className="px-6 py-4 text-center font-medium text-gray-200">
                       {player.closeResults}
                     </td>
-                    <td className="px-6 py-4 text-center font-medium text-gray-700">
+                    <td className="px-6 py-4 text-center font-medium text-gray-200">
                       {player.rightOutcome}
                     </td>
                   </tr>

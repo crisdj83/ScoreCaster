@@ -81,8 +81,8 @@ export default async function MatchPredictionsPage({ params }: PageProps) {
           </div>
         </div>
       </div>
-      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg">
-        <div className="grid grid-cols-[1fr_auto] border-b border-gray-100 bg-gray-50 px-5 py-4 text-xs font-black uppercase tracking-wider text-gray-500">
+      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-[#242424] shadow-lg">
+        <div className="grid grid-cols-[1fr_auto] border-b border-gray-100 bg-[#1b1b1b] px-5 py-4 text-xs font-black uppercase tracking-wider text-gray-300">
           <span>Player</span><span>Score / Points</span>
         </div>
         {players.length ? players.map(player => (
