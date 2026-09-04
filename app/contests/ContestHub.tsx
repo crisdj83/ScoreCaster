@@ -11,7 +11,7 @@ export default function ContestHub({ myContests, messages }: any) {
   return (
     <div className="max-w-4xl mx-auto space-y-6 pt-6">
       <div className="flex items-center space-x-3 mb-6">
-        <div className="bg-purple-900 text-white p-2.5 rounded-xl shadow">
+        <div className="bg-orange-500 text-black p-2.5 rounded-xl shadow">
           <Trophy className="h-6 w-6 text-orange-400" />
         </div>
         <h1 className="text-3xl font-black uppercase tracking-tight text-gray-900">Contest Hub</h1>
@@ -71,7 +71,7 @@ export default function ContestHub({ myContests, messages }: any) {
                 <Users className="h-10 w-10 text-gray-400 mb-3" />
                 <h3 className="text-gray-900 font-bold text-lg">No contests yet</h3>
                 <p className="text-gray-500 text-sm mt-1 max-w-sm mb-4">You haven't joined any prediction leagues. Join an existing one or create your own!</p>
-                <button onClick={() => setActiveTab('join')} className="text-purple-700 font-bold uppercase text-xs tracking-wider hover:underline">
+                <button onClick={() => setActiveTab('join')} className="text-orange-300 font-bold uppercase text-xs tracking-wider hover:underline">
                   Find a contest to join &rarr;
                 </button>
               </div>
@@ -93,7 +93,7 @@ export default function ContestHub({ myContests, messages }: any) {
                     </div>
                     <div className="flex items-center justify-between mt-auto pt-4 text-sm border-t border-gray-100">
                       <span className="text-gray-500 bg-gray-50 px-2 py-1 rounded text-xs">Key: <span className="font-mono font-bold text-gray-700">{membership.contests.contest_key}</span></span>
-                      <span className="flex items-center text-xs font-bold uppercase tracking-wider text-purple-800 group-hover:text-orange-600">
+                      <span className="flex items-center text-xs font-bold uppercase tracking-wider text-orange-300 group-hover:text-orange-200">
                         Dashboard <ChevronRight className="h-4 w-4 ml-0.5" />
                       </span>
                     </div>

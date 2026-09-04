@@ -27,7 +27,7 @@ export default async function Navbar() {
         <NavLinks isAdmin={profile?.is_global_admin === true} isLoggedIn={Boolean(user)} hasUnreadNews={hasUnreadNews} />
         {user && (
           <form action={signOut}>
-            <button className="flex items-center gap-2 rounded-full border border-red-100 bg-red-50 px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-red-600 shadow-sm transition-colors hover:bg-red-100">
+            <button             className="flex items-center gap-2 rounded-full border border-orange-500/50 bg-orange-500/10 px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-orange-300 shadow-sm transition-colors hover:bg-orange-500/20">
               <LogOut className="h-4 w-4" /> Sign Out
             </button>
           </form>
@@ -38,7 +38,7 @@ export default async function Navbar() {
             target="_blank"
             rel="noreferrer"
             aria-label="Instagram"
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-pink-200 bg-pink-50 text-pink-600 shadow-sm transition-all hover:border-pink-300 hover:bg-pink-100 hover:text-pink-700"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-orange-500/50 bg-orange-500/10 text-orange-300 shadow-sm transition-all hover:border-orange-400 hover:bg-orange-500/20 hover:text-orange-200"
           >
             <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5 fill-none stroke-current" strokeWidth="1.75">
               <rect x="3" y="3" width="18" height="18" rx="5" />
@@ -51,7 +51,7 @@ export default async function Navbar() {
             target="_blank"
             rel="noreferrer"
             aria-label="YouTube"
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-red-200 bg-red-50 text-red-600 shadow-sm transition-all hover:border-red-300 hover:bg-red-100 hover:text-red-700"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-orange-500/50 bg-orange-500/10 text-orange-300 shadow-sm transition-all hover:border-orange-400 hover:bg-orange-500/20 hover:text-orange-200"
           >
             <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5 fill-none stroke-current" strokeWidth="1.75">
               <rect x="3" y="6" width="18" height="12" rx="3" />

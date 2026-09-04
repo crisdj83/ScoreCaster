@@ -59,7 +59,7 @@ export default async function ContestLayout(props: {
       </div>
 
       {/* Contest Header - W-Series Gradient Aesthetic */}
-      <div className="bg-gradient-to-br from-purple-950 via-purple-900 to-orange-600 text-white p-6 md:p-10 rounded-2xl shadow-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden border border-purple-800">
+      <div className="bg-gradient-to-br from-[#0d0d0d] via-[#242424] to-orange-600 text-white p-6 md:p-10 rounded-2xl shadow-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden border border-orange-500/50">
         <div className="absolute right-0 top-0 translate-x-8 -translate-y-8 w-64 h-64 bg-orange-500/10 rounded-full blur-3xl pointer-events-none"></div>
         
         <div className="z-10">
@@ -73,7 +73,7 @@ export default async function ContestLayout(props: {
         </div>
         
         <div className="z-10 bg-black/40 px-5 py-3 rounded-xl border border-white/10 backdrop-blur-md text-center shadow-inner">
-          <p className="text-[10px] text-purple-200 uppercase tracking-widest font-black mb-1">Invite Code</p>
+          <p className="text-[10px] text-orange-200 uppercase tracking-widest font-black mb-1">Invite Code</p>
           <p className="font-mono text-2xl font-black tracking-widest text-[#d4ff00]">{contest.contest_key}</p>
         </div>
       </div>

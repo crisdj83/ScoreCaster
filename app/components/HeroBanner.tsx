@@ -30,6 +30,8 @@ export type ScoreData = {
   id: string | number;
   homeTeam: string;
   awayTeam: string;
+  homeCrest?: string;
+  awayCrest?: string;
   homeScore: number | null;
   awayScore: number | null;
   status: string; 
@@ -82,7 +84,7 @@ export default function HeroBanner({
   }
 
   return (
-    <div className="w-full relative overflow-hidden rounded-2xl shadow-2xl flex flex-col lg:flex-row bg-gray-950 border border-gray-800">
+    <div className="w-full relative overflow-hidden rounded-2xl shadow-2xl flex flex-col lg:flex-row bg-gradient-to-bl from-orange-600 via-[#242424] to-[#0d0d0d] border border-gray-800">
       
       <style dangerouslySetInnerHTML={{__html: `
         @keyframes scroll-y {
@@ -98,12 +100,12 @@ export default function HeroBanner({
       `}} />
 
       {/* LEFT SIDE: Countdown & Next Match */}
-      <div className="w-full lg:w-1/2 bg-gradient-to-br from-purple-900 via-purple-800 to-orange-600 p-6 sm:p-10 flex flex-col justify-between text-white relative">
+      <div className="w-full lg:w-1/2 bg-transparent p-6 sm:p-10 flex flex-col justify-between text-white relative">
         <div>
           <p className="mb-3 max-w-md text-3xl font-black uppercase leading-none tracking-tight text-white sm:text-5xl">
             Call the scores.<br /><span className="text-[#d4ff00]">Own the table.</span>
           </p>
-          <p className="mb-6 max-w-md text-sm leading-6 text-purple-100 sm:text-base">
+          <p className="mb-6 max-w-md text-sm leading-6 text-orange-100 sm:text-base">
             Predict match outcomes, compete with your league, and climb the leaderboard every matchweek.
           </p>
           <div className="flex items-center gap-2 mb-3">
@@ -113,7 +115,7 @@ export default function HeroBanner({
           <h2 className="text-2xl sm:text-4xl font-black uppercase tracking-tight leading-tight mb-2">
             Premier League
           </h2>
-          <p className="text-purple-100 font-medium text-base sm:text-lg">
+          <p className="text-orange-100 font-medium text-base sm:text-lg">
             {nextMatch ? `${nextMatch.homeTeam} vs ${nextMatch.awayTeam}` : 'Season Ended / No Fixtures'}
           </p>
         </div>
@@ -122,28 +124,28 @@ export default function HeroBanner({
         <div className="mt-8">
           <div className="flex flex-wrap gap-2 sm:gap-3 items-center mb-6">
             <div className="flex flex-col items-center">
-              <span className="text-[10px] uppercase tracking-wider text-purple-200 mb-1">Days</span>
+              <span className="text-[10px] uppercase tracking-wider text-orange-200 mb-1">Days</span>
               <div className="border-2 border-white/80 p-2 w-12 sm:w-14 flex items-center justify-center text-xl sm:text-2xl font-black font-mono rounded bg-black/20">
                 {timeLeft.days}
               </div>
             </div>
             <span className="text-xl font-black">:</span>
             <div className="flex flex-col items-center">
-              <span className="text-[10px] uppercase tracking-wider text-purple-200 mb-1">Hours</span>
+              <span className="text-[10px] uppercase tracking-wider text-orange-200 mb-1">Hours</span>
               <div className="border-2 border-white/80 p-2 w-12 sm:w-14 flex items-center justify-center text-xl sm:text-2xl font-black font-mono rounded bg-black/20">
                 {timeLeft.hours}
               </div>
             </div>
             <span className="text-xl font-black">:</span>
             <div className="flex flex-col items-center">
-              <span className="text-[10px] uppercase tracking-wider text-purple-200 mb-1">Mins</span>
+              <span className="text-[10px] uppercase tracking-wider text-orange-200 mb-1">Mins</span>
               <div className="border-2 border-white/80 p-2 w-12 sm:w-14 flex items-center justify-center text-xl sm:text-2xl font-black font-mono rounded bg-black/20">
                 {timeLeft.minutes}
               </div>
             </div>
             <span className="text-xl font-black">:</span>
             <div className="flex flex-col items-center">
-              <span className="text-[10px] uppercase tracking-wider text-purple-200 mb-1">Secs</span>
+              <span className="text-[10px] uppercase tracking-wider text-orange-200 mb-1">Secs</span>
               <div className="border-2 border-orange-400 p-2 w-12 sm:w-14 flex items-center justify-center text-xl sm:text-2xl font-black font-mono text-orange-400 rounded bg-black/20">
                 {timeLeft.seconds}
               </div>
@@ -162,20 +164,16 @@ export default function HeroBanner({
       </div>
 
       {/* RIGHT SIDE: Scrolling Latest Scores Feed */}
-      <div className="w-full lg:w-1/2 bg-gray-950 relative overflow-hidden flex flex-col h-[350px] lg:h-[420px]">
-        <div className="absolute top-0 left-0 w-full h-12 bg-gradient-to-b from-gray-950 to-transparent z-10 pointer-events-none"></div>
-        <div className="absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-gray-950 to-transparent z-10 pointer-events-none"></div>
-        
-        <div className="absolute top-4 right-6 z-20">
-          <span className="bg-orange-600 text-white text-[10px] font-bold px-3 py-1 uppercase tracking-widest rounded-full shadow">
-            Latest Scores
-          </span>
+      <div className="w-full lg:w-1/2 h-[350px] lg:h-auto lg:min-h-[420px] bg-transparent relative overflow-hidden flex flex-col">
+        <div className="absolute right-5 top-5 z-20 rounded-full bg-black px-4 py-2 text-xs font-black uppercase tracking-[0.2em] text-white shadow-lg">
+          Latest Scores
         </div>
-
+        
         {recentScores.length > 0 ? (
-          <div className="animate-marquee-y flex flex-col w-full p-4 sm:p-6 gap-3">
+          <div className="absolute inset-0 overflow-hidden">
+            <div className="animate-marquee-y flex min-h-full flex-col w-full p-4 sm:p-6 gap-3">
             {[...recentScores, ...recentScores].map((match, idx) => (
-              <div key={`${match.id}-${idx}`} className="bg-gray-900/90 border border-gray-800 rounded-xl p-3 sm:p-4 hover:border-gray-700 transition-colors">
+              <div key={`${match.id}-${idx}`} className="bg-[#242424] border border-orange-500/30 rounded-xl p-3 sm:p-4 shadow-lg shadow-black/20 hover:bg-[#2d2d2d] hover:border-orange-400/60 transition-colors">
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-[10px] font-bold text-orange-400 uppercase tracking-wider bg-orange-500/10 px-2 py-0.5 rounded">
                     {match.status}
@@ -185,8 +183,8 @@ export default function HeroBanner({
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 sm:gap-3 overflow-hidden">
-                      {getTeamLogo(match.homeTeam) && (
-                        <img src={getTeamLogo(match.homeTeam)} alt={match.homeTeam} className="w-5 h-5 object-contain flex-shrink-0" />
+                      {(match.homeCrest || getTeamLogo(match.homeTeam)) && (
+                        <img src={match.homeCrest || getTeamLogo(match.homeTeam)} alt={match.homeTeam} className="w-5 h-5 object-contain flex-shrink-0" />
                       )}
                       <span className="text-gray-200 font-semibold text-sm truncate">{match.homeTeam}</span>
                     </div>
@@ -195,8 +193,8 @@ export default function HeroBanner({
                   
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 sm:gap-3 overflow-hidden">
-                      {getTeamLogo(match.awayTeam) && (
-                        <img src={getTeamLogo(match.awayTeam)} alt={match.awayTeam} className="w-5 h-5 object-contain flex-shrink-0" />
+                      {(match.awayCrest || getTeamLogo(match.awayTeam)) && (
+                        <img src={match.awayCrest || getTeamLogo(match.awayTeam)} alt={match.awayTeam} className="w-5 h-5 object-contain flex-shrink-0" />
                       )}
                       <span className="text-gray-200 font-semibold text-sm truncate">{match.awayTeam}</span>
                     </div>
@@ -205,9 +203,10 @@ export default function HeroBanner({
                 </div>
               </div>
             ))}
+             </div>
           </div>
         ) : (
-          <div className="flex items-center justify-center h-full text-gray-500 text-sm">
+          <div className="absolute inset-0 flex items-center justify-center text-gray-500 text-sm">
             No recent matches to display.
           </div>
         )}

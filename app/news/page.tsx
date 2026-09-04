@@ -28,10 +28,10 @@ export default async function NewsPage(props: { searchParams: Promise<{ error?: 
       </div>
       {searchParams?.error && <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-700">{searchParams.error}</div>}
       {profile?.is_global_admin && (
-        <form action={createNewsPost} className="space-y-4 rounded-2xl border border-purple-200 bg-purple-50 p-6 shadow-lg">
-          <h2 className="font-black uppercase tracking-tight text-purple-950">Publish an update</h2>
-          <input name="title" required placeholder="Headline" className="w-full rounded-xl border border-purple-200 bg-white px-4 py-3" />
-          <textarea name="body" required rows={4} placeholder="Share an update with the league..." className="w-full rounded-xl border border-purple-200 bg-white px-4 py-3" />
+        <form action={createNewsPost} className="space-y-4 rounded-2xl border border-orange-500/40 bg-orange-500/10 p-6 shadow-lg">
+          <h2 className="font-black uppercase tracking-tight text-orange-300">Publish an update</h2>
+          <input name="title" required placeholder="Headline" className="w-full rounded-xl border border-orange-500/40 bg-[#242424] px-4 py-3 text-white" />
+          <textarea name="body" required rows={4} placeholder="Share an update with the league..." className="w-full rounded-xl border border-orange-500/40 bg-[#242424] px-4 py-3 text-white" />
           <button className="flex items-center gap-2 rounded-xl bg-gray-900 px-5 py-3 text-xs font-black uppercase tracking-wider text-white"><Send className="h-4 w-4" /> Publish</button>
         </form>
       )}

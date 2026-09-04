@@ -52,6 +52,8 @@ async function fetchPLData() {
       id: m.id,
       homeTeam: m.homeTeam.shortName || m.homeTeam.name,
       awayTeam: m.awayTeam.shortName || m.awayTeam.name,
+      homeCrest: m.homeTeam.crest,
+      awayCrest: m.awayTeam.crest,
       homeScore: m.score?.fullTime?.home ?? m.score?.halfTime?.home ?? 0,
       awayScore: m.score?.fullTime?.away ?? m.score?.halfTime?.away ?? 0,
       status: m.status === 'FINISHED' ? 'FT' : 'LIVE'

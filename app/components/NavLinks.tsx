@@ -15,8 +15,8 @@ export default function NavLinks({ isAdmin, isLoggedIn, hasUnreadNews }: NavLink
   const pathname = usePathname()
   const linkClass = (path: string) => `flex items-center gap-2 rounded-full border px-5 py-2.5 text-xs font-bold uppercase tracking-wider shadow-sm transition-all ${
     pathname === path
-      ? 'border-gray-300 bg-gray-200 text-gray-950 ring-2 ring-gray-300/50'
-      : 'border-gray-200 bg-white text-gray-800 hover:border-gray-300 hover:bg-gray-50'
+      ? 'border-orange-500 bg-orange-500/20 text-orange-300 ring-2 ring-orange-500/40'
+      : 'border-gray-200 bg-white text-gray-800 hover:border-orange-500 hover:bg-gray-50'
   }`
 
   return (
@@ -25,7 +25,7 @@ export default function NavLinks({ isAdmin, isLoggedIn, hasUnreadNews }: NavLink
         <ScoreCasterLogo compact />
       </Link>
       <Link href="/" className={`flex items-center gap-2 rounded-full px-5 py-2.5 text-xs font-bold uppercase tracking-wider shadow-sm transition-colors ${
-        pathname === '/' ? 'bg-gray-950 text-white ring-2 ring-gray-400/50' : 'bg-gray-900 text-white hover:bg-gray-800'
+        pathname === '/' ? 'bg-orange-500 text-black ring-2 ring-orange-400/50' : 'bg-gray-900 text-white hover:bg-orange-500 hover:text-black'
       }`}>
         <HomeIcon className="h-4 w-4" /> Dashboard
       </Link>
@@ -44,7 +44,7 @@ export default function NavLinks({ isAdmin, isLoggedIn, hasUnreadNews }: NavLink
       </Link>
       {isAdmin && (
         <Link href="/admin" className={`flex items-center gap-2 rounded-full border px-5 py-2.5 text-xs font-bold uppercase tracking-wider shadow-sm transition-all ${
-          pathname === '/admin' ? 'border-purple-300 bg-purple-200 text-purple-950 ring-2 ring-purple-300/50' : 'border-purple-200 bg-purple-50 text-purple-800 hover:bg-purple-100'
+          pathname === '/admin' ? 'border-orange-500 bg-orange-500/20 text-orange-300 ring-2 ring-orange-500/40' : 'border-orange-500/40 bg-orange-500/10 text-orange-300 hover:bg-orange-500/20'
         }`}>
           <ShieldCheck className="h-4 w-4" /> Admin
         </Link>

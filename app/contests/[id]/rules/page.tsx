@@ -70,11 +70,11 @@ export default async function RulesPage(props: { params: Promise<{ id: string }>
             </div>
 
             {/* Close Card */}
-            <div className="bg-gray-50/70 p-5 rounded-2xl border border-gray-200 shadow-sm relative overflow-hidden group hover:border-purple-600 transition-all flex flex-col">
-              <div className="absolute top-0 right-0 bg-purple-800 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-bl-xl shadow">
+            <div className="bg-gray-50/70 p-5 rounded-2xl border border-gray-200 shadow-sm relative overflow-hidden group hover:border-orange-500 transition-all flex flex-col">
+              <div className="absolute top-0 right-0 bg-orange-600 text-black text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-bl-xl shadow">
                 +{pointsClose} PTS
               </div>
-              <Activity className="h-7 w-7 text-purple-700 mb-3" />
+              <Activity className="h-7 w-7 text-orange-400 mb-3" />
               <h4 className="font-extrabold uppercase tracking-tight text-gray-900 mb-1.5">Close Prediction</h4>
               <p className="text-xs text-gray-600 leading-relaxed">
                 You predict the right outcome (Win/Draw/Loss), AND total goals scored is off by no more than 1.
