@@ -32,6 +32,7 @@ export default function ProfileForm({ user, profile, messages }: any) {
   const [teamOpen, setTeamOpen] = useState(false)
   const t = useTranslations()
   const [selectedTeam, setSelectedTeam] = useState(PREMIER_LEAGUE_TEAMS.find(t => t.name === profile?.favorite_team) || null)
+  const [motto, setMotto] = useState((profile?.quote || '').slice(0, 18))
   
   // React Ref to track where the dropdown is on the screen
   const teamRef = useRef<HTMLDivElement>(null)
@@ -123,13 +124,15 @@ export default function ProfileForm({ user, profile, messages }: any) {
           <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
             <Quote className="h-4 w-4 text-gray-400" /> {t('Personal Quote / Bio')}
           </label>
-          <textarea 
-            name="quote" 
-            defaultValue={profile?.quote || ''} 
+          <input
+            name="quote"
+            value={motto}
+            maxLength={18}
+            onChange={(event) => setMotto(event.target.value.slice(0, 18))}
             placeholder="Football is a simple game. Twenty-two men chase a ball for 90 minutes..." 
-            rows={3} 
             className="w-full rounded-md px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-scorecaster-green resize-none" 
           />
+          <button type="button" onClick={() => setMotto(['Play to win', 'Trust the process', 'Never stop scoring', 'Own the table'][Math.floor(Math.random() * 4)])} className="rounded-xl bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700">{t('Generate motto')}</button>
         </div>
 
         <div className="pt-4 border-t border-gray-100 flex justify-end">

@@ -69,7 +69,7 @@ export default async function FixturesPage(props: { params: Promise<{ id: string
                     <Link
                       key={match.id}
                       href={`/contests/${id}/predictions/${match.id}`}
-                      className="grid grid-cols-[1fr_auto] items-center gap-4 px-5 py-4 transition-colors hover:bg-orange-50 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]"
+                      className="fixture-calendar-game grid grid-cols-[1fr_auto] items-center gap-4 px-5 py-4 transition-colors sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]"
                     >
                       <span className="flex items-center justify-end gap-2 text-right font-bold text-gray-900">
                         <span className="truncate">{match.homeTeam.shortName || match.homeTeam.name}</span>

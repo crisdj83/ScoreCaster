@@ -32,3 +32,7 @@ export async function getPLMatches() {
 export async function getPLStandings() {
   return fetchFootballData('/competitions/PL/standings');
 }
+
+export async function getPLScorers() {
+  return fetchFootballData('/competitions/PL/scorers?limit=50');
+}

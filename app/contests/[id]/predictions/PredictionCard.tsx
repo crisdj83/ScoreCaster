@@ -12,6 +12,7 @@ export default function PredictionCard({ match, contestId, existingPrediction, r
   const [isPending, startTransition] = useTransition()
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saved'>('idle')
   const [saveError, setSaveError] = useState('')
+  const [bounceDirection, setBounceDirection] = useState<'up' | 'down' | null>(null)
   const [now, setNow] = useState(() => Date.now())
   const t = useTranslations()
   const { locale } = useLocale()
@@ -50,6 +51,8 @@ export default function PredictionCard({ match, contestId, existingPrediction, r
       newAway = Math.max(0, awayScore + change)
       setAwayScore(newAway)
     }
+    setBounceDirection(change > 0 ? 'up' : 'down')
+    window.setTimeout(() => setBounceDirection(null), 450)
 
     // Save to database in the background without freezing the UI
     setSaveStatus('idle')
@@ -66,7 +69,7 @@ export default function PredictionCard({ match, contestId, existingPrediction, r
   }
 
   return (
-    <div className={`p-4 md:p-6 border rounded-xl flex flex-col transition-all ${isHurryUp ? 'bg-red-950/30 border-red-500/70' : isLocked ? 'bg-[#242424] border-gray-200' : 'bg-[#242424] border-gray-200 hover:border-scorecaster-green hover:shadow-md'}`}>
+    <div className={`prediction-fixture p-4 md:p-6 border rounded-xl flex flex-col transition-all ${isHurryUp ? 'bg-red-950/30 border-red-500/70' : isLocked ? 'bg-[#242424] border-white/15' : 'bg-[#242424] border-white/15 hover:border-orange-400 hover:shadow-md'}`}>
       
       {/* Top Bar: Date & Status */}
       <div className="flex flex-wrap justify-between items-center gap-3 mb-6 pb-4 border-b border-gray-100 text-sm">
@@ -95,7 +98,7 @@ export default function PredictionCard({ match, contestId, existingPrediction, r
 
       {/* Main Row: Teams and Score Stepper */}
       <div
-        className="flex cursor-pointer flex-col rounded-xl p-1 transition-colors hover:bg-gray-50 md:flex-row items-center justify-between gap-6 md:gap-4"
+        className="prediction-fixture-content flex cursor-pointer flex-col rounded-xl bg-[#242424] p-1 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 md:flex-row items-center justify-between gap-6 md:gap-4"
         role="button"
         tabIndex={0}
         aria-expanded={showPredictions}
@@ -112,12 +115,13 @@ export default function PredictionCard({ match, contestId, existingPrediction, r
         {/* Home Team */}
         <div className="flex flex-col items-center flex-1 text-center w-full">
           <img src={match.homeTeam.crest} alt={match.homeTeam.name} className={`h-16 w-16 object-contain mb-3 ${isLocked ? 'opacity-50' : ''}`} />
-          <span className="font-bold text-gray-800 text-lg">{match.homeTeam.shortName || match.homeTeam.name}</span>
-          <span className="text-xs text-gray-500 uppercase tracking-wider font-semibold mt-1">{t('Home')}</span>
+          <span className="font-bold text-gray-100 text-lg">{match.homeTeam.shortName || match.homeTeam.name}</span>
+          <span className="text-xs text-gray-400 uppercase tracking-wider font-semibold mt-1">{t('Home')}</span>
         </div>
 
         {/* Score Stepper */}
-        <div className="flex items-center justify-center gap-4 bg-[#1b1b1b] p-3 rounded-2xl border border-gray-100">
+        <div className="relative flex items-center justify-center gap-4 bg-[#1b1b1b] p-3 rounded-2xl border border-gray-100">
+          {bounceDirection && <span className={`absolute -top-7 text-xl ${bounceDirection === 'up' ? 'animate-bounce' : 'scorecaster-ball-down'}`} aria-hidden="true">⚽</span>}
           
           {/* Home Controls */}
           <div className="flex flex-col gap-2">
@@ -151,8 +155,8 @@ export default function PredictionCard({ match, contestId, existingPrediction, r
         {/* Away Team */}
         <div className="flex flex-col items-center flex-1 text-center w-full">
           <img src={match.awayTeam.crest} alt={match.awayTeam.name} className={`h-16 w-16 object-contain mb-3 ${isLocked ? 'opacity-50' : ''}`} />
-          <span className="font-bold text-gray-800 text-lg">{match.awayTeam.shortName || match.awayTeam.name}</span>
-          <span className="text-xs text-gray-500 uppercase tracking-wider font-semibold mt-1">{t('Away')}</span>
+          <span className="font-bold text-gray-100 text-lg">{match.awayTeam.shortName || match.awayTeam.name}</span>
+          <span className="text-xs text-gray-400 uppercase tracking-wider font-semibold mt-1">{t('Away')}</span>
         </div>
       </div>
       {match.venue && (
@@ -170,7 +174,7 @@ export default function PredictionCard({ match, contestId, existingPrediction, r
           <div className="mt-3 space-y-2">
             {revealedPredictions.length ? revealedPredictions.map((prediction: any) => (
               <div key={`${prediction.user_id}-${prediction.match_id}`} className="flex items-center justify-between rounded-lg bg-[#2d2d2d] px-3 py-2 text-sm">
-                <span className="font-semibold text-gray-800">{prediction.users?.username || prediction.users?.email?.split('@')[0] || 'Player'}</span>
+                <span className="font-semibold text-gray-100">{prediction.users?.username || prediction.users?.email?.split('@')[0] || 'Player'}</span>
                 <span className="flex items-center gap-3 font-black text-white">
                   {prediction.predicted_home_score} : {prediction.predicted_away_score}
                   {match.status === 'FINISHED' && prediction.points_earned !== null && prediction.points_earned !== undefined && (

@@ -75,7 +75,7 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
 
   const { data: members, error: membersError } = await supabase
     .from('contest_members')
-    .select('user_id, users(username, email)')
+    .select('user_id, users(username, email, quote)')
     .eq('contest_id', params.id)
 
   if (membersError || !members) return <div className="p-6 text-sm text-red-600">Error loading leaderboard.</div>
@@ -118,6 +118,7 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
     return {
       id: member.user_id,
       username: displayName(member),
+      motto: (Array.isArray(member.users) ? member.users[0]?.quote : member.users?.quote) || '',
       totalPoints,
       exactResults,
       closeResults,
@@ -300,10 +301,14 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
               return (
                 <tr key={player.id} className="transition-colors hover:bg-orange-50/50">
                   <td className="px-4 py-4 text-center font-bold text-gray-900">
-                    {tiedRank === 1 ? <Trophy className="mx-auto h-6 w-6 text-yellow-500" /> : tiedRank === 2 ? <Medal className="mx-auto h-6 w-6 text-gray-400" /> : tiedRank === 3 ? <Medal className="mx-auto h-6 w-6 text-amber-600" /> : tiedRank}
+                    <div className="flex items-center justify-center gap-2">
+                      {tiedRank === 1 ? <Trophy className="h-6 w-6 text-yellow-500" /> : tiedRank === 2 ? <Medal className="h-6 w-6 text-gray-400" /> : tiedRank === 3 ? <Medal className="h-6 w-6 text-amber-600" /> : <span className="h-6 w-6" />}
+                      <span>{tiedRank}</span>
+                    </div>
                   </td>
                   <td className="px-4 py-4">
                     <div className="font-bold text-gray-900">{player.username}</div>
+                    {player.motto && <div className="mt-0.5 max-w-[18ch] truncate text-xs italic text-orange-500">&ldquo;{player.motto}&rdquo;</div>}
                     <div className="mt-0.5 text-xs text-gray-500">{player.totalPlayed} {t('matches played')} · {player.scoredMatches} {t('scored')}</div>
                   </td>
                   <td className="bg-orange-50/50 px-4 py-4 text-center text-xl font-black text-orange-600">{player.totalPoints.toFixed(1).replace('.0', '')}</td>

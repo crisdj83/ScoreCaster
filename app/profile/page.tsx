@@ -42,6 +42,7 @@ export default function ProfilePage() {
   const [isPending, setIsPending] = useState(false)
   
   const [favoriteTeam, setFavoriteTeam] = useState('')
+  const [motto, setMotto] = useState('')
   const [showDropdown, setShowDropdown] = useState(false)
 
   useEffect(() => {
@@ -64,6 +65,7 @@ export default function ProfilePage() {
 
         setProfile(data)
         setFavoriteTeam(data?.favorite_team || '')
+        setMotto(data?.quote || '')
         if (data?.pending_avatar_url) {
           setAvatarUrl(data.pending_avatar_url)
           setIsPending(true)
@@ -193,6 +195,29 @@ export default function ProfilePage() {
                 className="w-full rounded-xl px-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-scorecaster-green"
               />
             </div>
+
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">{t('Player motto')}</label>
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <input
+                  type="text"
+                  name="quote"
+                  value={motto}
+                  maxLength={18}
+                  onChange={(event) => setMotto(event.target.value.slice(0, 18))}
+                  placeholder={t('Enter a short motto')}
+                  className="min-w-0 flex-1 rounded-xl border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-scorecaster-green"
+                />
+                <button
+                  type="button"
+                  onClick={() => setMotto(['Play to win', 'Trust the process', 'Never stop scoring', 'Own the table'][Math.floor(Math.random() * 4)])}
+                  className="rounded-xl border border-gray-300 bg-gray-100 px-4 py-3 text-xs font-bold text-gray-700 hover:bg-gray-200"
+                >
+                  {t('Generate motto')}
+                </button>
+              </div>
+              <p className="text-xs text-gray-500">{motto.length}/18</p>
+            </div>
             
             <div className="relative">
               <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
@@ -204,7 +229,7 @@ export default function ProfilePage() {
               <button
                 type="button"
                 onClick={() => setShowDropdown(!showDropdown)}
-                className="w-full bg-white text-left rounded-xl px-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-scorecaster-green flex justify-between items-center"
+                className="w-full bg-[#0d0d0d] text-white text-left rounded-xl px-4 py-3 border border-orange-500/50 focus:outline-none focus:ring-2 focus:ring-scorecaster-green flex justify-between items-center"
               >
                 <div className="flex items-center gap-3">
                   {selectedTeamData ? (

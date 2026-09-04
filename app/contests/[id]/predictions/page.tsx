@@ -66,7 +66,7 @@ export default async function PredictionsPage(props: { params: Promise<{ id: str
     : { data: [] }
 
   return (
-    <div className="p-6 md:p-8 bg-gray-50/50 rounded-b-xl">
+    <div className="rounded-b-xl bg-[#151515] p-6 md:p-8">
       <LiveRefresh refreshAfter={matchdayFixtures.map((match: any) => match.utcDate)} />
       <div className="flex justify-between items-center mb-8">
         <div>

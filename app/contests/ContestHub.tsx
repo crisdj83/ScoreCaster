@@ -5,6 +5,7 @@ import { Trophy, Plus, Search, Users, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { createContest, joinContest } from './actions'
 import { useTranslations } from '../components/LocaleProvider'
+import ContestIcon from '../components/ContestIcon'
 
 export default function ContestHub({ myContests, messages }: any) {
   const [activeTab, setActiveTab] = useState<'my_contests' | 'join' | 'create'>('my_contests')
@@ -86,7 +87,8 @@ export default function ContestHub({ myContests, messages }: any) {
                     className="flex flex-col p-5 border border-gray-200 rounded-2xl hover:border-orange-500 hover:shadow-lg transition-all group cursor-pointer bg-white"
                   >
                     <div className="flex justify-between items-start mb-2">
-                      <div>
+                      <div className="flex items-center gap-3">
+                        <ContestIcon contestId={membership.contest_id} size="sm" />
                         <h3 className="font-extrabold text-lg text-gray-900 group-hover:text-orange-600 transition-colors">
                           {membership.contests.name}
                         </h3>

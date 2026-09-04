@@ -17,7 +17,7 @@ export default function ContestNav({ contestId, isAdmin }: { contestId: string; 
   ]
 
   return (
-    <div className="bg-gray-950 p-2 rounded-2xl shadow-lg flex overflow-x-auto hide-scrollbar gap-1 border border-gray-800">
+    <div className="bg-gray-950 p-2 rounded-2xl shadow-lg flex overflow-x-auto hide-scrollbar gap-1 border border-orange-500">
       {links.map(({ href, label, icon: Icon }) => {
         const active = pathname === href
         return (
@@ -25,7 +25,11 @@ export default function ContestNav({ contestId, isAdmin }: { contestId: string; 
             key={href}
             href={href}
             className={`flex items-center gap-2 px-5 py-3 text-xs md:text-sm font-bold uppercase tracking-wider rounded-xl transition-all whitespace-nowrap ${
-              active ? 'bg-[#d4ff00] text-black shadow-sm' : 'text-gray-400 hover:text-white hover:bg-gray-900'
+              active
+                ? href === `/contests/${contestId}/championship`
+                  ? 'rounded-full bg-orange-500 text-black shadow-sm'
+                  : 'bg-[#d4ff00] text-black shadow-sm'
+                : 'text-gray-400 hover:text-white hover:bg-gray-900'
             }`}
           >
             <Icon className="h-4 w-4" /> {label}

@@ -13,6 +13,7 @@ export async function updateProfile(formData: FormData) {
   const username = formData.get('username') as string
   const favoriteTeam = formData.get('favorite_team') as string
   const newAvatarUrl = formData.get('avatar_url') as string
+  const quote = String(formData.get('quote') || '').trim().slice(0, 18)
 
   // Fetch their current approved avatar to see if they are trying to change it
   const { data: currentUser } = await supabase
@@ -24,7 +25,8 @@ export async function updateProfile(formData: FormData) {
   // Base update payload with just the text fields
   const updatePayload: any = { 
     username, 
-    favorite_team: favoriteTeam 
+    favorite_team: favoriteTeam,
+    quote,
   }
 
   let message = 'Profile updated successfully!'

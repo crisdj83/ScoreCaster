@@ -1,8 +1,9 @@
 import { createClient } from '../../../lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { Trophy, ArrowLeft } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import ContestNav from './ContestNav'
+import ContestIcon from '../../components/ContestIcon'
 import { getTranslations } from '../../../lib/i18n'
 import { getServerLocale } from '../../../lib/i18n-server'
 
@@ -70,7 +71,7 @@ export default async function ContestLayout(props: {
             <span>{t('Official Prediction League')}</span>
           </div>
           <h1 className="text-3xl md:text-5xl font-black uppercase tracking-tight flex items-center gap-3 text-white">
-            <Trophy className="h-10 w-10 text-orange-400 flex-shrink-0" />
+            <ContestIcon contestId={contest.id} />
             {contest.name}
           </h1>
         </div>

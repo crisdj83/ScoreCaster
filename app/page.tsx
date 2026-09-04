@@ -1,7 +1,7 @@
 import { createClient } from '../lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { Trophy, ChevronRight, ShieldCheck } from 'lucide-react'
+import { ChevronRight, ShieldCheck } from 'lucide-react'
 import HeroBanner from './components/HeroBanner'
 import ScoreCasterLogo from './components/ScoreCasterLogo'
 import { getPLMatches } from '../lib/football'
@@ -9,6 +9,7 @@ import { getTranslations } from '../lib/i18n'
 import { getServerLocale } from '../lib/i18n-server'
 import { createClient as createServiceClient } from '@supabase/supabase-js'
 import HomepageUpdates from './components/HomepageUpdates'
+import ContestIcon from './components/ContestIcon'
 
 const TEAMS = [
   { name: 'Arsenal', crest: 'https://a.espncdn.com/i/teamlogos/soccer/500/359.png' },
@@ -237,7 +238,7 @@ export default async function Home(props: { searchParams: Promise<{ success?: st
                   className="flex items-center justify-between p-4 border border-orange-500/25 rounded-xl bg-[#242424] hover:border-orange-400 hover:shadow-sm transition-all group"
                 >
                   <div className="flex items-center gap-3 overflow-hidden">
-                    <Trophy className="h-8 w-8 text-yellow-400 flex-shrink-0" />
+                    <ContestIcon contestId={membership.contest_id} size="sm" />
                     <div className="truncate">
                       <p className="font-bold text-scorecaster-text truncate">{membership.contests.name}</p>
                       <p className="text-xs text-gray-500 mt-0.5">{t('Role:')} {membership.role === 'admin' ? t('Admin') : t('Member')} · {membership.contests.season_length === 'half' ? t('Half season') : t('Full season')}</p>
