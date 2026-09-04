@@ -59,12 +59,11 @@ export default function HeroBanner({
 
     const countdownDate = new Date(nextMatch.date).getTime()
 
-    const timer = setInterval(() => {
+    const updateCountdown = () => {
       const now = new Date().getTime()
       const distance = countdownDate - now
 
-      if (distance < 0) {
-        clearInterval(timer)
+      if (distance <= 0) {
         setTimeLeft({ days: '00', hours: '00', minutes: '00', seconds: '00' })
         return
       }
@@ -75,7 +74,10 @@ export default function HeroBanner({
         minutes: String(Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0'),
         seconds: String(Math.floor((distance % (1000 * 60)) / 1000)).padStart(2, '0')
       })
-    }, 1000)
+    }
+
+    updateCountdown()
+    const timer = setInterval(updateCountdown, 1000)
 
     return () => clearInterval(timer)
   }, [nextMatch])

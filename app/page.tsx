@@ -93,8 +93,10 @@ async function fetchPLData() {
     }));
 
     // 2. Get the Next Upcoming Match
+    const now = Date.now();
     const nextMatchRaw = data.matches
       .filter((m: any) => ['SCHEDULED', 'TIMED'].includes(m.status))
+      .filter((m: any) => new Date(m.utcDate).getTime() > now)
       // Sort ascending to get the closest future match
       .sort((a: any, b: any) => new Date(a.utcDate).getTime() - new Date(b.utcDate).getTime())[0];
 
@@ -167,13 +169,13 @@ export default async function Home(props: { searchParams: Promise<{ success?: st
     ? await supabase.from('contests').select('id, created_at').in('id', contestIds)
     : { data: [] }
   const { data: contestPredictions } = contestIds.length
-    ? await supabase.from('predictions').select('contest_id, user_id, points_earned').in('contest_id', contestIds)
+    ? await supabase.from('predictions').select('contest_id, user_id, points').in('contest_id', contestIds)
     : { data: [] }
   const bestRanking = (rankingMemberships || []).reduce<{ rank: number; year: number } | null>((best, membership) => {
     const members = new Map<string, number>()
     ;(contestPredictions || [])
       .filter(prediction => prediction.contest_id === membership.contest_id)
-      .forEach(prediction => members.set(prediction.user_id, (members.get(prediction.user_id) || 0) + (Number(prediction.points_earned) || 0)))
+      .forEach(prediction => members.set(prediction.user_id, (members.get(prediction.user_id) || 0) + (Number(prediction.points) || 0)))
     const sortedScores = Array.from(members.entries()).sort((a, b) => b[1] - a[1])
     const rank = sortedScores.findIndex(([userId]) => userId === user.id) + 1
     if (!rank) return best

@@ -30,9 +30,6 @@ export default function PredictionCard({ match, contestId, existingPrediction, r
   const countdown = millisecondsUntilKickoff <= 0
     ? t('Started')
     : `${Math.floor(millisecondsUntilKickoff / 86400000)}d ${String(Math.floor((millisecondsUntilKickoff % 86400000) / 3600000)).padStart(2, '0')}:${String(Math.floor((millisecondsUntilKickoff % 3600000) / 60000)).padStart(2, '0')}:${String(Math.floor((millisecondsUntilKickoff % 60000) / 1000)).padStart(2, '0')}`
-  const [showPredictions, setShowPredictions] = useState(false)
-  const togglePredictions = () => setShowPredictions((visible) => !visible)
-
   // Format the date nicely
   const dateFormatted = new Intl.DateTimeFormat(locale === 'en' ? 'en-GB' : locale, {
     weekday: 'short', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'
@@ -97,20 +94,7 @@ export default function PredictionCard({ match, contestId, existingPrediction, r
       </div>
 
       {/* Main Row: Teams and Score Stepper */}
-      <div
-        className="prediction-fixture-content flex cursor-pointer flex-col rounded-xl bg-[#242424] p-1 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 md:flex-row items-center justify-between gap-6 md:gap-4"
-        role="button"
-        tabIndex={0}
-        aria-expanded={showPredictions}
-        aria-label={`View predictions for ${match.homeTeam.name} versus ${match.awayTeam.name}`}
-        onClick={togglePredictions}
-        onKeyDown={(event) => {
-          if (event.key === 'Enter' || event.key === ' ') {
-            event.preventDefault()
-            togglePredictions()
-          }
-        }}
-      >
+      <div className="prediction-fixture-content flex flex-col rounded-xl bg-[#242424] p-1 transition-colors md:flex-row items-center justify-between gap-6 md:gap-4">
         
         {/* Home Team */}
         <div className="flex flex-col items-center flex-1 text-center w-full">
@@ -166,31 +150,19 @@ export default function PredictionCard({ match, contestId, existingPrediction, r
         </div>
       )}
       <div className="mt-6 border-t border-gray-100 pt-4">
-        <button type="button" onClick={togglePredictions} className={`flex w-full items-center justify-between rounded-xl px-4 py-3 text-left text-xs font-black uppercase tracking-wider transition-colors ${canReveal ? 'bg-gray-950 text-white' : 'bg-gray-100 text-gray-400'}`}>
-          <span className="flex items-center gap-2"><Eye className={`h-4 w-4 ${canReveal ? 'text-[#d4ff00]' : 'text-gray-400'}`} /> {canReveal ? `${showPredictions ? t('Hide') : t('View')} ${t("everyone's predictions")}` : t('Predictions hidden until 30 minutes before kickoff')}</span>
-          {canReveal && <span className="text-[#d4ff00]">{revealedPredictions.length}</span>}
-        </button>
-        {showPredictions && canReveal && (
-          <div className="mt-3 space-y-2">
-            {revealedPredictions.length ? revealedPredictions.map((prediction: any) => (
-              <div key={`${prediction.user_id}-${prediction.match_id}`} className="flex items-center justify-between rounded-lg bg-[#2d2d2d] px-3 py-2 text-sm">
-                <span className="font-semibold text-gray-100">{prediction.users?.username || prediction.users?.email?.split('@')[0] || 'Player'}</span>
-                <span className="flex items-center gap-3 font-black text-white">
-                  {prediction.predicted_home_score} : {prediction.predicted_away_score}
-                  {match.status === 'FINISHED' && prediction.points_earned !== null && prediction.points_earned !== undefined && (
-                    <span className="rounded-full bg-[#d4ff00] px-2 py-1 text-xs text-black">+{prediction.points_earned} pts</span>
-                  )}
-                </span>
-              </div>
-            )) : <p className="text-sm text-gray-500">{t('No predictions submitted yet.')}</p>}
+        {canReveal ? (
+          <Link
+            href={`/contests/${contestId}/ranking?matchId=${match.id}`}
+            className="flex w-full items-center justify-between rounded-xl bg-gray-950 px-4 py-3 text-left text-xs font-black uppercase tracking-wider text-white transition-colors hover:bg-gray-900"
+          >
+            <span className="flex items-center gap-2"><Eye className="h-4 w-4 text-[#d4ff00]" /> {t("View everyone's predictions")}</span>
+            <span className="text-[#d4ff00]">{revealedPredictions.length}</span>
+          </Link>
+        ) : (
+          <div className="flex w-full items-center gap-2 rounded-xl bg-gray-100 px-4 py-3 text-left text-xs font-black uppercase tracking-wider text-gray-400">
+            <Eye className="h-4 w-4" /> {t('Predictions hidden until 30 minutes before kickoff')}
           </div>
         )}
-        <Link
-          href={`/contests/${contestId}/predictions/${match.id}`}
-          className="mt-5 flex items-center justify-center rounded-xl border border-gray-200 bg-[#2d2d2d] px-4 py-2.5 text-xs font-black uppercase tracking-wider text-white transition-colors hover:border-orange-500 hover:text-orange-300"
-        >
-          {t('Open match page')}
-        </Link>
       </div>
     </div>
   )

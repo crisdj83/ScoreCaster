@@ -84,11 +84,11 @@ export async function GET(request: Request) {
         }
 
         // 8. Save the points to the database ONLY if they haven't been saved yet
-        if (prediction.points_earned !== points) {
+        if (prediction.points !== points) {
           await supabaseAdmin
             .from('predictions')
             .update({
-              points_earned: points,
+              points,
               is_correct: isCorrect,
               is_exact: isExact,
               updated_at: new Date().toISOString()

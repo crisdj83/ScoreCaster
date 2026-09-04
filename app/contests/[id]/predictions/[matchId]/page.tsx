@@ -42,7 +42,7 @@ export default async function MatchPredictionsPage({ params }: PageProps) {
     .eq('contest_id', id)
   const { data: predictions } = canReveal
     ? await db.from('predictions')
-      .select('user_id, predicted_home_score, predicted_away_score, points_earned')
+      .select('user_id, predicted_home_score, predicted_away_score, points')
       .eq('contest_id', id)
       .eq('match_id', matchId)
     : { data: [] }
@@ -56,7 +56,7 @@ export default async function MatchPredictionsPage({ params }: PageProps) {
       name: player?.username || player?.email?.split('@')[0] || 'Player',
       homeScore: prediction?.predicted_home_score,
       awayScore: prediction?.predicted_away_score,
-      points: prediction?.points_earned,
+      points: prediction?.points,
     }
   })
 

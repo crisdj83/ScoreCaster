@@ -28,16 +28,26 @@ export default async function PredictionsPage(props: { params: Promise<{ id: str
   const data = await getPLMatches()
   const seasonMatches = data.matches.filter((match: any) => isMatchInContestSeason(match, seasonLength))
   
-  // 3. Figure out which matchday is currently active
-  // (We look for the first match that is SCHEDULED or TIMED)
-  let currentMatchday = 1;
-  const upcomingMatch = seasonMatches.find((m: any) => m.status === 'TIMED' || m.status === 'SCHEDULED');
-  if (upcomingMatch) {
-    currentMatchday = upcomingMatch.matchday;
-  }
+  // 3. Figure out which matchday is currently active.
+  // Ignore stale scheduled records and use the closest genuinely upcoming fixture.
+  const now = Date.now();
+  const liveMatch = seasonMatches.find((match: any) => (
+    ['IN_PLAY', 'PAUSED'].includes(match.status)
+  ));
+  const upcomingMatch = seasonMatches
+    .filter((m: any) => (
+      ['TIMED', 'SCHEDULED'].includes(m.status) &&
+      Number.isFinite(new Date(m.utcDate).getTime()) &&
+      new Date(m.utcDate).getTime() > now
+    ))
+    .sort((a: any, b: any) => new Date(a.utcDate).getTime() - new Date(b.utcDate).getTime())[0];
+  const activeMatch = liveMatch || upcomingMatch;
+  const currentMatchday = activeMatch ? Number(activeMatch.matchday) : null;
 
   // Filter to show ONLY the matches for the current matchday
-  const matchdayFixtures = seasonMatches.filter((m: any) => m.matchday === currentMatchday)
+  const matchdayFixtures = currentMatchday
+    ? seasonMatches.filter((m: any) => Number(m.matchday) === currentMatchday)
+    : []
   const allowedMatchIds = seasonMatches.map((match: any) => String(match.id))
 
   // 4. Fetch the user's existing predictions from Supabase for this contest
@@ -52,18 +62,25 @@ export default async function PredictionsPage(props: { params: Promise<{ id: str
 
   const revealableMatchIds = matchdayFixtures
     .filter((match: any) => Date.now() >= new Date(match.utcDate).getTime() - 30 * 60 * 1000)
-    .map((match: any) => match.id)
+    .map((match: any) => String(match.id))
   const serviceSupabase = createServiceClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   )
-  const { data: revealedPredictions } = revealableMatchIds.length
+  const { data: revealedPredictionsRaw, error: revealedPredictionsError } = revealableMatchIds.length
     ? await serviceSupabase
       .from('predictions')
-      .select('match_id, user_id, predicted_home_score, predicted_away_score, points_earned, users(username, email)')
+      .select('match_id, user_id, predicted_home_score, predicted_away_score, points, users(username, email)')
       .eq('contest_id', params.id)
       .in('match_id', revealableMatchIds)
     : { data: [] }
+  if (revealedPredictionsError) {
+    throw new Error(`Unable to load revealed predictions: ${revealedPredictionsError.message}`)
+  }
+  const revealedPredictions = (revealedPredictionsRaw || []).map((prediction: any) => ({
+    ...prediction,
+    points_earned: prediction.points,
+  }))
 
   return (
     <div className="rounded-b-xl bg-[#151515] p-6 md:p-8">
@@ -79,7 +96,7 @@ export default async function PredictionsPage(props: { params: Promise<{ id: str
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {matchdayFixtures.map((match: any) => {
           // Find if the user already made a prediction for this specific match
-          const existingPrediction = myPredictions?.find(p => p.match_id === match.id)
+        const existingPrediction = myPredictions?.find(p => String(p.match_id) === String(match.id))
           
           return (
             <PredictionCard 
@@ -87,7 +104,7 @@ export default async function PredictionsPage(props: { params: Promise<{ id: str
               match={match} 
               contestId={params.id} 
               existingPrediction={existingPrediction} 
-              revealedPredictions={revealedPredictions?.filter((prediction: any) => prediction.match_id === match.id) || []}
+              revealedPredictions={revealedPredictions?.filter((prediction: any) => String(prediction.match_id) === String(match.id)) || []}
             />
           )
         })}

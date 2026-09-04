@@ -6,7 +6,6 @@ import {
   ChevronDown,
   Eye,
   EyeOff,
-  Flame,
   Shield,
   TrendingUp,
   Users,
@@ -23,8 +22,6 @@ type RankingPlayer = {
   scoredMatches: number
   accuracy: number
   averagePoints: number
-  currentStreak: number
-  recentForm: string[]
 }
 
 type EvolutionRow = {
@@ -45,8 +42,8 @@ type PredictionTrend = {
   matchday: number
   kickoff: string
   status: string
-  homeTeam: { name: string; shortName?: string; crest?: string; rank?: number; form?: string | null }
-  awayTeam: { name: string; shortName?: string; crest?: string; rank?: number; form?: string | null }
+  homeTeam: { name: string; shortName?: string; crest?: string; rank?: number }
+  awayTeam: { name: string; shortName?: string; crest?: string; rank?: number }
   actualScore: string | null
   revealed: boolean
   predictionCount: number
@@ -67,7 +64,6 @@ type TeamStat = {
   playedGames?: number
   points?: number
   goalDifference?: number
-  form?: string | null
 }
 
 type Labels = Record<string, string>
@@ -114,15 +110,10 @@ export default function RankingInsights({
   const visibleTrends = showAllTrends ? trends : trends.slice(0, 12)
   const formatPercent = (value: number) => `${Math.round(value)}%`
   const formatAverage = (value: number | null) => value === null ? '—' : value.toFixed(1)
-  const formColor = (result: string) => (
-    result === 'W' ? 'bg-emerald-500' :
-    result === 'D' ? 'bg-amber-400' :
-    result === 'L' ? 'bg-red-500' : 'bg-gray-300'
-  )
 
   return (
     <div className="mt-8 space-y-8">
-      <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm md:p-6">
+      {false && <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm md:p-6">
         <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <div className="mb-1 flex items-center gap-2 text-orange-600">
@@ -218,9 +209,9 @@ export default function RankingInsights({
             </div>
           </>
         )}
-      </section>
+      </section>}
 
-      <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm md:p-6">
+      {false && <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm md:p-6">
         <div className="mb-5">
           <div className="mb-1 flex items-center gap-2 text-orange-600">
             <BarChart3 className="h-5 w-5" />
@@ -298,7 +289,7 @@ export default function RankingInsights({
             )}
           </div>
         )}
-      </section>
+      </section>}
 
       <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm md:p-6">
         <div className="mb-5 flex items-center gap-2 text-orange-600">
@@ -317,7 +308,6 @@ export default function RankingInsights({
                   <th className="px-3 py-3 text-center">{labels.played}</th>
                   <th className="px-3 py-3 text-center">{labels.goalDifference}</th>
                   <th className="px-3 py-3 text-center">{labels.points}</th>
-                  <th className="px-4 py-3 text-center">{labels.form}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -331,21 +321,13 @@ export default function RankingInsights({
                     <td className="px-3 py-3 text-center">{team.playedGames ?? '—'}</td>
                     <td className="px-3 py-3 text-center">{team.goalDifference ?? '—'}</td>
                     <td className="px-3 py-3 text-center font-black text-orange-600">{team.points ?? '—'}</td>
-                    <td className="px-4 py-3">
-                      <div className="flex justify-center gap-1">
-                        {(team.form || '').split(',').filter(Boolean).slice(-5).map((result, index) => (
-                          <span key={`${team.id}-${index}`} className={`flex h-5 w-5 items-center justify-center rounded text-[9px] font-black text-white ${formColor(result)}`} title={result}>{result}</span>
-                        ))}
-                        {!team.form && <span className="text-gray-400">—</span>}
-                      </div>
-                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
         )}
-        <p className="mt-3 flex items-center gap-2 text-xs text-gray-500"><Flame className="h-3.5 w-3.5 text-orange-500" /> {labels.teamStatsDescription}</p>
+        <p className="mt-3 text-xs text-gray-500">{labels.teamStatsDescription}</p>
       </section>
     </div>
   )
