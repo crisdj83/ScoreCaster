@@ -1,7 +1,7 @@
 'use server'
 
 import { createClient } from '../../../../lib/supabase/server'
-import { createClient as createServiceClient } from '@supabase/supabase-js'
+import { createAdminClient } from '../../../../lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
@@ -178,10 +178,7 @@ export async function deleteContest(formData: FormData) {
     redirect(`/contests/${contestId}/edit?error=Unauthorized. Only the league admin can delete this league.`)
   }
 
-  const serviceSupabase = createServiceClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
+  const serviceSupabase = createAdminClient()
 
   const { error: predictionsError } = await serviceSupabase.from('predictions').delete().eq('contest_id', contestId)
   if (predictionsError) redirect(`/contests/${contestId}/edit?error=${encodeURIComponent(predictionsError.message)}`)

@@ -1,63 +1,121 @@
-// The 3-Tier Scoring System
-const POINTS_EXACT = 3;    // Exact score (e.g., predicted 2-1, actual 2-1)
-const POINTS_CLOSE = 2;    // Correct outcome & correct goal difference (e.g., predicted 2-1, actual 3-2)
-const POINTS_CORRECT = 1;  // Correct outcome only (e.g., predicted 2-0, actual 3-0)
-const POINTS_WRONG = 0;    // Completely wrong
+export const PREDICTION_LOCK_MS = 60 * 60 * 1000
+export const PREDICTION_REVEAL_MS = 30 * 60 * 1000
+
+export const DEFAULT_SCORING = {
+  exact: 3,
+  close: 1.5,
+  result: 1,
+} as const
+
+export type ContestScoring = {
+  exact: number
+  close: number
+  result: number
+}
+
+export type ScoreResult = {
+  points: number
+  is_exact: boolean
+  is_close: boolean
+  is_correct: boolean
+}
+
+export type MatchOutcome = 'HOME' | 'AWAY' | 'DRAW'
+
+export function resolveContestScoring(contest?: {
+  points_exact?: number | null
+  points_close?: number | null
+  points_result?: number | null
+} | null): ContestScoring {
+  return {
+    exact: Number(contest?.points_exact) || DEFAULT_SCORING.exact,
+    close: Number(contest?.points_close) || DEFAULT_SCORING.close,
+    result: Number(contest?.points_result) || DEFAULT_SCORING.result,
+  }
+}
+
+export function matchOutcome(home: number, away: number): MatchOutcome {
+  if (home > away) return 'HOME'
+  if (home < away) return 'AWAY'
+  return 'DRAW'
+}
 
 export function calculatePoints(
-  predictedHome: number, 
-  predictedAway: number, 
-  actualHome: number, 
-  actualAway: number
-) {
-  // 1. Did they get the EXACT score? (3 Points)
-  if (predictedHome === actualHome && predictedAway === actualAway) {
+  predictedHome: number,
+  predictedAway: number,
+  actualHome: number,
+  actualAway: number,
+  scoring: ContestScoring = DEFAULT_SCORING
+): ScoreResult {
+  const predictedHomeScore = Number(predictedHome)
+  const predictedAwayScore = Number(predictedAway)
+  const actualHomeScore = Number(actualHome)
+  const actualAwayScore = Number(actualAway)
+
+  if (predictedHomeScore === actualHomeScore && predictedAwayScore === actualAwayScore) {
     return {
-      points: POINTS_EXACT,
+      points: scoring.exact,
       is_exact: true,
       is_close: false,
-      is_correct: true
-    };
+      is_correct: true,
+    }
   }
 
-  // Calculate goal differences to check if it was a "Close" prediction
-  const actualDiff = actualHome - actualAway;
-  const predictedDiff = predictedHome - predictedAway;
+  const isCorrect =
+    matchOutcome(predictedHomeScore, predictedAwayScore) ===
+    matchOutcome(actualHomeScore, actualAwayScore)
+  const totalGoalsDiff = Math.abs(
+    (actualHomeScore + actualAwayScore) - (predictedHomeScore + predictedAwayScore)
+  )
+  const isClose = isCorrect && totalGoalsDiff <= 1
 
-  // Figure out the OUTCOME of the real match and the predicted match
-  const actualOutcome = actualHome > actualAway ? 'HOME_WIN' 
-                      : actualHome < actualAway ? 'AWAY_WIN' 
-                      : 'DRAW';
-
-  const predictedOutcome = predictedHome > predictedAway ? 'HOME_WIN' 
-                         : predictedHome < predictedAway ? 'AWAY_WIN' 
-                         : 'DRAW';
-
-  // 2. Was it CLOSE? (Correct outcome AND exact goal difference) (2 Points)
-  if (actualOutcome === predictedOutcome && actualDiff === predictedDiff) {
+  if (isClose) {
     return {
-      points: POINTS_CLOSE,
+      points: scoring.close,
       is_exact: false,
       is_close: true,
-      is_correct: true
-    };
+      is_correct: true,
+    }
   }
 
-  // 3. Was it just CORRECT? (Correct outcome, wrong goal difference) (1 Point)
-  if (actualOutcome === predictedOutcome) {
+  if (isCorrect) {
     return {
-      points: POINTS_CORRECT,
+      points: scoring.result,
       is_exact: false,
       is_close: false,
-      is_correct: true
-    };
+      is_correct: true,
+    }
   }
 
-  // 4. Completely wrong (0 Points)
   return {
-    points: POINTS_WRONG,
+    points: 0,
     is_exact: false,
     is_close: false,
-    is_correct: false
-  };
+    is_correct: false,
+  }
+}
+
+export function isPredictionLocked(utcDate: string, now = Date.now()): boolean {
+  const kickoff = new Date(utcDate).getTime()
+  return !Number.isFinite(kickoff) || now >= kickoff - PREDICTION_LOCK_MS
+}
+
+export function isPredictionRevealable(utcDate: string, now = Date.now()): boolean {
+  const kickoff = new Date(utcDate).getTime()
+  return Number.isFinite(kickoff) && now >= kickoff - PREDICTION_REVEAL_MS
+}
+
+export function getOfficialScore(match: {
+  status?: string | null
+  score?: {
+    fullTime?: { home?: number | null; away?: number | null }
+  } | null
+}): { home: number; away: number } | null {
+  if (!['FINISHED', 'IN_PLAY', 'PAUSED'].includes(match.status || '')) return null
+  const home = match.score?.fullTime?.home
+  const away = match.score?.fullTime?.away
+  if (home === null || home === undefined || away === null || away === undefined) {
+    return null
+  }
+  return { home, away }
 }

@@ -1,9 +1,17 @@
 import { createClient } from '../../../../lib/supabase/server'
-import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { getTranslations } from '../../../../lib/i18n'
 import { getServerLocale } from '../../../../lib/i18n-server'
 import { getPLMatches, getPLStandings } from '../../../../lib/football'
 import { isMatchInContestSeason } from '../../../../lib/contest-season'
+import {
+  calculatePoints,
+  getOfficialScore,
+  isPredictionLocked,
+  isPredictionRevealable,
+  resolveContestScoring,
+  type ContestScoring,
+} from '../../../../lib/scoring'
+import { createAdminClient } from '../../../../lib/supabase/admin'
 import { Trophy, Medal, Target, Activity, CheckCircle2, Gauge } from 'lucide-react'
 import RankingInsights from './RankingInsights'
 import CurrentGameweek from './CurrentGameweek'
@@ -32,40 +40,25 @@ type Prediction = {
   is_correct?: boolean | null
 }
 
-function isScored(prediction: Prediction) {
-  return prediction.points_earned !== null && prediction.points_earned !== undefined
+function pointsForPrediction(prediction: Prediction, match: Match | undefined, scoring: ContestScoring) {
+  if (!match) return null
+  const score = getOfficialScore(match)
+  if (!score) return null
+  return calculatePoints(
+    prediction.predicted_home_score,
+    prediction.predicted_away_score,
+    score.home,
+    score.away,
+    scoring
+  )
 }
 
-function outcomeSymbol(prediction: Prediction, exact: number, close: number, result: number) {
-  if (!isScored(prediction)) return ''
-  if (prediction.is_exact || Number(prediction.points_earned) === exact) return 'E'
-  if (prediction.is_correct === false) return '0'
-  if (Number(prediction.points_earned) === close) return 'C'
-  if (prediction.is_correct || Number(prediction.points_earned) === result) return 'R'
-  return Number(prediction.points_earned) > 0 ? 'R' : '0'
-}
-
-function calculatePoints(
-  prediction: Prediction,
-  match: Match,
-  exact: number,
-  close: number,
-  result: number
-) {
-  const home = match.score?.fullTime?.home ?? match.score?.halfTime?.home
-  const away = match.score?.fullTime?.away ?? match.score?.halfTime?.away
-  if (!['FINISHED', 'IN_PLAY', 'PAUSED'].includes(match.status || '') || home === null || home === undefined || away === null || away === undefined) {
-    return null
-  }
-
-  const predictedOutcome = prediction.predicted_home_score > prediction.predicted_away_score
-    ? 'HOME'
-    : prediction.predicted_home_score < prediction.predicted_away_score ? 'AWAY' : 'DRAW'
-  const actualOutcome = home > away ? 'HOME' : home < away ? 'AWAY' : 'DRAW'
-  const isExact = Number(prediction.predicted_home_score) === home && Number(prediction.predicted_away_score) === away
-  const isCorrect = predictedOutcome === actualOutcome
-  const closePrediction = isCorrect && !isExact && Math.abs((home + away) - (prediction.predicted_home_score + prediction.predicted_away_score)) <= 1
-  return isExact ? exact : closePrediction ? close : isCorrect ? result : 0
+function outcomeFromPoints(points: number | null, scoring: ContestScoring) {
+  if (points === null) return ''
+  if (points === scoring.exact) return 'E'
+  if (points === scoring.close) return 'C'
+  if (points === scoring.result) return 'R'
+  return points > 0 ? 'R' : '0'
 }
 
 function displayName(member: any) {
@@ -88,9 +81,10 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
 
   if (!contest) return <div className="p-6 text-sm text-red-600">Error loading contest data.</div>
 
-  const ptsExact = Number(contest.points_exact) || 3
-  const ptsClose = Number(contest.points_close) || 1.5
-  const ptsResult = Number(contest.points_result) || 1
+  const scoring = resolveContestScoring(contest)
+  const ptsExact = scoring.exact
+  const ptsClose = scoring.close
+  const ptsResult = scoring.result
   const seasonLength = contest.season_length === 'half' ? 'half' : 'full'
   const [matchData, standingsData] = await Promise.all([
     getPLMatches(),
@@ -108,11 +102,12 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
 
   if (membersError || !members) return <div className="p-6 text-sm text-red-600">Error loading leaderboard.</div>
 
-  // Use the service client for the same reveal-safe source used by the match page.
-  // Scores are only sent to the client for fixtures that have reached the reveal window.
-  const db = process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY
-    ? createServiceClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
-    : supabase
+  let db = supabase
+  try {
+    db = createAdminClient()
+  } catch {
+    db = supabase
+  }
   const { data: rawPredictions } = allowedMatchIds.length
     ? await db
       .from('predictions')
@@ -135,7 +130,7 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
       }))
       .map(item => ({
         ...item,
-        points: item.match ? calculatePoints(item.prediction, item.match, ptsExact, ptsClose, ptsResult) : null,
+        points: pointsForPrediction(item.prediction, item.match, scoring)?.points ?? null,
       }))
       .filter(item => item.points !== null)
     const playedPredictions = evaluatedPredictions.filter(item => (
@@ -143,7 +138,7 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
     ))
     const lockedPredictions = userPredictions.filter(prediction => {
       const match = matches.find(item => String(item.id) === String(prediction.match_id))
-      return !!match && Date.now() >= new Date(match.utcDate).getTime() - 60 * 60 * 1000
+      return !!match && isPredictionLocked(match.utcDate)
     })
     const exactResults = playedPredictions.filter(item => item.points === ptsExact).length
     const closeResults = playedPredictions.filter(item => item.points === ptsClose).length
@@ -166,17 +161,21 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
 
   const rankFor = (userId: string, matchday: number) => {
     const totals = members.map((member: any) => {
-      const memberPredictions = predictions.filter(prediction => prediction.user_id === member.user_id && isScored(prediction)).filter(prediction => {
-        const match = matches.find(item => String(item.id) === String(prediction.match_id))
-        return Number(match?.matchday) <= matchday
-      })
+      const memberResults = predictions
+        .filter(prediction => prediction.user_id === member.user_id)
+        .map(prediction => {
+          const match = matches.find(item => String(item.id) === String(prediction.match_id))
+          if (!match || match.status !== 'FINISHED' || Number(match.matchday) > matchday) return null
+          return pointsForPrediction(prediction, match, scoring)
+        })
+        .filter((result): result is NonNullable<typeof result> => result !== null)
       return {
         playerId: member.user_id,
-        points: memberPredictions.reduce((sum, prediction) => sum + (Number(prediction.points_earned) || 0), 0),
-        exact: memberPredictions.filter(prediction => outcomeSymbol(prediction, ptsExact, ptsClose, ptsResult) === 'E').length,
-        close: memberPredictions.filter(prediction => outcomeSymbol(prediction, ptsExact, ptsClose, ptsResult) === 'C').length,
-        accuracy: memberPredictions.length
-          ? memberPredictions.filter(prediction => (Number(prediction.points_earned) || 0) > 0).length / memberPredictions.length
+        points: memberResults.reduce((sum, result) => sum + result.points, 0),
+        exact: memberResults.filter(result => outcomeFromPoints(result.points, scoring) === 'E').length,
+        close: memberResults.filter(result => outcomeFromPoints(result.points, scoring) === 'C').length,
+        accuracy: memberResults.length
+          ? memberResults.filter(result => result.points > 0).length / memberResults.length
           : 0,
       }
     }).sort((a, b) => b.points - a.points || b.exact - a.exact || b.close - a.close || b.accuracy - a.accuracy)
@@ -202,24 +201,31 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
     return { name: team.name, shortName: team.shortName, crest: team.crest, rank: row?.position }
   }
   const now = Date.now()
-  const playersByMatch = Object.fromEntries(matches.map(match => [String(match.id), predictions
-    .filter(prediction => String(prediction.match_id) === String(match.id))
-    .map(prediction => ({
-      id: prediction.user_id,
-      name: memberNames.get(prediction.user_id) || 'Player',
-      prediction: `${prediction.predicted_home_score} : ${prediction.predicted_away_score}`,
-      points: calculatePoints(prediction, match, ptsExact, ptsClose, ptsResult),
-      outcome: (() => {
-        const points = calculatePoints(prediction, match, ptsExact, ptsClose, ptsResult)
-        return points === ptsExact ? 'exact' : points === ptsClose ? 'close' : points === ptsResult ? 'result' : 'zero'
-      })(),
-      avatar: (() => {
-        const member = members.find((item: any) => item.user_id === prediction.user_id)
-        const user = Array.isArray(member?.users) ? member.users[0] : member?.users
-        return user?.avatar_url || null
-      })(),
-    }))
-    .sort((a, b) => (b.points ?? -1) - (a.points ?? -1) || a.name.localeCompare(b.name))]))
+  const playersByMatch = Object.fromEntries(matches.map(match => {
+    if (!isPredictionRevealable(match.utcDate, now)) {
+      return [String(match.id), []]
+    }
+    const scoredPlayers = predictions
+      .filter(prediction => String(prediction.match_id) === String(match.id))
+      .map(prediction => {
+        const result = pointsForPrediction(prediction, match, scoring)
+        const points = result?.points ?? null
+        return {
+          id: prediction.user_id,
+          name: memberNames.get(prediction.user_id) || 'Player',
+          prediction: `${prediction.predicted_home_score} : ${prediction.predicted_away_score}`,
+          points,
+          outcome: (points === ptsExact ? 'exact' : points === ptsClose ? 'close' : points === ptsResult ? 'result' : 'zero') as 'zero' | 'close' | 'exact' | 'result',
+          avatar: (() => {
+            const member = members.find((item: any) => item.user_id === prediction.user_id)
+            const profile = Array.isArray(member?.users) ? member.users[0] : member?.users
+            return profile?.avatar_url || null
+          })(),
+        }
+      })
+      .sort((a, b) => (b.points ?? -1) - (a.points ?? -1) || a.name.localeCompare(b.name))
+    return [String(match.id), scoredPlayers]
+  }))
   const currentGameweekFixtures = matches.map(match => ({
     id: String(match.id),
     matchday: Number(match.matchday),
@@ -235,7 +241,7 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
       : null,
   }))
   const trends = matches.map(match => {
-    const revealable = now >= new Date(match.utcDate).getTime() - 30 * 60 * 1000
+    const revealable = isPredictionRevealable(match.utcDate, now)
     const matchPredictions = predictions.filter(prediction => String(prediction.match_id) === String(match.id))
     const counts = { home: 0, draw: 0, away: 0 }
     const scoreCounts = new Map<string, number>()
@@ -276,7 +282,7 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
           username: memberNames.get(prediction.user_id) || 'Player',
           homeScore: Number(prediction.predicted_home_score),
           awayScore: Number(prediction.predicted_away_score),
-          points: isScored(prediction) ? Number(prediction.points_earned) : null,
+          points: pointsForPrediction(prediction, match, scoring)?.points ?? null,
         })) : [],
     }
   })
@@ -370,7 +376,7 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
           </tbody>
         </table>
       </div>
-      <RankingInsights players={players} evolution={[]} trends={trends} labels={labels} />
+      <RankingInsights players={players} evolution={evolution} trends={trends} labels={labels} />
     </div>
   )
 }

@@ -1,8 +1,9 @@
 // Fixed both imports to go up 4 folders instead of 5!
 import { createClient } from '../../../../lib/supabase/server'
-import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { getPLMatches } from '../../../../lib/football'
 import { isMatchInContestSeason } from '../../../../lib/contest-season'
+import { isPredictionRevealable } from '../../../../lib/scoring'
+import { createAdminClient } from '../../../../lib/supabase/admin'
 import PredictionCard from './PredictionCard'
 import { getTranslations } from '../../../../lib/i18n'
 import { getServerLocale } from '../../../../lib/i18n-server'
@@ -61,12 +62,9 @@ export default async function PredictionsPage(props: { params: Promise<{ id: str
     : { data: [] }
 
   const revealableMatchIds = matchdayFixtures
-    .filter((match: any) => Date.now() >= new Date(match.utcDate).getTime() - 30 * 60 * 1000)
-    .map((match: any) => String(match.id))
-  const serviceSupabase = createServiceClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
+    .filter((match: { utcDate: string }) => isPredictionRevealable(match.utcDate))
+    .map((match: { id: number | string }) => String(match.id))
+  const serviceSupabase = createAdminClient()
   const { data: revealedPredictionsRaw, error: revealedPredictionsError } = revealableMatchIds.length
     ? await serviceSupabase
       .from('predictions')

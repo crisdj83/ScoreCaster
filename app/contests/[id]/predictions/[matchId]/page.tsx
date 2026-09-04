@@ -1,7 +1,8 @@
 import { createClient } from '../../../../../lib/supabase/server'
-import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { getPLMatches } from '../../../../../lib/football'
 import { isMatchInContestSeason } from '../../../../../lib/contest-season'
+import { isPredictionRevealable } from '../../../../../lib/scoring'
+import { createAdminClient } from '../../../../../lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Clock, Eye, Lock, Trophy } from 'lucide-react'
@@ -33,9 +34,8 @@ export default async function MatchPredictionsPage({ params }: PageProps) {
     redirect(`/contests/${id}/predictions?error=This fixture is not part of this contest season.`)
   }
 
-  const kickoff = new Date(match.utcDate).getTime()
-  const canReveal = Date.now() >= kickoff - 30 * 60 * 1000
-  const db = createServiceClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
+  const canReveal = isPredictionRevealable(match.utcDate)
+  const db = createAdminClient()
   const { data: members } = await db
     .from('contest_members')
     .select('user_id, users(username, email)')

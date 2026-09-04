@@ -1,6 +1,6 @@
 // Changed to ../../ to go up two folder levels!
 import { createClient } from '../../lib/supabase/server'
-import { createClient as createAdminClient } from '@supabase/supabase-js'
+import { createAdminClient } from '../../lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { approveAvatar, rejectAvatar } from './actions'
 import { ShieldCheck, Check, X, ArrowLeft, Clock } from 'lucide-react'
@@ -37,10 +37,7 @@ export default async function AdminDashboard(props: { searchParams: Promise<{ su
   }
 
   // 3. Use the Service Role to fetch all users who are waiting for image approval
-  const supabaseAdmin = createAdminClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
+  const supabaseAdmin = createAdminClient()
 
   const { data: pendingUsers } = await supabaseAdmin
     .from('users')

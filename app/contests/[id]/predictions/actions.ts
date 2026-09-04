@@ -1,9 +1,10 @@
 'use server'
 
 import { createClient } from '../../../../lib/supabase/server'
-import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { getPLMatches } from '../../../../lib/football'
 import { isMatchInContestSeason } from '../../../../lib/contest-season'
+import { isPredictionLocked } from '../../../../lib/scoring'
+import { createAdminClient } from '../../../../lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 
 export async function savePrediction(
@@ -13,7 +14,7 @@ export async function savePrediction(
   awayScoreRaw: number | string
 ) {
   const supabase = await createClient()
-  
+
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('You must be logged in to save a prediction.')
 
@@ -32,14 +33,9 @@ export async function savePrediction(
   if (!isMatchInContestSeason(match, contest?.season_length)) {
     throw new Error('This fixture is not part of this contest season.')
   }
-  if (!match.utcDate || Date.now() >= new Date(match.utcDate).getTime() - 60 * 60 * 1000) {
+  if (!match.utcDate || isPredictionLocked(match.utcDate)) {
     throw new Error('Predictions are locked one hour before kickoff.')
   }
-
-  const serviceSupabase = createServiceClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
 
   if (homeScoreRaw === undefined || homeScoreRaw === null || homeScoreRaw === '') {
     throw new Error('Missing Home Score. Please enter a valid number.')
@@ -55,45 +51,49 @@ export async function savePrediction(
     throw new Error('Scores must be valid numbers.')
   }
 
-  const { data: existingPrediction } = await serviceSupabase
+  const admin = createAdminClient()
+  const payload = {
+    user_id: user.id,
+    contest_id: contestId,
+    match_id: matchId,
+    predicted_home_score: homeScore,
+    predicted_away_score: awayScore,
+    updated_at: new Date().toISOString(),
+  }
+  const { error: upsertError } = await admin
     .from('predictions')
-    .select('id')
-    .eq('user_id', user.id)
-    .eq('contest_id', contestId)
-    .eq('match_id', matchId)
-    .single()
+    .upsert(payload, { onConflict: 'user_id,contest_id,match_id' })
 
-  if (existingPrediction) {
-    const { error: updateError } = await serviceSupabase
+  if (upsertError) {
+    const { data: existingPrediction } = await admin
       .from('predictions')
-      .update({ 
-        predicted_home_score: homeScore,   // FIXED COLUMN NAME
-        predicted_away_score: awayScore,   // FIXED COLUMN NAME
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', existingPrediction.id)
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('contest_id', contestId)
+      .eq('match_id', matchId)
+      .maybeSingle()
 
-    if (updateError) {
-      throw new Error(`Supabase Update Error: ${updateError.message}`)
-    }
-  } else {
-    const { error: insertError } = await serviceSupabase
-      .from('predictions')
-      .insert({
-        user_id: user.id,
-        contest_id: contestId,
-        match_id: matchId,
-        predicted_home_score: homeScore,   // FIXED COLUMN NAME
-        predicted_away_score: awayScore    // FIXED COLUMN NAME
-      })
+    const { error: fallbackError } = existingPrediction
+      ? await admin.from('predictions').update({
+          predicted_home_score: homeScore,
+          predicted_away_score: awayScore,
+          updated_at: payload.updated_at,
+        }).eq('id', existingPrediction.id)
+      : await admin.from('predictions').insert({
+          user_id: user.id,
+          contest_id: contestId,
+          match_id: matchId,
+          predicted_home_score: homeScore,
+          predicted_away_score: awayScore,
+        })
 
-    if (insertError) {
-      throw new Error(`Supabase Insert Error: ${insertError.message}`)
+    if (fallbackError) {
+      throw new Error(`Supabase Save Error: ${fallbackError.message}`)
     }
   }
 
   revalidatePath(`/contests/${contestId}/predictions`)
   revalidatePath(`/contests/${contestId}`)
-  
+
   return { success: true }
 }
