@@ -5,6 +5,7 @@ import Navbar from "./components/Navbar";
 import { LocaleProvider } from "./components/LocaleProvider";
 import { getServerLocale } from "../lib/i18n-server";
 import { getTranslations } from "../lib/i18n";
+import { Analytics } from "@vercel/analytics/next";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -31,6 +32,7 @@ export default function RootLayout({
             {children}
           </main>
         </LocaleProvider>
+        <Analytics />
       </body>
     </html>
   );
