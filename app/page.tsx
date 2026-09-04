@@ -1,13 +1,14 @@
 import { createClient } from '../lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { ChevronRight, ShieldCheck } from 'lucide-react'
+import { BarChart3, ChevronRight, ExternalLink, ShieldCheck } from 'lucide-react'
 import HeroBanner from './components/HeroBanner'
 import ScoreCasterLogo from './components/ScoreCasterLogo'
 import { getPLMatches } from '../lib/football'
 import { getTranslations } from '../lib/i18n'
 import { getServerLocale } from '../lib/i18n-server'
 import { createClient as createServiceClient } from '@supabase/supabase-js'
+import { Analytics } from '@vercel/analytics/next'
 import HomepageUpdates from './components/HomepageUpdates'
 import ContestIcon from './components/ContestIcon'
 
@@ -33,6 +34,41 @@ const TEAMS = [
   { name: 'West Ham United', crest: 'https://a.espncdn.com/i/teamlogos/soccer/500/371.png' },
   { name: 'Wolverhampton Wanderers', crest: 'https://a.espncdn.com/i/teamlogos/soccer/500/380.png' }
 ]
+
+async function fetchAnalytics() {
+  const token = process.env.VERCEL_API_TOKEN
+  const projectId = process.env.VERCEL_PROJECT_ID
+  if (!token || !projectId) return null
+
+  const params = new URLSearchParams({
+    projectId,
+    since: new Date(new Date().setHours(0, 0, 0, 0)).toISOString(),
+    until: new Date().toISOString(),
+  })
+  if (process.env.VERCEL_TEAM_ID) params.set('teamId', process.env.VERCEL_TEAM_ID)
+
+  let response: Response
+  try {
+    response = await fetch(
+      `https://api.vercel.com/v1/query/web-analytics/visits/count?${params}`,
+      { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' }
+    )
+  } catch (error) {
+    console.error('Vercel Analytics Request Error:', error)
+    return null
+  }
+  if (!response.ok) {
+    console.error('Vercel Analytics API Error:', response.status)
+    return null
+  }
+
+  const payload = await response.json() as { data?: Array<{ pageviews?: number; visitors?: number }> | { pageviews?: number; visitors?: number } }
+  const rows = Array.isArray(payload.data) ? payload.data : payload.data ? [payload.data] : []
+  return {
+    pageviews: rows.reduce((total, row) => total + (Number(row.pageviews) || 0), 0),
+    visitors: rows.reduce((total, row) => total + (Number(row.visitors) || 0), 0),
+  }
+}
 
 // Fetch both the recent scores AND the next scheduled match
 async function fetchPLData() {
@@ -112,6 +148,7 @@ export default async function Home(props: { searchParams: Promise<{ success?: st
   
   // Fetch data
   const { recentScores, nextMatch } = await fetchPLData();
+  const analytics = await fetchAnalytics()
   const serviceSupabase = createServiceClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -255,6 +292,30 @@ export default async function Home(props: { searchParams: Promise<{ success?: st
         updates={websiteUpdates || []}
         isOwner={user.email?.toLowerCase() === 'cris.the.dj@gmail.com'}
       />
+      <section className="flex items-center justify-between gap-4 rounded-2xl border border-orange-500/25 bg-gradient-to-r from-[#242424] to-[#171717] p-5 shadow-lg shadow-black/20">
+        <div className="flex items-center gap-3">
+          <BarChart3 className="h-5 w-5 text-orange-300" aria-hidden="true" />
+          <div>
+            <h2 className="font-semibold text-scorecaster-text">{t('Analytics')}</h2>
+            {analytics ? (
+              <p className="text-sm text-gray-400">
+                {analytics.visitors} {t('visitors')} · {analytics.pageviews} {t('page views')} {t('today')}
+              </p>
+            ) : (
+              <p className="text-sm text-gray-400">{t('Live data is unavailable.')}</p>
+            )}
+          </div>
+        </div>
+        <a
+          href="https://vercel.com/dashboard"
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex shrink-0 items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3 py-1.5 text-xs font-bold text-orange-100 transition hover:border-white/40 hover:bg-white/20"
+        >
+          {t('Open Dashboard')}
+          <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+        </a>
+      </section>
       <footer className="flex flex-col items-center gap-2 py-2 text-center">
         <p className="max-w-xl text-xs font-medium tracking-wide text-orange-100/70">
           Built with 10% skill, 90% Googling, and love from Sfariac Cristian.
@@ -264,6 +325,7 @@ export default async function Home(props: { searchParams: Promise<{ success?: st
           <span>ScoreCaster</span>
         </p>
       </footer>
+      <Analytics />
     </div>
   );
 }
