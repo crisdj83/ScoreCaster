@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useTranslations } from './LocaleProvider'
 
 const TEAMS = [
   { name: 'Arsenal', crest: 'https://a.espncdn.com/i/teamlogos/soccer/500/359.png' },
@@ -51,6 +52,7 @@ export default function HeroBanner({
   recentScores: ScoreData[];
 }) {
   const [timeLeft, setTimeLeft] = useState({ days: '00', hours: '00', minutes: '00', seconds: '00' })
+  const t = useTranslations()
 
   useEffect(() => {
     if (!nextMatch?.date) return;
@@ -103,20 +105,20 @@ export default function HeroBanner({
       <div className="w-full lg:w-1/2 bg-transparent p-6 sm:p-10 flex flex-col justify-between text-white relative">
         <div>
           <p className="mb-3 max-w-md text-3xl font-black uppercase leading-none tracking-tight text-white sm:text-5xl">
-            Call the scores.<br /><span className="text-[#d4ff00]">Own the table.</span>
+            {t('Call the scores.')}<br /><span className="text-[#d4ff00]">{t('Own the table.')}</span>
           </p>
           <p className="mb-6 max-w-md text-sm leading-6 text-orange-100 sm:text-base">
-            Predict match outcomes, compete with your league, and climb the leaderboard every matchweek.
+            {t('Predict match outcomes, compete with your league, and climb the leaderboard every matchweek.')}
           </p>
           <div className="flex items-center gap-2 mb-3">
             <span className="text-lg">⚽</span>
-            <span className="font-extrabold tracking-widest text-xs uppercase text-orange-200">Upcoming Match</span>
+            <span className="font-extrabold tracking-widest text-xs uppercase text-orange-200">{t('Upcoming Match')}</span>
           </div>
           <h2 className="text-2xl sm:text-4xl font-black uppercase tracking-tight leading-tight mb-2">
             Premier League
           </h2>
           <p className="text-orange-100 font-medium text-base sm:text-lg">
-            {nextMatch ? `${nextMatch.homeTeam} vs ${nextMatch.awayTeam}` : 'Season Ended / No Fixtures'}
+            {nextMatch ? `${nextMatch.homeTeam} vs ${nextMatch.awayTeam}` : t('Season Ended / No Fixtures')}
           </p>
         </div>
 
@@ -124,28 +126,28 @@ export default function HeroBanner({
         <div className="mt-8">
           <div className="flex flex-wrap gap-2 sm:gap-3 items-center mb-6">
             <div className="flex flex-col items-center">
-              <span className="text-[10px] uppercase tracking-wider text-orange-200 mb-1">Days</span>
+              <span className="text-[10px] uppercase tracking-wider text-orange-200 mb-1">{t('Days')}</span>
               <div className="border-2 border-white/80 p-2 w-12 sm:w-14 flex items-center justify-center text-xl sm:text-2xl font-black font-mono rounded bg-black/20">
                 {timeLeft.days}
               </div>
             </div>
             <span className="text-xl font-black">:</span>
             <div className="flex flex-col items-center">
-              <span className="text-[10px] uppercase tracking-wider text-orange-200 mb-1">Hours</span>
+              <span className="text-[10px] uppercase tracking-wider text-orange-200 mb-1">{t('Hours')}</span>
               <div className="border-2 border-white/80 p-2 w-12 sm:w-14 flex items-center justify-center text-xl sm:text-2xl font-black font-mono rounded bg-black/20">
                 {timeLeft.hours}
               </div>
             </div>
             <span className="text-xl font-black">:</span>
             <div className="flex flex-col items-center">
-              <span className="text-[10px] uppercase tracking-wider text-orange-200 mb-1">Mins</span>
+              <span className="text-[10px] uppercase tracking-wider text-orange-200 mb-1">{t('Mins')}</span>
               <div className="border-2 border-white/80 p-2 w-12 sm:w-14 flex items-center justify-center text-xl sm:text-2xl font-black font-mono rounded bg-black/20">
                 {timeLeft.minutes}
               </div>
             </div>
             <span className="text-xl font-black">:</span>
             <div className="flex flex-col items-center">
-              <span className="text-[10px] uppercase tracking-wider text-orange-200 mb-1">Secs</span>
+              <span className="text-[10px] uppercase tracking-wider text-orange-200 mb-1">{t('Secs')}</span>
               <div className="border-2 border-orange-400 p-2 w-12 sm:w-14 flex items-center justify-center text-xl sm:text-2xl font-black font-mono text-orange-400 rounded bg-black/20">
                 {timeLeft.seconds}
               </div>
@@ -157,7 +159,7 @@ export default function HeroBanner({
               href="/contests" 
               className="inline-block bg-[#d4ff00] hover:bg-[#bce600] text-black font-black uppercase tracking-wider px-6 py-3 text-xs sm:text-sm transition-colors rounded shadow-md"
             >
-              Make Predictions
+              {t('Make Predictions')}
             </Link>
           </div>
         </div>
@@ -166,7 +168,7 @@ export default function HeroBanner({
       {/* RIGHT SIDE: Scrolling Latest Scores Feed */}
       <div className="w-full lg:w-1/2 h-[350px] lg:h-auto lg:min-h-[420px] bg-transparent relative overflow-hidden flex flex-col">
         <div className="absolute right-5 top-5 z-20 rounded-full bg-black px-4 py-2 text-xs font-black uppercase tracking-[0.2em] text-white shadow-lg">
-          Latest Scores
+          {t('Latest Scores')}
         </div>
         
         {recentScores.length > 0 ? (
@@ -207,7 +209,7 @@ export default function HeroBanner({
           </div>
         ) : (
           <div className="absolute inset-0 flex items-center justify-center text-gray-500 text-sm">
-            No recent matches to display.
+            {t('No recent matches to display.')}
           </div>
         )}
       </div>

@@ -3,6 +3,7 @@
 import { createClient } from '../../../../lib/supabase/server'
 import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { getPLMatches } from '../../../../lib/football'
+import { isMatchInContestSeason } from '../../../../lib/contest-season'
 import { revalidatePath } from 'next/cache'
 
 export async function savePrediction(
@@ -18,15 +19,19 @@ export async function savePrediction(
 
   const { data: membership, error: membershipError } = await supabase
     .from('contest_members')
-    .select('user_id')
+    .select('user_id, contests(season_length)')
     .eq('contest_id', contestId)
     .eq('user_id', user.id)
     .single()
   if (membershipError || !membership) throw new Error('You are not a member of this contest.')
 
   const matchData = await getPLMatches()
-  const match = matchData.matches.find((item: { id: number | string; utcDate: string }) => String(item.id) === String(matchId))
+  const match = matchData.matches.find((item: { id: number | string; utcDate: string; matchday?: number }) => String(item.id) === String(matchId))
   if (!match) throw new Error('This match could not be verified. Please refresh and try again.')
+  const contest = Array.isArray(membership.contests) ? membership.contests[0] : membership.contests
+  if (!isMatchInContestSeason(match, contest?.season_length)) {
+    throw new Error('This fixture is not part of this contest season.')
+  }
   if (!match.utcDate || Date.now() >= new Date(match.utcDate).getTime() - 60 * 60 * 1000) {
     throw new Error('Predictions are locked one hour before kickoff.')
   }

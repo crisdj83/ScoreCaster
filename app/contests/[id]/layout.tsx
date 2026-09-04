@@ -3,12 +3,15 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Trophy, ArrowLeft } from 'lucide-react'
 import ContestNav from './ContestNav'
+import { getTranslations } from '../../../lib/i18n'
+import { getServerLocale } from '../../../lib/i18n-server'
 
 export default async function ContestLayout(props: { 
   children: React.ReactNode;
   params: Promise<{ id: string }>;
 }) {
   const params = await props.params;
+  const t = getTranslations(getServerLocale())
   const supabase = await createClient()
 
   // 1. Verify user is logged in
@@ -50,10 +53,10 @@ export default async function ContestLayout(props: {
       {/* Back button and breadcrumb */}
       <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-gray-500">
         <Link href="/" className="hover:text-gray-900 transition-colors flex items-center gap-1">
-          <ArrowLeft className="h-3.5 w-3.5" /> Dashboard
+          <ArrowLeft className="h-3.5 w-3.5" /> {t('Dashboard')}
         </Link>
         <span>/</span>
-        <Link href="/contests" className="hover:text-gray-900 transition-colors">Contests</Link>
+        <Link href="/contests" className="hover:text-gray-900 transition-colors">{t('Contests')}</Link>
         <span>/</span>
         <span className="text-orange-600">{contest.name}</span>
       </div>
@@ -64,7 +67,7 @@ export default async function ContestLayout(props: {
         
         <div className="z-10">
           <div className="flex items-center gap-2 text-orange-200 text-xs font-black uppercase tracking-widest mb-2">
-            <span>Official Prediction League</span>
+            <span>{t('Official Prediction League')}</span>
           </div>
           <h1 className="text-3xl md:text-5xl font-black uppercase tracking-tight flex items-center gap-3 text-white">
             <Trophy className="h-10 w-10 text-orange-400 flex-shrink-0" />
@@ -73,7 +76,7 @@ export default async function ContestLayout(props: {
         </div>
         
         <div className="z-10 bg-black/40 px-5 py-3 rounded-xl border border-white/10 backdrop-blur-md text-center shadow-inner">
-          <p className="text-[10px] text-orange-200 uppercase tracking-widest font-black mb-1">Invite Code</p>
+          <p className="text-[10px] text-orange-200 uppercase tracking-widest font-black mb-1">{t('Invite Code')}</p>
           <p className="font-mono text-2xl font-black tracking-widest text-[#d4ff00]">{contest.contest_key}</p>
         </div>
       </div>

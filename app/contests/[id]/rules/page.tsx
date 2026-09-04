@@ -1,8 +1,11 @@
 import { Target, Activity, CheckCircle2, Clock, AlertCircle } from 'lucide-react'
 import { createClient } from '../../../../lib/supabase/server'
+import { getTranslations } from '../../../../lib/i18n'
+import { getServerLocale } from '../../../../lib/i18n-server'
 
 export default async function RulesPage(props: { params: Promise<{ id: string }> }) {
   const { id } = await props.params
+  const t = getTranslations(getServerLocale())
   const supabase = await createClient()
   const { data: contest } = await supabase
     .from('contests')
@@ -16,8 +19,8 @@ export default async function RulesPage(props: { params: Promise<{ id: string }>
   return (
     <div className="space-y-6 max-w-4xl">
       <div className="mb-2">
-        <h2 className="text-2xl font-black uppercase tracking-tight text-gray-900">Contest Rules & Scoring</h2>
-        <p className="text-gray-500 text-sm mt-0.5">Everything you need to know to dominate the leaderboard.</p>
+        <h2 className="text-2xl font-black uppercase tracking-tight text-gray-900">{t('Contest Rules & Scoring')}</h2>
+        <p className="text-gray-500 text-sm mt-0.5">{t('Everything you need to know to dominate the leaderboard.')}</p>
       </div>
 
       <div className="space-y-6">
@@ -28,13 +31,13 @@ export default async function RulesPage(props: { params: Promise<{ id: string }>
             <div className="bg-orange-500/10 p-2 rounded-xl">
               <AlertCircle className="h-5 w-5 text-orange-600" />
             </div>
-            How to Play
+            {t('How to Play')}
           </h3>
           <ul className="space-y-3 text-gray-600 text-sm ml-7 list-disc marker:text-orange-500 font-medium">
-            <li>Navigate to the <strong className="text-gray-900">Predictions</strong> tab to see the upcoming Premier League fixtures.</li>
-            <li>Use the <span className="font-mono bg-gray-100 px-1.5 py-0.5 rounded text-xs font-bold text-gray-800 border border-gray-200">+</span> and <span className="font-mono bg-gray-100 px-1.5 py-0.5 rounded text-xs font-bold text-gray-800 border border-gray-200">-</span> buttons to set your predicted score for the Home and Away teams.</li>
-            <li>Your predictions are saved automatically as you change them.</li>
-            <li><strong className="text-gray-900">Lockout Time:</strong> You can change your prediction as many times as you want up until the exact minute the match kicks off. Once a match begins, predictions are locked.</li>
+            <li>{t('Navigate to the Predictions tab to see the upcoming Premier League fixtures.')}</li>
+            <li>{t('Use the + and - buttons to set your predicted score for the Home and Away teams.')}</li>
+            <li>{t('Your predictions are saved automatically as you change them.')}</li>
+            <li><strong className="text-gray-900">{t('Lockout Time:')}</strong> {t('You can change your prediction as many times as you want up until the exact minute the match kicks off. Once a match begins, predictions are locked.')}</li>
           </ul>
         </div>
 
@@ -44,10 +47,10 @@ export default async function RulesPage(props: { params: Promise<{ id: string }>
             <div className="bg-orange-500/10 p-2 rounded-xl">
               <Target className="h-5 w-5 text-orange-600" />
             </div>
-            Tiered Scoring System
+            {t('Tiered Scoring System')}
           </h3>
           <p className="text-gray-500 text-sm mb-6">
-            Points are awarded after the final whistle based on how accurate your prediction was compared to the real-world result.
+            {t('Points are awarded after the final whistle based on how accurate your prediction was compared to the real-world result.')}
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -58,14 +61,14 @@ export default async function RulesPage(props: { params: Promise<{ id: string }>
                 +{pointsExact} PTS
               </div>
               <Target className="h-7 w-7 text-orange-600 mb-3" />
-              <h4 className="font-extrabold uppercase tracking-tight text-gray-900 mb-1.5">Exact Score</h4>
+              <h4 className="font-extrabold uppercase tracking-tight text-gray-900 mb-1.5">{t('Exact Score')}</h4>
               <p className="text-xs text-gray-600 leading-relaxed">
-                You correctly predict the exact final score of the match.
+                {t('You correctly predict the exact final score of the match.')}
               </p>
               <div className="mt-auto pt-4 bg-white p-3 rounded-xl border border-gray-200 text-xs text-gray-500 shadow-inner">
-                <span className="block font-extrabold uppercase tracking-wider text-gray-700 mb-1">Example:</span>
-                Predicted: 2 - 1 <br />
-                Actual: 2 - 1
+                <span className="block font-extrabold uppercase tracking-wider text-gray-700 mb-1">{t('Example')}</span>
+                {t('Predicted')} 2 - 1 <br />
+                {t('Actual')} 2 - 1
               </div>
             </div>
 
@@ -75,14 +78,14 @@ export default async function RulesPage(props: { params: Promise<{ id: string }>
                 +{pointsClose} PTS
               </div>
               <Activity className="h-7 w-7 text-orange-400 mb-3" />
-              <h4 className="font-extrabold uppercase tracking-tight text-gray-900 mb-1.5">Close Prediction</h4>
+              <h4 className="font-extrabold uppercase tracking-tight text-gray-900 mb-1.5">{t('Close Prediction')}</h4>
               <p className="text-xs text-gray-600 leading-relaxed">
-                You predict the right outcome (Win/Draw/Loss), AND total goals scored is off by no more than 1.
+                {t('You predict the right outcome (Win/Draw/Loss), AND total goals scored is off by no more than 1.')}
               </p>
               <div className="mt-auto pt-4 bg-white p-3 rounded-xl border border-gray-200 text-xs text-gray-500 shadow-inner">
-                <span className="block font-extrabold uppercase tracking-wider text-gray-700 mb-1">Example:</span>
-                Predicted: 1 - 0 (Total: 1) <br />
-                Actual: 2 - 0 (Total: 2)
+                <span className="block font-extrabold uppercase tracking-wider text-gray-700 mb-1">{t('Example')}</span>
+                {t('Predicted')} 1 - 0 (Total: 1) <br />
+                {t('Actual')} 2 - 0 (Total: 2)
               </div>
             </div>
 
@@ -92,14 +95,14 @@ export default async function RulesPage(props: { params: Promise<{ id: string }>
                 +{pointsResult} PT{pointsResult === 1 ? '' : 'S'}
               </div>
               <CheckCircle2 className="h-7 w-7 text-gray-700 mb-3" />
-              <h4 className="font-extrabold uppercase tracking-tight text-gray-900 mb-1.5">Correct Result</h4>
+              <h4 className="font-extrabold uppercase tracking-tight text-gray-900 mb-1.5">{t('Correct Result')}</h4>
               <p className="text-xs text-gray-600 leading-relaxed">
-                You predict the right outcome (Win/Draw/Loss), but total goals are not close.
+                {t('You predict the right outcome (Win/Draw/Loss), but total goals are not close.')}
               </p>
               <div className="mt-auto pt-4 bg-white p-3 rounded-xl border border-gray-200 text-xs text-gray-500 shadow-inner">
-                <span className="block font-extrabold uppercase tracking-wider text-gray-700 mb-1">Example:</span>
-                Predicted: 1 - 0 (Total: 1)<br />
-                Actual: 4 - 0 (Total: 4)
+                <span className="block font-extrabold uppercase tracking-wider text-gray-700 mb-1">{t('Example')}</span>
+                {t('Predicted')} 1 - 0 (Total: 1)<br />
+                {t('Actual')} 4 - 0 (Total: 4)
               </div>
             </div>
 
@@ -112,13 +115,13 @@ export default async function RulesPage(props: { params: Promise<{ id: string }>
             <div className="bg-orange-500/10 p-2 rounded-xl">
               <Clock className="h-5 w-5 text-orange-600" />
             </div>
-            Leaderboard Tiebreakers
+            {t('Leaderboard Tiebreakers')}
           </h3>
-          <p className="text-gray-500 text-sm mb-4">If two or more players have the exact same Total Points, the leaderboard will rank them based on:</p>
+          <p className="text-gray-500 text-sm mb-4">{t('If two or more players have the exact same Total Points, the leaderboard will rank them based on:')}</p>
           <ol className="space-y-2 text-sm text-gray-700 ml-7 list-decimal marker:text-orange-600 font-bold">
-            <li>Highest number of Exact Scores (+{pointsExact} pts)</li>
-            <li>Highest number of Close Predictions (+{pointsClose} pts)</li>
-            <li>Highest overall prediction accuracy percentage</li>
+            <li>{t('Highest number of Exact Scores')} (+{pointsExact} pts)</li>
+            <li>{t('Highest number of Close Predictions')} (+{pointsClose} pts)</li>
+            <li>{t('Highest overall prediction accuracy percentage')}</li>
           </ol>
         </div>
 

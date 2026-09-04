@@ -5,6 +5,8 @@ import { redirect } from 'next/navigation'
 import { approveAvatar, rejectAvatar } from './actions'
 import { ShieldCheck, Check, X, ArrowLeft, Clock } from 'lucide-react'
 import Link from 'next/link'
+import { getTranslations } from '../../lib/i18n'
+import { getServerLocale } from '../../lib/i18n-server'
 
 type PendingUser = {
   id: string
@@ -16,6 +18,7 @@ type PendingUser = {
 
 export default async function AdminDashboard(props: { searchParams: Promise<{ success?: string, error?: string }> }) {
   const searchParams = await props.searchParams;
+  const t = getTranslations(getServerLocale())
   const supabase = await createClient()
 
   // 1. Verify this user is logged in
@@ -50,15 +53,15 @@ export default async function AdminDashboard(props: { searchParams: Promise<{ su
       {/* Back Navigation */}
       <div>
         <Link href="/" className="text-gray-500 hover:text-gray-900 transition-colors text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 mb-3">
-          <ArrowLeft className="h-4 w-4" /> Back to Dashboard
+          <ArrowLeft className="h-4 w-4" /> {t('Back to Dashboard')}
         </Link>
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl md:text-4xl font-black uppercase tracking-tight text-gray-900 flex items-center gap-3">
               <ShieldCheck className="h-8 w-8 text-orange-600" />
-              Global Admin Portal
+              {t('Global Admin Portal')}
             </h1>
-            <p className="text-gray-500 text-sm mt-1">Review and moderate pending user profile images.</p>
+            <p className="text-gray-500 text-sm mt-1">{t('Review and moderate pending user profile images.')}</p>
           </div>
         </div>
       </div>
@@ -74,14 +77,14 @@ export default async function AdminDashboard(props: { searchParams: Promise<{ su
         
         <div className="p-5 bg-gray-950 text-white font-black uppercase tracking-wider text-xs flex items-center gap-2">
           <Clock className="h-4 w-4 text-orange-400" />
-          Pending Image Approvals ({pendingUsers?.length || 0})
+          {t('Pending Image Approvals')} ({pendingUsers?.length || 0})
         </div>
 
         <div className="p-6 md:p-8">
           {!pendingUsers || pendingUsers.length === 0 ? (
             <div className="text-center py-16 text-gray-400">
               <ShieldCheck className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-              <p className="font-bold text-gray-600 uppercase tracking-tight">Queue is empty</p>
+              <p className="font-bold text-gray-600 uppercase tracking-tight">{t('Queue is empty')}</p>
               <p className="text-xs text-gray-400 mt-1">All user images have been reviewed successfully.</p>
             </div>
           ) : (
@@ -110,7 +113,7 @@ export default async function AdminDashboard(props: { searchParams: Promise<{ su
                       <input type="hidden" name="user_id" value={u.id} />
                       <input type="hidden" name="pending_url" value={u.pending_avatar_url} />
                       <button type="submit" className="w-full flex items-center justify-center gap-1 bg-[#d4ff00] hover:bg-[#bce600] text-black py-2.5 rounded-xl font-black uppercase tracking-wider transition-colors text-xs shadow-sm">
-                        <Check className="h-4 w-4" /> Approve
+                        <Check className="h-4 w-4" /> {t('Approve')}
                       </button>
                     </form>
 
@@ -118,7 +121,7 @@ export default async function AdminDashboard(props: { searchParams: Promise<{ su
                     <form action={rejectAvatar} className="flex-1">
                       <input type="hidden" name="user_id" value={u.id} />
                       <button type="submit" className="w-full flex items-center justify-center gap-1 bg-red-50 hover:bg-red-100 text-red-700 py-2.5 rounded-xl font-bold uppercase tracking-wider transition-colors text-xs border border-red-200 shadow-sm">
-                        <X className="h-4 w-4" /> Reject
+                        <X className="h-4 w-4" /> {t('Reject')}
                       </button>
                     </form>
                   </div>

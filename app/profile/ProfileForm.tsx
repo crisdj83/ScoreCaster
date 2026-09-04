@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { User, Quote, Trophy, ChevronDown, Check } from 'lucide-react'
 import { updateProfile } from './actions'
+import { useTranslations } from '../components/LocaleProvider'
 
 const PREMIER_LEAGUE_TEAMS = [
   { name: "Arsenal", logo: "https://crests.football-data.org/57.png" },
@@ -29,6 +30,7 @@ const PREMIER_LEAGUE_TEAMS = [
 
 export default function ProfileForm({ user, profile, messages }: any) {
   const [teamOpen, setTeamOpen] = useState(false)
+  const t = useTranslations()
   const [selectedTeam, setSelectedTeam] = useState(PREMIER_LEAGUE_TEAMS.find(t => t.name === profile?.favorite_team) || null)
   
   // React Ref to track where the dropdown is on the screen
@@ -65,14 +67,14 @@ export default function ProfileForm({ user, profile, messages }: any) {
 
         {/* Email Address */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">{t('Email Address')}</label>
           <input type="text" disabled value={user.email} className="w-full rounded-xl px-4 py-3 bg-gray-50 border border-gray-200 text-gray-500 cursor-not-allowed" />
         </div>
 
         {/* Username */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
-            <User className="h-4 w-4 text-gray-400" /> Username
+            <User className="h-4 w-4 text-gray-400" /> {t('Username')}
           </label>
           <input type="text" name="username" defaultValue={profile?.username || ''} placeholder="e.g. Dracula's Revenge FC" className="w-full rounded-xl px-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-scorecaster-green" />
         </div>
@@ -80,7 +82,7 @@ export default function ProfileForm({ user, profile, messages }: any) {
         {/* Custom Team Dropdown */}
         <div className="relative" ref={teamRef}>
           <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
-            <Trophy className="h-4 w-4 text-gray-400" /> Favorite Premier League Team
+            <Trophy className="h-4 w-4 text-gray-400" /> {t('Favorite Premier League Team')}
           </label>
           <div 
             onClick={() => setTeamOpen(!teamOpen)}
@@ -93,7 +95,7 @@ export default function ProfileForm({ user, profile, messages }: any) {
                   <span>{selectedTeam.name}</span>
                 </>
               ) : (
-                <span className="text-gray-500">Select a team...</span>
+                <span className="text-gray-500">{t('Select a team...')}</span>
               )}
             </div>
             <ChevronDown className="h-4 w-4 text-gray-400" />
@@ -119,7 +121,7 @@ export default function ProfileForm({ user, profile, messages }: any) {
         {/* Quote / Bio */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
-            <Quote className="h-4 w-4 text-gray-400" /> Personal Quote / Bio
+            <Quote className="h-4 w-4 text-gray-400" /> {t('Personal Quote / Bio')}
           </label>
           <textarea 
             name="quote" 
@@ -132,7 +134,7 @@ export default function ProfileForm({ user, profile, messages }: any) {
 
         <div className="pt-4 border-t border-gray-100 flex justify-end">
           <button type="submit" className="bg-gray-900 hover:bg-gray-800 text-white rounded-xl px-6 py-3 font-black uppercase tracking-wider text-xs transition-colors shadow-sm">
-            Save Profile Changes
+            {t('Save Profile Changes')}
           </button>
         </div>
       </form>

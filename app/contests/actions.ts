@@ -30,6 +30,7 @@ export async function createContest(formData: FormData) {
       admin_id: user.id,
       name: name,
       contest_key: contestKey,
+      season_length: 'full',
     })
     .select('id')
     .single()

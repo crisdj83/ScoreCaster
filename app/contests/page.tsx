@@ -20,6 +20,7 @@ export default async function ContestsPage(props: { searchParams: Promise<{ erro
       contests (
         name,
         contest_key,
+        season_length,
         is_open
       )
     `)

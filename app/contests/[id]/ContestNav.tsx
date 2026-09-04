@@ -2,15 +2,18 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Trophy, BarChart2, BookOpen, Shield, Settings } from 'lucide-react'
+import { Trophy, BarChart2, BookOpen, Shield, Settings, CalendarDays } from 'lucide-react'
+import { useTranslations } from '../../components/LocaleProvider'
 
 export default function ContestNav({ contestId, isAdmin }: { contestId: string; isAdmin: boolean }) {
   const pathname = usePathname()
+  const t = useTranslations()
   const links = [
-    { href: `/contests/${contestId}/predictions`, label: 'Predictions', icon: Trophy },
-    { href: `/contests/${contestId}/ranking`, label: 'Ranking', icon: BarChart2 },
-    { href: `/contests/${contestId}/championship`, label: 'PL Standings', icon: Shield },
-    { href: `/contests/${contestId}/rules`, label: 'Rules', icon: BookOpen },
+    { href: `/contests/${contestId}/predictions`, label: t('Predictions'), icon: Trophy },
+    { href: `/contests/${contestId}/fixtures`, label: t('Fixtures'), icon: CalendarDays },
+    { href: `/contests/${contestId}/ranking`, label: t('Ranking'), icon: BarChart2 },
+    { href: `/contests/${contestId}/championship`, label: t('PL Standings'), icon: Shield },
+    { href: `/contests/${contestId}/rules`, label: t('Rules'), icon: BookOpen },
   ]
 
   return (
@@ -36,7 +39,7 @@ export default function ContestNav({ contestId, isAdmin }: { contestId: string; 
             pathname === `/contests/${contestId}/edit` ? 'bg-orange-500 text-black' : 'text-orange-300 hover:text-white hover:bg-orange-500/20'
           }`}
         >
-          <Settings className="h-4 w-4" /> Settings
+          <Settings className="h-4 w-4" /> {t('Settings')}
         </Link>
       )}
     </div>

@@ -1,9 +1,12 @@
 import { createClient } from '../../lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { Trophy } from 'lucide-react'
+import { getTranslations } from '../../lib/i18n'
+import { getServerLocale } from '../../lib/i18n-server'
 
 export default async function UpdatePasswordPage(props: { searchParams: Promise<{ message?: string }> }) {
   const searchParams = await props.searchParams;
+  const t = getTranslations(getServerLocale())
 
   // This is the server action that actually updates the password in the database
   async function updatePassword(formData: FormData) {
@@ -30,14 +33,14 @@ export default async function UpdatePasswordPage(props: { searchParams: Promise<
         <div className="rounded-2xl bg-gray-900 p-3 mb-3">
           <Trophy className="h-8 w-8 text-[#d4ff00]" />
         </div>
-        <h1 className="text-2xl font-black uppercase tracking-tight text-gray-900">Reset Password</h1>
-        <p className="text-gray-500 text-sm mt-1">Enter your new secure password below</p>
+        <h1 className="text-2xl font-black uppercase tracking-tight text-gray-900">{t('Reset Password')}</h1>
+        <p className="text-gray-500 text-sm mt-1">{t('Enter your new secure password below')}</p>
       </div>
 
       <form action={updatePassword} className="flex-1 flex flex-col w-full justify-center gap-4 text-scorecaster-text">
         <div className="flex flex-col gap-1">
           <label className="text-sm font-medium" htmlFor="password">
-            New Password
+            {t('New Password')}
           </label>
           <input
             className="rounded-md px-4 py-2 bg-inherit border border-gray-300 focus:outline-none focus:ring-2 focus:ring-scorecaster-green"
@@ -58,7 +61,7 @@ export default async function UpdatePasswordPage(props: { searchParams: Promise<
         <button
           className="bg-gray-900 hover:bg-gray-800 text-white rounded-xl px-4 py-3 font-black uppercase tracking-wider text-xs transition-colors mt-4"
         >
-          Update Password
+          {t('Update Password')}
         </button>
       </form>
       </div>

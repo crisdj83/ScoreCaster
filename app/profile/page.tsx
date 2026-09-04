@@ -6,6 +6,7 @@ import { updateProfile } from './actions'
 import { User, Shield, Image as ImageIcon, RefreshCw, ArrowLeft, Clock, ChevronDown } from 'lucide-react'
 import Link from 'next/link'
 import { createClient } from '../../lib/supabase/client'
+import { useTranslations } from '../components/LocaleProvider'
 
 // All 20 Premier League Teams (Using enterprise-grade ESPN CDN for 100% uptime)
 const TEAMS = [
@@ -33,6 +34,7 @@ const TEAMS = [
 
 export default function ProfilePage() {
   const router = useRouter()
+  const t = useTranslations()
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState('')
   const [profile, setProfile] = useState<any>(null)
@@ -87,14 +89,14 @@ export default function ProfilePage() {
 
   const selectedTeamData = TEAMS.find(t => t.name === favoriteTeam)
 
-  if (loading) return <div className="p-8 text-center text-gray-500">Loading profile...</div>
+  if (loading) return <div className="p-8 text-center text-gray-500">{t('Loading profile...')}</div>
   if (loadError) {
     return (
       <div className="mx-auto mt-8 max-w-md rounded-2xl border border-red-200 bg-red-50 p-6 text-center text-red-700">
-        <p className="font-bold">Could not load your profile</p>
+        <p className="font-bold">{t('Could not load your profile')}</p>
         <p className="mt-1 text-sm">{loadError}</p>
         <button onClick={() => window.location.reload()} className="mt-4 rounded-xl bg-gray-900 px-5 py-2.5 text-xs font-black uppercase tracking-wider text-white">
-          Try Again
+          {t('Try Again')}
         </button>
       </div>
     )
@@ -106,11 +108,11 @@ export default function ProfilePage() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <Link href="/" className="text-gray-500 hover:text-gray-900 transition-colors text-xs font-bold uppercase tracking-wider flex items-center gap-1 mb-2">
-            <ArrowLeft className="h-4 w-4" /> Back to Dashboard
+            <ArrowLeft className="h-4 w-4" /> {t('Back to Dashboard')}
           </Link>
           <h1 className="text-3xl md:text-4xl font-black uppercase tracking-tight text-gray-900 flex items-center gap-3">
             <User className="h-8 w-8 text-scorecaster-green" />
-            Your Profile
+            {t('Your Profile')}
           </h1>
         </div>
       </div>
@@ -128,7 +130,7 @@ export default function ProfilePage() {
           
           <div>
             <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-              <ImageIcon className="h-5 w-5 text-blue-500" /> Profile Picture / Logo
+              <ImageIcon className="h-5 w-5 text-blue-500" /> {t('Profile Picture / Logo')}
             </h3>
             
             <div className="flex flex-col md:flex-row items-start gap-6">
@@ -139,20 +141,20 @@ export default function ProfilePage() {
                   {avatarUrl ? (
                     <img src={avatarUrl} alt="Profile Preview" className="h-full w-full object-cover" />
                   ) : (
-                    <span className="text-gray-400 text-sm">No Image</span>
+                    <span className="text-gray-400 text-sm">{t('No Image')}</span>
                   )}
                 </div>
                 
                 {isPending && (
                   <div className="absolute -bottom-3 -right-3 bg-amber-100 border border-amber-300 text-amber-800 text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1 shadow-sm">
-                    <Clock className="h-3 w-3" /> Pending
+                    <Clock className="h-3 w-3" /> {t('Pending')}
                   </div>
                 )}
               </div>
 
               <div className="flex-grow w-full space-y-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('Image URL')}</label>
                   <input 
                     type="url" 
                     name="avatar_url" 
@@ -171,7 +173,7 @@ export default function ProfilePage() {
                   onClick={generateRandomAvatar}
                   className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl px-4 py-2.5 text-sm font-medium transition-colors border border-gray-200"
                 >
-                  <RefreshCw className="h-4 w-4" /> Auto-Generate Avatar
+                  <RefreshCw className="h-4 w-4" /> {t('Auto-Generate Avatar')}
                 </button>
               </div>
             </div>
@@ -181,7 +183,7 @@ export default function ProfilePage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('Username')}</label>
               <input 
                 type="text" 
                 name="username" 
@@ -194,7 +196,7 @@ export default function ProfilePage() {
             
             <div className="relative">
               <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
-                <Shield className="h-4 w-4 text-scorecaster-green" /> Favorite Team
+                <Shield className="h-4 w-4 text-scorecaster-green" /> {t('Favorite Team')}
               </label>
               
               <input type="hidden" name="favorite_team" value={favoriteTeam} />
@@ -217,7 +219,7 @@ export default function ProfilePage() {
                   ) : favoriteTeam ? (
                     <span>{favoriteTeam}</span>
                   ) : (
-                    <span className="text-gray-400">Select a team...</span>
+                    <span className="text-gray-400">{t('Select a team...')}</span>
                   )}
                 </div>
                 <ChevronDown className="h-4 w-4 text-gray-400" />
@@ -233,7 +235,7 @@ export default function ProfilePage() {
                       onClick={() => { setFavoriteTeam(''); setShowDropdown(false); }}
                     >
                       <div className="w-5 h-5 bg-gray-100 rounded-full flex items-center justify-center text-[10px]">⚽</div>
-                      None
+                      {t('None')}
                     </div>
                     
                     {TEAMS.map((team) => (
@@ -261,7 +263,7 @@ export default function ProfilePage() {
               type="submit" 
               className="bg-gray-900 hover:bg-gray-800 text-white rounded-xl px-8 py-3 font-black uppercase tracking-wider text-xs transition-colors shadow-sm z-0 relative"
             >
-              Save Profile
+              {t('Save Profile')}
             </button>
           </div>
         </form>

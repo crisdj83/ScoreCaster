@@ -1,6 +1,9 @@
 import { getPLStandings } from '../../../../lib/football'
+import { getTranslations } from '../../../../lib/i18n'
+import { getServerLocale } from '../../../../lib/i18n-server'
 
 export default async function ChampionshipPage() {
+  const t = getTranslations(getServerLocale())
   // Fetch the live standings from our function
   const data = await getPLStandings()
   
@@ -11,8 +14,8 @@ export default async function ChampionshipPage() {
   return (
     <div className="space-y-6">
       <div className="mb-2">
-        <h2 className="text-2xl font-black uppercase tracking-tight text-gray-900">Premier League Standings</h2>
-        <p className="text-gray-500 text-sm mt-0.5">Live official championship table powered by your API.</p>
+        <h2 className="text-2xl font-black uppercase tracking-tight text-gray-900">{t('Premier League Standings')}</h2>
+        <p className="text-gray-500 text-sm mt-0.5">{t('Live official championship table powered by your API.')}</p>
       </div>
 
       <div className="bg-white border border-gray-200 rounded-2xl shadow-lg overflow-x-auto">
@@ -20,7 +23,7 @@ export default async function ChampionshipPage() {
           <thead className="bg-gray-950 text-white font-black uppercase tracking-wider text-xs">
             <tr>
               <th className="px-5 py-4 text-center w-14">#</th>
-              <th className="px-4 py-4">Club</th>
+              <th className="px-4 py-4">{t('Club')}</th>
               <th className="px-3 py-4 text-center">MP</th>
               <th className="px-3 py-4 text-center">W</th>
               <th className="px-3 py-4 text-center">D</th>
@@ -29,7 +32,7 @@ export default async function ChampionshipPage() {
               <th className="px-3 py-4 text-center">GA</th>
               <th className="px-3 py-4 text-center">GD</th>
               <th className="px-4 py-4 text-center font-black text-orange-400">Pts</th>
-              <th className="px-5 py-4 text-center w-36">Form</th>
+              <th className="px-5 py-4 text-center w-36">{t('Form')}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 font-medium">

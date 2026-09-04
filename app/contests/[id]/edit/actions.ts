@@ -31,6 +31,42 @@ export async function updateContestSettings(formData: FormData) {
   redirect(`/contests/${contestId}/edit?success=Contest name updated successfully.`)
 }
 
+export async function updateSeasonSettings(formData: FormData) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
+  const contestId = formData.get('contest_id') as string
+  const seasonLength = formData.get('season_length') as string
+
+  if (seasonLength !== 'full' && seasonLength !== 'half') {
+    redirect(`/contests/${contestId}/edit?error=Choose a valid season length.`)
+  }
+
+  const { data: membership, error: membershipError } = await supabase
+    .from('contest_members').select('role').eq('contest_id', contestId).eq('user_id', user.id).single()
+
+  if (membershipError || membership?.role !== 'admin') {
+    redirect(`/contests/${contestId}?error=Unauthorized. Only admins can edit settings.`)
+  }
+
+  const { error: updateError } = await supabase
+    .from('contests')
+    .update({ season_length: seasonLength })
+    .eq('id', contestId)
+
+  if (updateError) {
+    redirect(`/contests/${contestId}/edit?error=${encodeURIComponent(updateError.message)}`)
+  }
+
+  revalidatePath(`/contests/${contestId}`, 'layout')
+  revalidatePath(`/contests/${contestId}/fixtures`)
+  revalidatePath(`/contests/${contestId}/predictions`)
+  revalidatePath(`/contests/${contestId}/ranking`)
+  revalidatePath('/contests', 'page')
+  redirect(`/contests/${contestId}/edit?success=Season length updated successfully.`)
+}
+
 // Action 2: Generate a Random Invite Key
 export async function generateNewInviteKey(formData: FormData) {
   const supabase = await createClient()

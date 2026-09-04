@@ -4,9 +4,11 @@ import { useState } from 'react'
 import { Trophy, Plus, Search, Users, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { createContest, joinContest } from './actions'
+import { useTranslations } from '../components/LocaleProvider'
 
 export default function ContestHub({ myContests, messages }: any) {
   const [activeTab, setActiveTab] = useState<'my_contests' | 'join' | 'create'>('my_contests')
+  const t = useTranslations()
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 pt-6">
@@ -14,7 +16,7 @@ export default function ContestHub({ myContests, messages }: any) {
         <div className="bg-orange-500 text-black p-2.5 rounded-xl shadow">
           <Trophy className="h-6 w-6 text-orange-400" />
         </div>
-        <h1 className="text-3xl font-black uppercase tracking-tight text-gray-900">Contest Hub</h1>
+        <h1 className="text-3xl font-black uppercase tracking-tight text-gray-900">{t('Contest Hub')}</h1>
       </div>
 
       {/* Error Message */}
@@ -34,7 +36,7 @@ export default function ContestHub({ myContests, messages }: any) {
               : 'text-gray-400 hover:text-white'
           }`}
         >
-          <Trophy className="h-4 w-4" /> My Contests
+          <Trophy className="h-4 w-4" /> {t('My Contests')}
         </button>
         <button 
           onClick={() => setActiveTab('join')}
@@ -44,7 +46,7 @@ export default function ContestHub({ myContests, messages }: any) {
               : 'text-gray-400 hover:text-white'
           }`}
         >
-          <Search className="h-4 w-4" /> Join Private
+          <Search className="h-4 w-4" /> {t('Join Private')}
         </button>
         <button 
           onClick={() => setActiveTab('create')}
@@ -54,7 +56,7 @@ export default function ContestHub({ myContests, messages }: any) {
               : 'text-gray-400 hover:text-white'
           }`}
         >
-          <Plus className="h-4 w-4" /> Create Contest
+          <Plus className="h-4 w-4" /> {t('Create Contest')}
         </button>
       </div>
 
@@ -64,15 +66,15 @@ export default function ContestHub({ myContests, messages }: any) {
         {/* MY CONTESTS TAB */}
         {activeTab === 'my_contests' && (
           <div className="space-y-4">
-            <h2 className="text-lg font-extrabold uppercase tracking-tight text-gray-900 mb-4">Your Active Contests</h2>
+            <h2 className="text-lg font-extrabold uppercase tracking-tight text-gray-900 mb-4">{t('Your Active Contests')}</h2>
             
             {myContests.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 text-center border-2 border-dashed border-gray-200 rounded-2xl bg-gray-50">
                 <Users className="h-10 w-10 text-gray-400 mb-3" />
-                <h3 className="text-gray-900 font-bold text-lg">No contests yet</h3>
-                <p className="text-gray-500 text-sm mt-1 max-w-sm mb-4">You haven't joined any prediction leagues. Join an existing one or create your own!</p>
+                <h3 className="text-gray-900 font-bold text-lg">{t('No contests yet')}</h3>
+                <p className="text-gray-500 text-sm mt-1 max-w-sm mb-4">{t("You haven't joined any prediction leagues. Join an existing one or create your own!")}</p>
                 <button onClick={() => setActiveTab('join')} className="text-orange-300 font-bold uppercase text-xs tracking-wider hover:underline">
-                  Find a contest to join &rarr;
+                  {t('Find a contest to join →')}
                 </button>
               </div>
             ) : (
@@ -84,17 +86,22 @@ export default function ContestHub({ myContests, messages }: any) {
                     className="flex flex-col p-5 border border-gray-200 rounded-2xl hover:border-orange-500 hover:shadow-lg transition-all group cursor-pointer bg-white"
                   >
                     <div className="flex justify-between items-start mb-2">
-                      <h3 className="font-extrabold text-lg text-gray-900 group-hover:text-orange-600 transition-colors">
-                        {membership.contests.name}
-                      </h3>
+                      <div>
+                        <h3 className="font-extrabold text-lg text-gray-900 group-hover:text-orange-600 transition-colors">
+                          {membership.contests.name}
+                        </h3>
+                        <p className="text-xs font-bold uppercase tracking-wider text-gray-500 mt-1">
+                          {t('Season')}: {membership.contests.season_length === 'half' ? t('Half season') : t('Full season')}
+                        </p>
+                      </div>
                       <span className={`text-[10px] uppercase tracking-widest px-2.5 py-1 rounded-full font-extrabold ${membership.role === 'admin' ? 'bg-orange-100 text-orange-800' : 'bg-gray-100 text-gray-600'}`}>
-                        {membership.role === 'admin' ? 'Admin' : 'Member'}
+                        {membership.role === 'admin' ? t('Admin') : t('Member')}
                       </span>
                     </div>
                     <div className="flex items-center justify-between mt-auto pt-4 text-sm border-t border-gray-100">
-                      <span className="text-gray-500 bg-gray-50 px-2 py-1 rounded text-xs">Key: <span className="font-mono font-bold text-gray-700">{membership.contests.contest_key}</span></span>
+                      <span className="text-gray-500 bg-gray-50 px-2 py-1 rounded text-xs">{t('Key:')} <span className="font-mono font-bold text-gray-700">{membership.contests.contest_key}</span></span>
                       <span className="flex items-center text-xs font-bold uppercase tracking-wider text-orange-300 group-hover:text-orange-200">
-                        Dashboard <ChevronRight className="h-4 w-4 ml-0.5" />
+                        {t('Dashboard')} <ChevronRight className="h-4 w-4 ml-0.5" />
                       </span>
                     </div>
                   </Link>
@@ -109,12 +116,12 @@ export default function ContestHub({ myContests, messages }: any) {
           <div className="max-w-md mx-auto py-4">
             <div className="text-center mb-6">
               <Search className="h-10 w-10 text-orange-600 mx-auto mb-3" />
-              <h2 className="text-xl font-extrabold uppercase tracking-tight text-gray-900">Join a Private Contest</h2>
-              <p className="text-gray-500 text-sm mt-1">Enter the 7-character invitation key provided by the contest administrator.</p>
+              <h2 className="text-xl font-extrabold uppercase tracking-tight text-gray-900">{t('Join a Private Contest')}</h2>
+              <p className="text-gray-500 text-sm mt-1">{t('Enter the 7-character invitation key provided by the contest administrator.')}</p>
             </div>
             <form action={joinContest} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">Contest Key *</label>
+                <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">{t('Contest Key *')}</label>
                 <input 
                   type="text" 
                   name="contest_key" 
@@ -124,7 +131,7 @@ export default function ContestHub({ myContests, messages }: any) {
                 />
               </div>
               <button type="submit" className="w-full bg-gray-900 hover:bg-gray-800 text-white rounded-xl px-4 py-3.5 font-black uppercase tracking-wider text-sm transition-colors shadow-md">
-                Join Contest
+                {t('Join Contest')}
               </button>
             </form>
           </div>
@@ -135,12 +142,12 @@ export default function ContestHub({ myContests, messages }: any) {
           <div className="max-w-md mx-auto py-4">
             <div className="text-center mb-6">
               <Plus className="h-10 w-10 text-orange-600 mx-auto mb-3" />
-              <h2 className="text-xl font-extrabold uppercase tracking-tight text-gray-900">Create a New Contest</h2>
-              <p className="text-gray-500 text-sm mt-1">Create your own prediction league and invite your friends to compete.</p>
+              <h2 className="text-xl font-extrabold uppercase tracking-tight text-gray-900">{t('Create a New Contest')}</h2>
+              <p className="text-gray-500 text-sm mt-1">{t('Create your own prediction league and invite your friends to compete.')}</p>
             </div>
             <form action={createContest} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">Contest Name *</label>
+                <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">{t('Contest Name *')}</label>
                 <input 
                   type="text" 
                   name="name" 
@@ -150,10 +157,10 @@ export default function ContestHub({ myContests, messages }: any) {
                 />
               </div>
               <button type="submit" className="w-full bg-gray-900 hover:bg-gray-800 text-white rounded-xl px-4 py-3.5 font-black uppercase tracking-wider text-sm transition-colors shadow-md">
-                Create & Generate Key
+                {t('Create & Generate Key')}
               </button>
               <p className="text-[11px] text-center text-gray-400 mt-4">
-                You will automatically become the Admin. You can customize settings after creation.
+                {t('You will automatically become the Admin. You can customize settings after creation.')}
               </p>
             </form>
           </div>
