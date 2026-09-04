@@ -202,12 +202,6 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
     return { name: team.name, shortName: team.shortName, crest: team.crest, rank: row?.position }
   }
   const now = Date.now()
-  const liveMatch = matches.find(match => ['IN_PLAY', 'PAUSED'].includes(match.status || ''))
-  const upcomingMatch = matches
-    .filter(match => ['TIMED', 'SCHEDULED'].includes(match.status || '') && new Date(match.utcDate).getTime() > now)
-    .sort((a, b) => new Date(a.utcDate).getTime() - new Date(b.utcDate).getTime())[0]
-  const currentMatchday = Number((liveMatch || upcomingMatch)?.matchday) || null
-  const gameweeks = Array.from(new Set(matches.map(match => Number(match.matchday)))).filter(Number.isFinite).sort((a, b) => a - b)
   const playersByMatch = Object.fromEntries(matches.map(match => [String(match.id), predictions
     .filter(prediction => String(prediction.match_id) === String(match.id))
     .map(prediction => ({
@@ -286,15 +280,6 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
         })) : [],
     }
   })
-  const teamStats = table.map((row: any) => ({
-    id: String(row.team?.id),
-    name: row.team?.name || 'Unknown team',
-    crest: row.team?.crest,
-    position: row.position,
-    playedGames: row.playedGames,
-    points: row.points,
-    goalDifference: row.goalDifference,
-  }))
   const labels = {
     evolution: t('Ranking evolution'),
     evolutionTitle: t('Ranking evolution by matchday'),
@@ -322,13 +307,7 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
     noPredictions: t('No predictions submitted yet.'),
     showAll: t('Show all'),
     showLess: t('Show less'),
-    teamStats: t('Team ranking'),
-    noTeamStats: t('Team standings are currently unavailable.'),
-    team: t('Team'),
-    played: t('Played'),
-    goalDifference: t('Goal difference'),
     finalScore: t('Final score'),
-    teamStatsDescription: t('Live Premier League rank powered by football-data.org.'),
   }
 
   return (
@@ -345,8 +324,6 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
         </p>
       </div>
       <CurrentGameweek
-        currentMatchday={currentMatchday}
-        gameweeks={gameweeks}
         fixtures={currentGameweekFixtures}
         playersByMatch={playersByMatch}
         selectedMatchId={searchParams.matchId}
@@ -393,7 +370,7 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
           </tbody>
         </table>
       </div>
-      <RankingInsights players={players} evolution={[]} trends={trends} teamStats={teamStats} labels={labels} />
+      <RankingInsights players={players} evolution={[]} trends={trends} labels={labels} />
     </div>
   )
 }

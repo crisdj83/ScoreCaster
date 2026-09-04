@@ -26,20 +26,22 @@ type Player = {
 }
 
 export default function CurrentGameweek({
-  currentMatchday,
-  gameweeks,
   fixtures,
   playersByMatch,
   selectedMatchId,
 }: {
-  currentMatchday: number | null
-  gameweeks: number[]
   fixtures: Fixture[]
   playersByMatch: Record<string, Player[]>
   selectedMatchId?: string
 }) {
-  const [selectedMatchday, setSelectedMatchday] = useState(currentMatchday ?? gameweeks[0] ?? 1)
-  const [focusedMatchId, setFocusedMatchId] = useState(selectedMatchId)
+  const selectedFixtureFromUrl = selectedMatchId ? fixtures.find(fixture => fixture.id === selectedMatchId) : undefined
+  const defaultFixture = selectedFixtureFromUrl
+    || [...fixtures]
+      .filter(fixture => fixture.status === 'FINISHED')
+      .sort((a, b) => new Date(b.kickoff).getTime() - new Date(a.kickoff).getTime())[0]
+    || fixtures[0]
+  const [selectedMatchday] = useState(defaultFixture?.matchday ?? 1)
+  const [focusedMatchId, setFocusedMatchId] = useState(defaultFixture?.id)
   const gameweekFixtures = fixtures.filter(fixture => fixture.matchday === selectedMatchday)
   const focusedIndex = gameweekFixtures.findIndex(fixture => fixture.id === focusedMatchId)
   const selectedFixtures = focusedIndex >= 0 ? [gameweekFixtures[focusedIndex]] : gameweekFixtures
@@ -68,19 +70,6 @@ export default function CurrentGameweek({
           <h3 className="mt-1 text-xl font-black text-white">Scores and current points</h3>
           <p className="mt-1 text-sm text-gray-400">Live scores and points refresh every five minutes.</p>
         </div>
-        <label className="flex items-center gap-3 text-sm font-bold text-gray-300">
-          <span>Gameweek</span>
-          <select
-            value={selectedMatchday}
-            onChange={event => {
-              setSelectedMatchday(Number(event.target.value))
-              setFocusedMatchId(undefined)
-            }}
-            className="rounded-lg border border-orange-500/60 bg-[#111] px-3 py-2 text-white"
-          >
-            {gameweeks.map(matchday => <option key={matchday} value={matchday}>{matchday}</option>)}
-          </select>
-        </label>
       </div>
 
       {focusedIndex >= 0 && (

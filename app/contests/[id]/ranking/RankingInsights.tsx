@@ -6,7 +6,6 @@ import {
   ChevronDown,
   Eye,
   EyeOff,
-  Shield,
   TrendingUp,
   Users,
 } from 'lucide-react'
@@ -56,29 +55,17 @@ type PredictionTrend = {
   predictions: TrendPrediction[]
 }
 
-type TeamStat = {
-  id: string
-  name: string
-  crest?: string
-  position?: number
-  playedGames?: number
-  points?: number
-  goalDifference?: number
-}
-
 type Labels = Record<string, string>
 
 export default function RankingInsights({
   players,
   evolution,
   trends,
-  teamStats,
   labels,
 }: {
   players: RankingPlayer[]
   evolution: EvolutionRow[]
   trends: PredictionTrend[]
-  teamStats: TeamStat[]
   labels: Labels
 }) {
   const [selectedPlayer, setSelectedPlayer] = useState('all')
@@ -291,44 +278,6 @@ export default function RankingInsights({
         )}
       </section>}
 
-      <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm md:p-6">
-        <div className="mb-5 flex items-center gap-2 text-orange-600">
-          <Shield className="h-5 w-5" />
-          <h3 className="text-xl font-black uppercase tracking-tight text-gray-900">{labels.teamStats}</h3>
-        </div>
-        {teamStats.length === 0 ? (
-          <p className="rounded-xl bg-gray-50 p-6 text-center text-sm text-gray-500">{labels.noTeamStats}</p>
-        ) : (
-          <div className="overflow-x-auto rounded-xl border border-gray-200">
-            <table className="w-full min-w-[680px] text-sm">
-              <thead className="bg-gray-950 text-left text-[10px] font-black uppercase tracking-wider text-gray-300">
-                <tr>
-                  <th className="px-4 py-3 text-center">#</th>
-                  <th className="px-4 py-3">{labels.team}</th>
-                  <th className="px-3 py-3 text-center">{labels.played}</th>
-                  <th className="px-3 py-3 text-center">{labels.goalDifference}</th>
-                  <th className="px-3 py-3 text-center">{labels.points}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {teamStats.map(team => (
-                  <tr key={team.id} className="text-gray-700">
-                    <td className="px-4 py-3 text-center font-black text-gray-900">{team.position ?? '—'}</td>
-                    <td className="flex items-center gap-2 px-4 py-3 font-bold text-gray-900">
-                      {team.crest && <img src={team.crest} alt="" className="h-6 w-6 object-contain" />}
-                      {team.name}
-                    </td>
-                    <td className="px-3 py-3 text-center">{team.playedGames ?? '—'}</td>
-                    <td className="px-3 py-3 text-center">{team.goalDifference ?? '—'}</td>
-                    <td className="px-3 py-3 text-center font-black text-orange-600">{team.points ?? '—'}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-        <p className="mt-3 text-xs text-gray-500">{labels.teamStatsDescription}</p>
-      </section>
     </div>
   )
 }
