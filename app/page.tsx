@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { Trophy, ChevronRight, ShieldCheck } from 'lucide-react'
 import HeroBanner from './components/HeroBanner'
 import ScoreCasterLogo from './components/ScoreCasterLogo'
+import { getPLMatches } from '../lib/football'
 
 const TEAMS = [
   { name: 'Arsenal', crest: 'https://a.espncdn.com/i/teamlogos/soccer/500/359.png' },
@@ -31,16 +32,7 @@ const TEAMS = [
 // Fetch both the recent scores AND the next scheduled match
 async function fetchPLData() {
   try {
-    const res = await fetch('https://api.football-data.org/v4/competitions/PL/matches', {
-      headers: {
-        'X-Auth-Token': '4551c62e82d64b21b63b63d343ed85e6'
-      },
-      next: { revalidate: 60 } 
-    });
-
-    if (!res.ok) throw new Error('Failed to fetch from API');
-
-    const data = await res.json();
+    const data = await getPLMatches();
 
     // 1. Get the Recent Scores (Finished or Live)
     const recentMatchesRaw = data.matches

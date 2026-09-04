@@ -1,35 +1,34 @@
-const API_KEY = process.env.FOOTBALL_DATA_API_KEY;
 const BASE_URL = 'https://api.football-data.org/v4';
 
-// Function 1: Gets the individual matches (What we just used)
-export async function getPLMatches() {
-  const res = await fetch(`${BASE_URL}/competitions/PL/matches`, {
+async function fetchFootballData(path: string) {
+  const apiKey = process.env.FOOTBALL_DATA_API_KEY;
+  if (!apiKey) {
+    throw new Error('FOOTBALL_DATA_API_KEY is not configured');
+  }
+
+  const res = await fetch(`${BASE_URL}${path}`, {
     headers: {
-      'X-Auth-Token': API_KEY!,
+      'X-Auth-Token': apiKey,
     },
-    next: { revalidate: 3600 },
+    next: { revalidate: 300 },
   });
 
   if (!res.ok) {
-    throw new Error('Failed to fetch matches from football-data.org');
+    const details = await res.text();
+    throw new Error(
+      `football-data.org request failed: ${res.status} ${res.statusText}${details ? ` — ${details}` : ''}`
+    );
   }
 
   return res.json();
 }
 
+// Function 1: Gets the individual matches (What we just used)
+export async function getPLMatches() {
+  return fetchFootballData('/competitions/PL/matches');
+}
+
 // Function 2: Gets the Live League Table (New!)
 export async function getPLStandings() {
-  const res = await fetch(`${BASE_URL}/competitions/PL/standings`, {
-    headers: {
-      'X-Auth-Token': API_KEY!,
-    },
-    // Cache for 1 hour
-    next: { revalidate: 3600 },
-  });
-
-  if (!res.ok) {
-    throw new Error('Failed to fetch standings from football-data.org');
-  }
-
-  return res.json();
+  return fetchFootballData('/competitions/PL/standings');
 }
