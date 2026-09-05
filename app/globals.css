@@ -1,5 +1,4 @@
 @import "tw-animate-css";
-@import "shadcn/tailwind.css";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -8,210 +7,134 @@
   .text-balance {
     text-wrap: balance;
   }
+
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .surface {
+    @apply rounded-xl border border-scorecaster-border bg-scorecaster-card;
+  }
+
+  .focus-frost {
+    @apply outline-none ring-0;
+  }
+
+  .focus-frost:focus,
+  .focus-frost:focus-visible {
+    border-color: rgb(255 122 24 / 0.5);
+    box-shadow:
+      0 0 0 1px rgb(255 122 24 / 0.4),
+      0 10px 28px rgb(0 0 0 / 0.45),
+      inset 0 1px 0 rgb(255 255 255 / 0.06),
+      0 0 26px rgb(255 122 24 / 0.14);
+  }
 }
 
 @layer base {
-  .theme {
-    --font-heading: var(--font-sans);
-    --font-sans: var(--font-sans);
-  }
   :root {
+    --scorecaster-bg: #0f0f10;
+    --scorecaster-card: #18181b;
+    --scorecaster-surface: #18181b;
+    --scorecaster-border: #27272a;
+    --scorecaster-text: #f4f4f5;
+    --scorecaster-muted: #a1a1aa;
+    --scorecaster-accent: #ff7a18;
     --scorecaster-orange: #ff7a18;
     --scorecaster-green: #ff7a18;
-    --scorecaster-text: #f5f5f5;
-    --scorecaster-card: #242424;
-    --background: oklch(0.14 0 0);
-    --foreground: oklch(0.96 0 0);
-    --card: oklch(0.19 0 0);
-    --card-foreground: oklch(0.96 0 0);
-    --popover: oklch(0.19 0 0);
-    --popover-foreground: oklch(0.96 0 0);
-    --primary: oklch(0.72 0.17 55);
-    --primary-foreground: oklch(0.12 0 0);
-    --secondary: oklch(0.24 0 0);
-    --secondary-foreground: oklch(0.96 0 0);
-    --muted: oklch(0.24 0 0);
-    --muted-foreground: oklch(0.68 0 0);
-    --accent: oklch(0.28 0.06 55);
-    --accent-foreground: oklch(0.96 0 0);
-    --destructive: oklch(0.65 0.2 25);
-    --border: oklch(1 0 0 / 14%);
-    --input: oklch(1 0 0 / 18%);
-    --ring: oklch(0.72 0.17 55);
-    --chart-1: oklch(0.87 0 0);
-    --chart-2: oklch(0.556 0 0);
-    --chart-3: oklch(0.439 0 0);
-    --chart-4: oklch(0.371 0 0);
-    --chart-5: oklch(0.269 0 0);
-    --radius: 0.625rem;
-    --sidebar: oklch(0.985 0 0);
-    --sidebar-foreground: oklch(0.145 0 0);
-    --sidebar-primary: oklch(0.205 0 0);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.97 0 0);
-    --sidebar-accent-foreground: oklch(0.205 0 0);
-    --sidebar-border: oklch(0.922 0 0);
-    --sidebar-ring: oklch(0.708 0 0);
+
+    --background: #0f0f10;
+    --foreground: #f4f4f5;
+    --card: #18181b;
+    --card-foreground: #f4f4f5;
+    --popover: #18181b;
+    --popover-foreground: #f4f4f5;
+    --primary: #ff7a18;
+    --primary-foreground: #0f0f10;
+    --secondary: #27272a;
+    --secondary-foreground: #f4f4f5;
+    --muted: #27272a;
+    --muted-foreground: #a1a1aa;
+    --accent: #ff7a18;
+    --accent-foreground: #0f0f10;
+    --destructive: #ef4444;
+    --border: #27272a;
+    --input: #3f3f46;
+    --ring: #ff7a18;
+    --radius: 0.75rem;
   }
 
-  /* Shared futuristic charcoal/orange surface treatment for existing page utilities. */
-  body,
-  .bg-gray-50,
-  .bg-gray-100,
-  .bg-\[\#151515\] {
-    background-color: #151515 !important;
-  }
-
-  [class*="bg-gray-50"],
-  [class*="bg-gray-100"] {
-    background-color: #242424 !important;
-    color: #f5f5f5 !important;
-  }
-
-  [class*="bg-gray-200"] {
-    background-color: #2d2d2d !important;
-    color: #f5f5f5 !important;
-  }
-
-  .prediction-fixture-content {
-    background-color: #18181b !important;
-    background-image:
-      linear-gradient(rgba(24, 24, 27, 0.86), rgba(24, 24, 27, 0.92)),
-      url("https://images.unsplash.com/photo-1556056504-5c7696c4c28d?auto=format&fit=crop&w=1200&q=70") !important;
-    background-position: center !important;
-    background-size: cover !important;
-    background-repeat: no-repeat !important;
-    background-blend-mode: normal !important;
-  }
-
-  .prediction-fixture-content:hover {
-    background-color: #202024 !important;
-  }
-
-  .fixture-calendar-game:hover {
-    background-color: #432313 !important;
-  }
-
-  .fixture-calendar-game:hover .text-gray-900,
-  .fixture-calendar-game:hover .text-gray-500 {
-    color: #f5f5f5 !important;
-  }
-
-  [class*="bg-gray-300"] {
-    background-color: #3a3a3a !important;
-    color: #f5f5f5 !important;
-  }
-
-  .bg-white,
-  .bg-scorecaster-card {
-    background-color: #242424 !important;
-  }
-
-  .bg-gray-950,
-  .bg-gray-900 {
-    background-color: #0d0d0d !important;
-  }
-
-  .text-gray-950,
-  .text-gray-900,
-  .text-gray-800,
-  .text-gray-700,
-  .text-gray-600,
-  .text-scorecaster-text {
-    color: #f5f5f5 !important;
-  }
-
-  .text-gray-500,
-  .text-gray-400 {
-    color: #a3a3a3 !important;
-  }
-
-  .border-gray-100,
-  .border-gray-200,
-  .border-gray-300 {
-    border-color: #3a3a3a !important;
-  }
-
-  .text-scorecaster-green,
-  .text-green-700,
-  .text-green-600,
-  .text-\[\#d4ff00\] {
-    color: #ff7a18 !important;
-  }
-
-  .bg-scorecaster-green,
-  .bg-\[\#d4ff00\] {
-    background-color: #ff7a18 !important;
-  }
-
-  .hover\:bg-\[\#bce600\]:hover {
-    background-color: #ff922f !important;
-  }
-
-  /* Keep hover states consistent with the charcoal/orange visual system. */
-  .hover\:bg-white:hover,
-  .hover\:bg-gray-50:hover,
-  .hover\:bg-gray-100:hover,
-  .hover\:bg-gray-200:hover,
-  .hover\:bg-orange-50:hover,
-  .hover\:bg-green-50:hover {
-    background-color: #342820 !important;
-    color: #f5f5f5 !important;
-  }
-
-  .ring-gray-300,
-  .ring-gray-400 {
-    --tw-ring-color: rgb(255 122 24 / 0.45) !important;
-  }
-  .dark {
-    --background: oklch(0.145 0 0);
-    --foreground: oklch(0.985 0 0);
-    --card: oklch(0.205 0 0);
-    --card-foreground: oklch(0.985 0 0);
-    --popover: oklch(0.205 0 0);
-    --popover-foreground: oklch(0.985 0 0);
-    --primary: oklch(0.922 0 0);
-    --primary-foreground: oklch(0.205 0 0);
-    --secondary: oklch(0.269 0 0);
-    --secondary-foreground: oklch(0.985 0 0);
-    --muted: oklch(0.269 0 0);
-    --muted-foreground: oklch(0.708 0 0);
-    --accent: oklch(0.269 0 0);
-    --accent-foreground: oklch(0.985 0 0);
-    --destructive: oklch(0.704 0.191 22.216);
-    --border: oklch(1 0 0 / 10%);
-    --input: oklch(1 0 0 / 15%);
-    --ring: oklch(0.556 0 0);
-    --chart-1: oklch(0.87 0 0);
-    --chart-2: oklch(0.556 0 0);
-    --chart-3: oklch(0.439 0 0);
-    --chart-4: oklch(0.371 0 0);
-    --chart-5: oklch(0.269 0 0);
-    --sidebar: oklch(0.205 0 0);
-    --sidebar-foreground: oklch(0.985 0 0);
-    --sidebar-primary: oklch(0.488 0.243 264.376);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.269 0 0);
-    --sidebar-accent-foreground: oklch(0.985 0 0);
-    --sidebar-border: oklch(1 0 0 / 10%);
-    --sidebar-ring: oklch(0.556 0 0);
-  }
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border;
   }
-  body {
-    @apply bg-background text-foreground;
+
+  *:focus,
+  *:focus-visible {
+    outline: none;
   }
+
   html {
-    @apply font-sans;
+    @apply font-sans antialiased;
+    color-scheme: dark;
+  }
+
+  body {
+    @apply min-h-screen bg-scorecaster-bg text-scorecaster-text;
+  }
+
+  input:focus,
+  textarea:focus,
+  select:focus,
+  button:focus-visible,
+  [role="button"]:focus-visible,
+  a:focus-visible,
+  summary:focus-visible {
+    outline: none;
+    border-color: rgb(255 122 24 / 0.5);
+    box-shadow:
+      0 0 0 1px rgb(255 122 24 / 0.4),
+      0 10px 28px rgb(0 0 0 / 0.45),
+      inset 0 1px 0 rgb(255 255 255 / 0.06),
+      0 0 26px rgb(255 122 24 / 0.14);
   }
 
   @keyframes scorecaster-ball-down {
-    0% { transform: translateY(0); opacity: 1; }
-    100% { transform: translateY(14px); opacity: 0.2; }
+    0% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(14px);
+      opacity: 0.2;
+    }
   }
 
   .scorecaster-ball-down {
     animation: scorecaster-ball-down 450ms ease-out;
+  }
+}
+
+@layer components {
+  .prediction-fixture-content {
+    background-color: #18181b;
+    background-image:
+      linear-gradient(rgba(24, 24, 27, 0.88), rgba(24, 24, 27, 0.94)),
+      url("https://images.unsplash.com/photo-1556056504-5c7696c4c28d?auto=format&fit=crop&w=1200&q=70");
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+  }
+
+  .prediction-fixture-content:hover {
+    background-color: #202024;
+  }
+
+  .fixture-calendar-game:hover {
+    background-color: rgb(255 122 24 / 0.12);
   }
 }

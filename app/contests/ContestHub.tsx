@@ -1,174 +1,189 @@
 'use client'
 
 import { useState } from 'react'
-import { Trophy, Plus, Search, Users, ChevronRight } from 'lucide-react'
+import { Trophy, Plus, Search, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { createContest, joinContest } from './actions'
 import { useTranslations } from '../components/LocaleProvider'
 import ContestIcon from '../components/ContestIcon'
+import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Badge } from '@/components/ui/badge'
+import { EmptyState, PageHeader } from '@/components/ui/page-header'
+import { cn } from '@/lib/utils'
+import { segmentActive, segmentBase, segmentInactive } from '@/lib/tab-styles'
+import { getSeasonLengthLabelKey } from '../../lib/contest-season'
 
 export default function ContestHub({ myContests, messages }: any) {
   const [activeTab, setActiveTab] = useState<'my_contests' | 'join' | 'create'>('my_contests')
   const t = useTranslations()
 
-  return (
-    <div className="max-w-4xl mx-auto space-y-6 pt-6">
-      <div className="flex items-center space-x-3 mb-6">
-        <div className="bg-orange-500 text-black p-2.5 rounded-xl shadow">
-          <Trophy className="h-6 w-6 text-orange-400" />
-        </div>
-        <h1 className="text-3xl font-black uppercase tracking-tight text-gray-900">{t('Contest Hub')}</h1>
-      </div>
+  const tabClass = (tab: typeof activeTab) =>
+    cn(segmentBase, 'flex-1 text-[10px] sm:text-xs md:text-sm', activeTab === tab ? segmentActive : segmentInactive)
 
-      {/* Error Message */}
+  return (
+    <div className="mx-auto w-full space-y-6 pt-2 sm:pt-6">
+      <PageHeader
+        title={t('Contest Hub')}
+        actions={
+          <div className="rounded-xl bg-scorecaster-accent p-2.5 text-scorecaster-bg shadow">
+            <Trophy className="h-6 w-6" />
+          </div>
+        }
+      />
+
       {messages?.error && (
-        <div className="p-4 bg-red-50 text-red-700 border border-red-200 rounded-xl text-sm font-medium">
+        <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm font-medium text-red-300">
           {messages.error}
         </div>
       )}
 
-      {/* Tabs Navigation - High-contrast sports aesthetic */}
-      <div className="flex space-x-2 bg-gray-900 p-1.5 rounded-2xl shadow-md">
-        <button 
-          onClick={() => setActiveTab('my_contests')}
-          className={`flex-1 flex items-center justify-center gap-2 py-3 text-xs md:text-sm font-bold uppercase tracking-wider rounded-xl transition-all ${
-            activeTab === 'my_contests' 
-              ? 'bg-[#d4ff00] text-black shadow' 
-              : 'text-gray-400 hover:text-white'
-          }`}
-        >
-          <Trophy className="h-4 w-4" /> {t('My Contests')}
+      <div className="flex gap-1 rounded-xl border border-white/10 bg-zinc-950/70 p-1.5 shadow-md backdrop-blur-md">
+        <button type="button" onClick={() => setActiveTab('my_contests')} className={tabClass('my_contests')}>
+          <Trophy className="h-4 w-4 shrink-0" />
+          <span className="hidden xs:inline sm:inline">{t('My Contests')}</span>
+          <span className="sm:hidden">Mine</span>
         </button>
-        <button 
-          onClick={() => setActiveTab('join')}
-          className={`flex-1 flex items-center justify-center gap-2 py-3 text-xs md:text-sm font-bold uppercase tracking-wider rounded-xl transition-all ${
-            activeTab === 'join' 
-              ? 'bg-[#d4ff00] text-black shadow' 
-              : 'text-gray-400 hover:text-white'
-          }`}
-        >
-          <Search className="h-4 w-4" /> {t('Join Private')}
+        <button type="button" onClick={() => setActiveTab('join')} className={tabClass('join')}>
+          <Search className="h-4 w-4 shrink-0" />
+          <span className="hidden sm:inline">{t('Join Private')}</span>
+          <span className="sm:hidden">Join</span>
         </button>
-        <button 
-          onClick={() => setActiveTab('create')}
-          className={`flex-1 flex items-center justify-center gap-2 py-3 text-xs md:text-sm font-bold uppercase tracking-wider rounded-xl transition-all ${
-            activeTab === 'create' 
-              ? 'bg-[#d4ff00] text-black shadow' 
-              : 'text-gray-400 hover:text-white'
-          }`}
-        >
-          <Plus className="h-4 w-4" /> {t('Create Contest')}
+        <button type="button" onClick={() => setActiveTab('create')} className={tabClass('create')}>
+          <Plus className="h-4 w-4 shrink-0" />
+          <span className="hidden sm:inline">{t('Create Contest')}</span>
+          <span className="sm:hidden">New</span>
         </button>
       </div>
 
-      {/* Tab Content */}
-      <div className="bg-white p-6 md:p-8 rounded-2xl shadow-xl border border-gray-100 min-h-[300px]">
-        
-        {/* MY CONTESTS TAB */}
-        {activeTab === 'my_contests' && (
-          <div className="space-y-4">
-            <h2 className="text-lg font-extrabold uppercase tracking-tight text-gray-900 mb-4">{t('Your Active Contests')}</h2>
-            
-            {myContests.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-center border-2 border-dashed border-gray-200 rounded-2xl bg-gray-50">
-                <Users className="h-10 w-10 text-gray-400 mb-3" />
-                <h3 className="text-gray-900 font-bold text-lg">{t('No contests yet')}</h3>
-                <p className="text-gray-500 text-sm mt-1 max-w-sm mb-4">{t("You haven't joined any prediction leagues. Join an existing one or create your own!")}</p>
-                <button onClick={() => setActiveTab('join')} className="text-orange-300 font-bold uppercase text-xs tracking-wider hover:underline">
-                  {t('Find a contest to join →')}
-                </button>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {myContests.map((membership: any) => (
-                  <Link 
-                    key={membership.contest_id} 
-                    href={`/contests/${membership.contest_id}`}
-                    className="flex flex-col p-5 border border-gray-200 rounded-2xl hover:border-orange-500 hover:shadow-lg transition-all group cursor-pointer bg-white"
-                  >
-                    <div className="flex justify-between items-start mb-2">
-                      <div className="flex items-center gap-3">
-                        <ContestIcon contestId={membership.contest_id} size="sm" />
-                        <h3 className="font-extrabold text-lg text-gray-900 group-hover:text-orange-600 transition-colors">
-                          {membership.contests.name}
-                        </h3>
-                        <p className="text-xs font-bold uppercase tracking-wider text-gray-500 mt-1">
-                          {t('Season')}: {membership.contests.season_length === 'half' ? t('Half season') : t('Full season')}
-                        </p>
+      <Card>
+        <CardContent className="p-5 md:p-8">
+          {activeTab === 'my_contests' && (
+            <div className="space-y-4">
+              <h2 className="mb-4 text-lg font-extrabold uppercase tracking-tight text-zinc-100">
+                {t('Your Active Contests')}
+              </h2>
+
+              {myContests.length === 0 ? (
+                <EmptyState
+                  title={t('No contests yet')}
+                  description={t(
+                    "You haven't joined any prediction leagues. Join an existing one or create your own!"
+                  )}
+                  action={
+                    <Button type="button" variant="link" onClick={() => setActiveTab('join')}>
+                      {t('Find a contest to join →')}
+                    </Button>
+                  }
+                />
+              ) : (
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  {myContests.map((membership: any) => (
+                    <Link
+                      key={membership.contest_id}
+                      href={`/contests/${membership.contest_id}`}
+                      className="group flex min-h-[120px] cursor-pointer flex-col rounded-xl border border-zinc-800 bg-zinc-950/50 p-5 transition-all hover:border-scorecaster-accent hover:shadow-lg"
+                    >
+                      <div className="mb-2 flex items-start justify-between gap-2">
+                        <div className="flex min-w-0 items-start gap-3">
+                          <ContestIcon contestId={membership.contest_id} size="sm" />
+                          <div className="min-w-0">
+                            <h3 className="truncate text-lg font-extrabold text-zinc-100 transition-colors group-hover:text-scorecaster-accent">
+                              {membership.contests.name}
+                            </h3>
+                            <p className="mt-1 text-xs font-bold uppercase tracking-wider text-zinc-500">
+                              {t('Season')}:{' '}
+                              {t(getSeasonLengthLabelKey(membership.contests.season_length))}
+                            </p>
+                          </div>
+                        </div>
+                        <Badge variant={membership.role === 'admin' ? 'accent' : 'muted'}>
+                          {membership.role === 'admin' ? t('Admin') : t('Member')}
+                        </Badge>
                       </div>
-                      <span className={`text-[10px] uppercase tracking-widest px-2.5 py-1 rounded-full font-extrabold ${membership.role === 'admin' ? 'bg-orange-100 text-orange-800' : 'bg-gray-100 text-gray-600'}`}>
-                        {membership.role === 'admin' ? t('Admin') : t('Member')}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between mt-auto pt-4 text-sm border-t border-gray-100">
-                      <span className="text-gray-500 bg-gray-50 px-2 py-1 rounded text-xs">{t('Key:')} <span className="font-mono font-bold text-gray-700">{membership.contests.contest_key}</span></span>
-                      <span className="flex items-center text-xs font-bold uppercase tracking-wider text-orange-300 group-hover:text-orange-200">
-                        {t('Dashboard')} <ChevronRight className="h-4 w-4 ml-0.5" />
-                      </span>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* JOIN CONTEST TAB */}
-        {activeTab === 'join' && (
-          <div className="max-w-md mx-auto py-4">
-            <div className="text-center mb-6">
-              <Search className="h-10 w-10 text-orange-600 mx-auto mb-3" />
-              <h2 className="text-xl font-extrabold uppercase tracking-tight text-gray-900">{t('Join a Private Contest')}</h2>
-              <p className="text-gray-500 text-sm mt-1">{t('Enter the 7-character invitation key provided by the contest administrator.')}</p>
+                      <div className="mt-auto flex items-center justify-between border-t border-zinc-800 pt-4 text-sm">
+                        <span className="rounded bg-zinc-900 px-2 py-1 text-xs text-zinc-400">
+                          {t('Key:')}{' '}
+                          <span className="font-mono font-bold text-zinc-200">
+                            {membership.contests.contest_key}
+                          </span>
+                        </span>
+                        <span className="flex items-center text-xs font-bold uppercase tracking-wider text-orange-300 group-hover:text-orange-200">
+                          {t('Dashboard')} <ChevronRight className="ml-0.5 h-4 w-4" />
+                        </span>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
             </div>
-            <form action={joinContest} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">{t('Contest Key *')}</label>
-                <input 
-                  type="text" 
-                  name="contest_key" 
-                  required 
-                  placeholder="e.g. btyfwtx" 
-                  className="w-full rounded-xl px-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500 font-mono text-center text-lg tracking-widest uppercase bg-gray-50" 
-                />
-              </div>
-              <button type="submit" className="w-full bg-gray-900 hover:bg-gray-800 text-white rounded-xl px-4 py-3.5 font-black uppercase tracking-wider text-sm transition-colors shadow-md">
-                {t('Join Contest')}
-              </button>
-            </form>
-          </div>
-        )}
+          )}
 
-        {/* CREATE CONTEST TAB */}
-        {activeTab === 'create' && (
-          <div className="max-w-md mx-auto py-4">
-            <div className="text-center mb-6">
-              <Plus className="h-10 w-10 text-orange-600 mx-auto mb-3" />
-              <h2 className="text-xl font-extrabold uppercase tracking-tight text-gray-900">{t('Create a New Contest')}</h2>
-              <p className="text-gray-500 text-sm mt-1">{t('Create your own prediction league and invite your friends to compete.')}</p>
+          {activeTab === 'join' && (
+            <div className="mx-auto max-w-md py-4">
+              <div className="mb-6 text-center">
+                <Search className="mx-auto mb-3 h-10 w-10 text-scorecaster-accent" />
+                <h2 className="text-xl font-extrabold uppercase tracking-tight text-zinc-100">
+                  {t('Join a Private Contest')}
+                </h2>
+                <p className="mt-1 text-sm text-zinc-400">
+                  {t('Enter the 7-character invitation key provided by the contest administrator.')}
+                </p>
+              </div>
+              <form action={joinContest} className="space-y-4">
+                <div>
+                  <Label htmlFor="contest_key">{t('Contest Key *')}</Label>
+                  <Input
+                    id="contest_key"
+                    type="text"
+                    name="contest_key"
+                    required
+                    placeholder="e.g. btyfwtx"
+                    className="text-center font-mono text-lg uppercase tracking-widest"
+                  />
+                </div>
+                <Button type="submit" className="w-full uppercase tracking-wider">
+                  {t('Join Contest')}
+                </Button>
+              </form>
             </div>
-            <form action={createContest} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">{t('Contest Name *')}</label>
-                <input 
-                  type="text" 
-                  name="name" 
-                  required 
-                  placeholder="e.g. Office Premier League 24/25" 
-                  className="w-full rounded-xl px-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500 bg-gray-50" 
-                />
-              </div>
-              <button type="submit" className="w-full bg-gray-900 hover:bg-gray-800 text-white rounded-xl px-4 py-3.5 font-black uppercase tracking-wider text-sm transition-colors shadow-md">
-                {t('Create & Generate Key')}
-              </button>
-              <p className="text-[11px] text-center text-gray-400 mt-4">
-                {t('You will automatically become the Admin. You can customize settings after creation.')}
-              </p>
-            </form>
-          </div>
-        )}
+          )}
 
-      </div>
+          {activeTab === 'create' && (
+            <div className="mx-auto max-w-md py-4">
+              <div className="mb-6 text-center">
+                <Plus className="mx-auto mb-3 h-10 w-10 text-scorecaster-accent" />
+                <h2 className="text-xl font-extrabold uppercase tracking-tight text-zinc-100">
+                  {t('Create a New Contest')}
+                </h2>
+                <p className="mt-1 text-sm text-zinc-400">
+                  {t('Create your own prediction league and invite your friends to compete.')}
+                </p>
+              </div>
+              <form action={createContest} className="space-y-4">
+                <div>
+                  <Label htmlFor="name">{t('Contest Name *')}</Label>
+                  <Input
+                    id="name"
+                    type="text"
+                    name="name"
+                    required
+                    placeholder="e.g. Office Premier League 24/25"
+                  />
+                </div>
+                <Button type="submit" className="w-full uppercase tracking-wider">
+                  {t('Create & Generate Key')}
+                </Button>
+                <p className="mt-4 text-center text-[11px] text-zinc-500">
+                  {t('You will automatically become the Admin. You can customize settings after creation.')}
+                </p>
+              </form>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   )
 }

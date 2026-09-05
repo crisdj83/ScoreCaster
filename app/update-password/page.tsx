@@ -3,6 +3,10 @@ import { redirect } from 'next/navigation'
 import { Trophy } from 'lucide-react'
 import { getTranslations } from '../../lib/i18n'
 import { getServerLocale } from '../../lib/i18n-server'
+import { Card, CardContent } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Button } from '@/components/ui/button'
 
 export default async function UpdatePasswordPage(props: { searchParams: Promise<{ message?: string }> }) {
   const searchParams = await props.searchParams;
@@ -27,44 +31,44 @@ export default async function UpdatePasswordPage(props: { searchParams: Promise<
   }
 
   return (
-    <div className="flex-1 flex flex-col w-full max-w-md justify-center mx-auto py-8">
-      <div className="bg-white border border-gray-200 rounded-2xl shadow-xl p-6 md:p-8">
-      <div className="flex flex-col items-center mb-8">
-        <div className="rounded-2xl bg-gray-900 p-3 mb-3">
-          <Trophy className="h-8 w-8 text-[#d4ff00]" />
-        </div>
-        <h1 className="text-2xl font-black uppercase tracking-tight text-gray-900">{t('Reset Password')}</h1>
-        <p className="text-gray-500 text-sm mt-1">{t('Enter your new secure password below')}</p>
-      </div>
-
-      <form action={updatePassword} className="flex-1 flex flex-col w-full justify-center gap-4 text-scorecaster-text">
-        <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium" htmlFor="password">
-            {t('New Password')}
-          </label>
-          <input
-            className="rounded-md px-4 py-2 bg-inherit border border-gray-300 focus:outline-none focus:ring-2 focus:ring-scorecaster-green"
-            type="password"
-            name="password"
-            placeholder="••••••••"
-            required
-            minLength={6}
-          />
-        </div>
-        
-        {searchParams?.message && (
-          <div className="p-3 bg-red-100 text-red-700 rounded-md text-sm text-center">
-            {searchParams.message}
+    <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center py-8">
+      <Card>
+        <CardContent className="p-6 md:p-8">
+          <div className="mb-8 flex flex-col items-center">
+            <div className="mb-3 rounded-xl bg-zinc-950 p-3">
+              <Trophy className="h-8 w-8 text-scorecaster-accent" />
+            </div>
+            <h1 className="text-2xl font-black uppercase tracking-tight text-zinc-100">
+              {t('Reset Password')}
+            </h1>
+            <p className="mt-1 text-sm text-zinc-400">{t('Enter your new secure password below')}</p>
           </div>
-        )}
 
-        <button
-          className="bg-gray-900 hover:bg-gray-800 text-white rounded-xl px-4 py-3 font-black uppercase tracking-wider text-xs transition-colors mt-4"
-        >
-          {t('Update Password')}
-        </button>
-      </form>
-      </div>
+          <form action={updatePassword} className="flex w-full flex-col gap-4 text-zinc-100">
+            <div>
+              <Label htmlFor="password">{t('New Password')}</Label>
+              <Input
+                id="password"
+                type="password"
+                name="password"
+                placeholder="••••••••"
+                required
+                minLength={6}
+              />
+            </div>
+
+            {searchParams?.message && (
+              <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-center text-sm text-red-300">
+                {searchParams.message}
+              </div>
+            )}
+
+            <Button type="submit" className="mt-2 w-full uppercase tracking-wider">
+              {t('Update Password')}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   )
 }

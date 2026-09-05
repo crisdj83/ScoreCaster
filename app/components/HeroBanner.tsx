@@ -88,7 +88,7 @@ export default function HeroBanner({
   }
 
   return (
-    <div className="w-full relative overflow-hidden rounded-2xl shadow-2xl flex flex-col lg:flex-row bg-gradient-to-bl from-orange-600 via-[#242424] to-[#0d0d0d] border border-gray-800">
+    <div className="relative flex w-full flex-col overflow-hidden rounded-2xl border border-zinc-800 bg-gradient-to-bl from-orange-600 via-zinc-900 to-zinc-950 shadow-2xl lg:flex-row">
       
       <style dangerouslySetInnerHTML={{__html: `
         @keyframes scroll-y {
@@ -107,7 +107,7 @@ export default function HeroBanner({
       <div className="w-full lg:w-1/2 bg-transparent p-6 sm:p-10 flex flex-col justify-between text-white relative">
         <div>
           <p className="mb-3 max-w-md text-3xl font-black uppercase leading-none tracking-tight text-white sm:text-5xl">
-            {t('Call the scores.')}<br /><span className="text-[#d4ff00]">{t('Own the table.')}</span>
+            {t('Call the scores.')}<br /><span className="text-scorecaster-accent">{t('Own the table.')}</span>
           </p>
           <p className="mb-6 max-w-md text-sm leading-6 text-orange-100 sm:text-base">
             {t('Predict match outcomes, compete with your league, and climb the leaderboard every matchweek.')}
@@ -159,7 +159,7 @@ export default function HeroBanner({
           <div>
             <Link 
               href="/contests" 
-              className="inline-block bg-[#d4ff00] hover:bg-[#bce600] text-black font-black uppercase tracking-wider px-6 py-3 text-xs sm:text-sm transition-colors rounded shadow-md"
+              className="inline-block rounded bg-scorecaster-accent px-6 py-3 text-xs font-black uppercase tracking-wider text-scorecaster-bg shadow-md transition-colors hover:bg-[#ff922f] sm:text-sm"
             >
               {t('Make Predictions')}
             </Link>
@@ -168,41 +168,44 @@ export default function HeroBanner({
       </div>
 
       {/* RIGHT SIDE: Scrolling Latest Scores Feed */}
-      <div className="w-full lg:w-1/2 h-[350px] lg:h-auto lg:min-h-[420px] bg-transparent relative overflow-hidden flex flex-col">
-        <div className="absolute right-5 top-5 z-20 rounded-full bg-black px-4 py-2 text-xs font-black uppercase tracking-[0.2em] text-white shadow-lg">
+      <div className="relative flex h-[350px] w-full flex-col overflow-hidden bg-transparent lg:h-auto lg:min-h-[420px] lg:w-1/2">
+        <div className="absolute right-5 top-5 z-20 rounded-full border border-white/15 bg-zinc-800/65 px-4 py-2 text-xs font-black uppercase tracking-[0.2em] text-white shadow-lg backdrop-blur-md">
           {t('Latest Scores')}
         </div>
         
         {recentScores.length > 0 ? (
           <div className="absolute inset-0 overflow-hidden">
-            <div className="animate-marquee-y flex min-h-full flex-col w-full p-4 sm:p-6 gap-3">
+            <div className="animate-marquee-y flex min-h-full w-full flex-col gap-3 p-4 sm:p-6">
             {[...recentScores, ...recentScores].map((match, idx) => (
-              <div key={`${match.id}-${idx}`} className="bg-[#242424] border border-orange-500/30 rounded-xl p-3 sm:p-4 shadow-lg shadow-black/20 hover:bg-[#2d2d2d] hover:border-orange-400/60 transition-colors">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-[10px] font-bold text-orange-400 uppercase tracking-wider bg-orange-500/10 px-2 py-0.5 rounded">
+              <div
+                key={`${match.id}-${idx}`}
+                className="rounded-xl border border-zinc-600/35 bg-zinc-800/65 p-3 shadow-lg shadow-black/20 backdrop-blur-md transition-colors hover:border-orange-400/40 hover:bg-zinc-800/75 sm:p-4"
+              >
+                <div className="mb-2 flex items-center justify-between">
+                  <span className="rounded-full border border-orange-500/30 bg-orange-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-orange-300 backdrop-blur-sm">
                     {match.status}
                   </span>
                 </div>
                 
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 sm:gap-3 overflow-hidden">
+                    <div className="flex items-center gap-2 overflow-hidden sm:gap-3">
                       {(match.homeCrest || getTeamLogo(match.homeTeam)) && (
-                        <img src={match.homeCrest || getTeamLogo(match.homeTeam)} alt={match.homeTeam} className="w-5 h-5 object-contain flex-shrink-0" />
+                        <img src={match.homeCrest || getTeamLogo(match.homeTeam)} alt={match.homeTeam} className="h-5 w-5 flex-shrink-0 object-contain" />
                       )}
-                      <span className="text-gray-200 font-semibold text-sm truncate">{match.homeTeam}</span>
+                      <span className="truncate text-sm font-semibold text-zinc-100">{match.homeTeam}</span>
                     </div>
-                    <span className="text-lg font-bold text-white flex-shrink-0">{match.homeScore !== null ? match.homeScore : '-'}</span>
+                    <span className="flex-shrink-0 text-lg font-bold text-white">{match.homeScore !== null ? match.homeScore : '-'}</span>
                   </div>
                   
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 sm:gap-3 overflow-hidden">
+                    <div className="flex items-center gap-2 overflow-hidden sm:gap-3">
                       {(match.awayCrest || getTeamLogo(match.awayTeam)) && (
-                        <img src={match.awayCrest || getTeamLogo(match.awayTeam)} alt={match.awayTeam} className="w-5 h-5 object-contain flex-shrink-0" />
+                        <img src={match.awayCrest || getTeamLogo(match.awayTeam)} alt={match.awayTeam} className="h-5 w-5 flex-shrink-0 object-contain" />
                       )}
-                      <span className="text-gray-200 font-semibold text-sm truncate">{match.awayTeam}</span>
+                      <span className="truncate text-sm font-semibold text-zinc-100">{match.awayTeam}</span>
                     </div>
-                    <span className="text-lg font-bold text-white flex-shrink-0">{match.awayScore !== null ? match.awayScore : '-'}</span>
+                    <span className="flex-shrink-0 text-lg font-bold text-white">{match.awayScore !== null ? match.awayScore : '-'}</span>
                   </div>
                 </div>
               </div>
@@ -210,7 +213,7 @@ export default function HeroBanner({
              </div>
           </div>
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center text-gray-500 text-sm">
+          <div className="absolute inset-0 flex items-center justify-center text-sm text-zinc-400">
             {t('No recent matches to display.')}
           </div>
         )}

@@ -1,5 +1,6 @@
 import { createClient } from '../lib/supabase/server'
 import { redirect } from 'next/navigation'
+import Image from 'next/image'
 import Link from 'next/link'
 import { BarChart3, ChevronRight, ExternalLink, ShieldCheck } from 'lucide-react'
 import HeroBanner from './components/HeroBanner'
@@ -7,10 +8,11 @@ import ScoreCasterLogo from './components/ScoreCasterLogo'
 import { getPLMatches } from '../lib/football'
 import { getTranslations } from '../lib/i18n'
 import { getServerLocale } from '../lib/i18n-server'
-import { createClient as createServiceClient } from '@supabase/supabase-js'
-import { Analytics } from '@vercel/analytics/next'
+import { createAdminClient } from '../lib/supabase/admin'
+import { isSiteOwner } from '../lib/owner'
 import HomepageUpdates from './components/HomepageUpdates'
 import ContestIcon from './components/ContestIcon'
+import { getSeasonLengthLabelKey } from '../lib/contest-season'
 
 const TEAMS = [
   { name: 'Arsenal', crest: 'https://a.espncdn.com/i/teamlogos/soccer/500/359.png' },
@@ -51,7 +53,7 @@ async function fetchAnalytics() {
   try {
     response = await fetch(
       `https://api.vercel.com/v1/query/web-analytics/visits/count?${params}`,
-      { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' }
+      { headers: { Authorization: `Bearer ${token}` }, next: { revalidate: 300 } }
     )
   } catch (error) {
     console.error('Vercel Analytics Request Error:', error)
@@ -127,51 +129,39 @@ export default async function Home(props: { searchParams: Promise<{ success?: st
     redirect('/login')
   }
 
-  const { data: profile } = await supabase
-    .from('users')
-    .select('*')
-    .eq('id', user.id)
-    .single()
-
-  const { data: myContests } = await supabase
-    .from('contest_members')
-    .select(`
+  const [{ data: profile }, { data: myContests }, plData, analytics, websiteUpdatesResult] = await Promise.all([
+    supabase.from('users').select('username, email, avatar_url, favorite_team, is_global_admin').eq('id', user.id).single(),
+    supabase.from('contest_members').select(`
       contest_id,
       role,
       contests (
         name,
         contest_key,
-        season_length
+        season_length,
+        created_at
       )
-    `)
-    .eq('user_id', user.id)
-
-  const selectedTeamData = TEAMS.find(t => t.name === profile?.favorite_team)
-  
-  // Fetch data
-  const { recentScores, nextMatch } = await fetchPLData();
-  const analytics = await fetchAnalytics()
-  const serviceSupabase = createServiceClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
-  const { data: websiteUpdates } = await serviceSupabase
-    .from('news_posts')
-    .select('id, title, body, created_at')
-    .order('created_at', { ascending: false })
-    .limit(8)
-  const { data: rankingMemberships } = await supabase
-    .from('contest_members')
-    .select('contest_id')
-    .eq('user_id', user.id)
-  const contestIds = (rankingMemberships || []).map(membership => membership.contest_id)
-  const { data: rankingContests } = contestIds.length
-    ? await supabase.from('contests').select('id, created_at').in('id', contestIds)
-    : { data: [] }
+    `).eq('user_id', user.id),
+    fetchPLData(),
+    fetchAnalytics(),
+    (async () => {
+      try {
+        return await createAdminClient()
+          .from('news_posts')
+          .select('id, title, body, created_at')
+          .order('created_at', { ascending: false })
+          .limit(8)
+      } catch {
+        return { data: [] as Array<{ id: string; title: string; body: string; created_at: string }> }
+      }
+    })(),
+  ])
+  const { recentScores, nextMatch } = plData
+  const websiteUpdates = websiteUpdatesResult.data
+  const contestIds = (myContests || []).map(membership => membership.contest_id)
   const { data: contestPredictions } = contestIds.length
     ? await supabase.from('predictions').select('contest_id, user_id, points').in('contest_id', contestIds)
     : { data: [] }
-  const bestRanking = (rankingMemberships || []).reduce<{ rank: number; year: number } | null>((best, membership) => {
+  const bestRanking = (myContests || []).reduce<{ rank: number; year: number } | null>((best, membership) => {
     const members = new Map<string, number>()
     ;(contestPredictions || [])
       .filter(prediction => prediction.contest_id === membership.contest_id)
@@ -179,10 +169,12 @@ export default async function Home(props: { searchParams: Promise<{ success?: st
     const sortedScores = Array.from(members.entries()).sort((a, b) => b[1] - a[1])
     const rank = sortedScores.findIndex(([userId]) => userId === user.id) + 1
     if (!rank) return best
-    const createdAt = rankingContests?.find(contest => contest.id === membership.contest_id)?.created_at
+    const createdAt = (membership.contests as { created_at?: string } | null)?.created_at
     const current = { rank, year: createdAt ? new Date(createdAt).getFullYear() : new Date().getFullYear() }
     return !best || current.rank < best.rank ? current : best
   }, null)
+
+  const selectedTeamData = TEAMS.find(team => team.name === profile?.favorite_team)
 
   return (
     <div className="space-y-8 pb-12">
@@ -200,90 +192,92 @@ export default async function Home(props: { searchParams: Promise<{ success?: st
       <HeroBanner nextMatch={nextMatch} recentScores={recentScores} />
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-gradient-to-br from-orange-600 via-[#242424] to-[#0d0d0d] p-6 rounded-2xl shadow-lg shadow-black/30 border border-blue-900/80 col-span-1 md:col-span-1">
-          <div className="flex justify-between items-start mb-4">
-            <h2 className="text-lg font-semibold text-scorecaster-text">{t('Your Profile')}</h2>
+        <div className="col-span-1 rounded-2xl border border-zinc-800 bg-gradient-to-br from-orange-600 via-zinc-900 to-zinc-950 p-6 shadow-lg shadow-black/30 md:col-span-1">
+          <div className="mb-4 flex items-start justify-between">
+            <h2 className="text-lg font-semibold text-zinc-100">{t('Your Profile')}</h2>
             <Link href="/profile" className="rounded-full border border-white/25 bg-white/10 px-3 py-1.5 text-xs font-bold text-orange-100 backdrop-blur-sm transition hover:border-white/40 hover:bg-white/20">{t('Edit')}</Link>
           </div>
           
-          <div className="flex items-center space-x-4 mb-4">
+          <div className="mb-4 flex items-center space-x-4">
             {profile?.avatar_url ? (
-              <img 
-                src={profile.avatar_url} 
-                alt="Profile" 
-                className="h-12 w-12 rounded-full object-cover border border-gray-200 bg-gray-50"
+              <img
+                src={profile.avatar_url}
+                alt="Profile"
+                className="h-12 w-12 rounded-full border border-zinc-700 bg-zinc-800 object-cover"
               />
             ) : (
-              <div className="rounded-full bg-scorecaster-green text-white h-12 w-12 flex items-center justify-center font-bold text-lg">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-scorecaster-accent text-lg font-bold text-scorecaster-bg">
                 {profile?.username ? profile.username.charAt(0).toUpperCase() : profile?.email?.charAt(0).toUpperCase()}
               </div>
             )}
             <div>
               <div className="flex items-center gap-2">
-                <p className="font-medium text-scorecaster-text">{profile?.username || t('No username set')}</p>
+                <p className="font-medium text-zinc-100">{profile?.username || t('No username set')}</p>
                 {profile?.is_global_admin && (
                   <span title="Global Admin" className="flex items-center">
-                    <ShieldCheck className="h-4 w-4 text-blue-500" />
+                    <ShieldCheck className="h-4 w-4 text-scorecaster-accent" />
                   </span>
                 )}
               </div>
-              <p className="text-sm text-gray-500 truncate max-w-[150px]">{profile?.email}</p>
+              <p className="max-w-[150px] truncate text-sm text-zinc-500">{profile?.email}</p>
             </div>
           </div>
 
-          <div className="pt-4 border-t border-gray-100 space-y-2">
-            <div className="text-sm text-gray-600 flex justify-between items-center">
-              <span className="font-medium text-gray-500">{t('Favorite Team:')}</span>
+          <div className="space-y-2 border-t border-zinc-800 pt-4">
+            <div className="flex items-center justify-between text-sm text-zinc-400">
+              <span className="font-medium text-zinc-500">{t('Favorite Team:')}</span>
               
               <div className="flex items-center gap-2">
                 {selectedTeamData && (
-                  <img 
-                    src={selectedTeamData.crest} 
-                    alt={`${selectedTeamData.name} Logo`} 
+                  <Image
+                    src={selectedTeamData.crest}
+                    alt={`${selectedTeamData.name} Logo`}
+                    width={20}
+                    height={20}
                     className="h-5 w-5 object-contain"
                   />
                 )}
-                <span className="font-semibold text-scorecaster-text">
+                <span className="font-semibold text-zinc-100">
                   {profile?.favorite_team || t('Not selected')}
                 </span>
               </div>
             </div>
             <div className="flex items-center justify-between text-sm">
-              <span className="font-medium text-gray-500">{t('Best league ranking:')}</span>
-              <span className="font-semibold text-scorecaster-text">
+              <span className="font-medium text-zinc-500">{t('Best league ranking:')}</span>
+              <span className="font-semibold text-zinc-100">
                 {bestRanking ? `#${bestRanking.rank} (${bestRanking.year})` : t('Not ranked yet')}
               </span>
             </div>
           </div>
         </div>
 
-        <div className="bg-gradient-to-bl from-orange-600 via-[#242424] to-[#0d0d0d] p-6 rounded-2xl shadow-lg shadow-black/30 border border-blue-900/80 col-span-1 md:col-span-2">
-          <div className="flex justify-between items-start mb-4">
-            <h2 className="text-lg font-semibold text-scorecaster-text">{t('My Contests')}</h2>
+        <div className="col-span-1 rounded-2xl border border-zinc-800 bg-gradient-to-bl from-orange-600 via-zinc-900 to-zinc-950 p-6 shadow-lg shadow-black/30 md:col-span-2">
+          <div className="mb-4 flex items-start justify-between">
+            <h2 className="text-lg font-semibold text-zinc-100">{t('My Contests')}</h2>
             <Link href="/contests" className="rounded-full border border-white/25 bg-white/10 px-3 py-1.5 text-xs font-bold text-orange-100 backdrop-blur-sm transition hover:border-white/40 hover:bg-white/20">{t('View Hub')}</Link>
           </div>
           
           {!myContests || myContests.length === 0 ? (
-            <div className="border-2 border-dashed border-orange-500/30 rounded-xl h-32 flex flex-col items-center justify-center text-gray-400 bg-[#242424]">
+            <div className="flex h-32 flex-col items-center justify-center rounded-xl border-2 border-dashed border-zinc-700 bg-zinc-950 text-zinc-500">
               <p>{t("You haven't joined any contests yet.")}</p>
-              <Link href="/contests" className="text-scorecaster-green text-sm font-medium hover:underline mt-1">{t('Join or Create one')}</Link>
+              <Link href="/contests" className="mt-1 text-sm font-medium text-scorecaster-accent hover:underline">{t('Join or Create one')}</Link>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               {myContests.map((membership: any) => (
                 <Link 
                   key={membership.contest_id} 
                   href={`/contests/${membership.contest_id}`}
-                  className="flex items-center justify-between p-4 border border-orange-500/25 rounded-xl bg-[#242424] hover:border-orange-400 hover:shadow-sm transition-all group"
+                  className="group flex items-center justify-between rounded-xl border border-zinc-800 bg-zinc-950 p-4 transition-all hover:border-scorecaster-accent/50 hover:shadow-sm"
                 >
                   <div className="flex items-center gap-3 overflow-hidden">
                     <ContestIcon contestId={membership.contest_id} size="sm" />
                     <div className="truncate">
-                      <p className="font-bold text-scorecaster-text truncate">{membership.contests.name}</p>
-                      <p className="text-xs text-gray-500 mt-0.5">{t('Role:')} {membership.role === 'admin' ? t('Admin') : t('Member')} · {membership.contests.season_length === 'half' ? t('Half season') : t('Full season')}</p>
+                      <p className="truncate font-bold text-zinc-100">{membership.contests.name}</p>
+                      <p className="mt-0.5 text-xs text-zinc-500">{t('Role:')} {membership.role === 'admin' ? t('Admin') : t('Member')} · {t(getSeasonLengthLabelKey(membership.contests.season_length))}</p>
                     </div>
                   </div>
-                  <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-scorecaster-green" />
+                  <ChevronRight className="h-5 w-5 text-zinc-500 group-hover:text-scorecaster-accent" />
                 </Link>
               ))}
             </div>
@@ -292,19 +286,19 @@ export default async function Home(props: { searchParams: Promise<{ success?: st
       </div>
       <HomepageUpdates
         updates={websiteUpdates || []}
-        isOwner={user.email?.toLowerCase() === 'cris.the.dj@gmail.com'}
+        isOwner={isSiteOwner(user.email)}
       />
-      <section className="flex items-center justify-between gap-4 rounded-2xl border border-orange-500/25 bg-gradient-to-r from-[#242424] to-[#171717] p-5 shadow-lg shadow-black/20">
+      <section className="flex items-center justify-between gap-4 rounded-2xl border border-zinc-800 bg-gradient-to-r from-zinc-900 to-zinc-950 p-5 shadow-lg shadow-black/20">
         <div className="flex items-center gap-3">
-          <BarChart3 className="h-5 w-5 text-orange-300" aria-hidden="true" />
+          <BarChart3 className="h-5 w-5 text-scorecaster-accent" aria-hidden="true" />
           <div>
-            <h2 className="font-semibold text-scorecaster-text">{t('Analytics')}</h2>
+            <h2 className="font-semibold text-zinc-100">{t('Analytics')}</h2>
             {analytics ? (
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-zinc-400">
                 {analytics.visitors} {t('visitors')} · {analytics.pageviews} {t('page views')} {t('today')}
               </p>
             ) : (
-              <p className="text-sm text-gray-400">{t('Live data is unavailable.')}</p>
+              <p className="text-sm text-zinc-400">{t('Live data is unavailable.')}</p>
             )}
           </div>
         </div>
@@ -318,16 +312,6 @@ export default async function Home(props: { searchParams: Promise<{ success?: st
           <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
         </a>
       </section>
-      <footer className="flex flex-col items-center gap-2 py-2 text-center">
-        <p className="max-w-xl text-xs font-medium tracking-wide text-orange-100/70">
-          Built with 10% skill, 90% Googling, and love from Sfariac Cristian.
-        </p>
-        <p className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.2em] text-orange-300/70">
-          <span aria-hidden="true">©</span>
-          <span>ScoreCaster</span>
-        </p>
-      </footer>
-      <Analytics />
     </div>
   );
 }

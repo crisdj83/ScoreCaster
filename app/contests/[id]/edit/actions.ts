@@ -39,7 +39,11 @@ export async function updateSeasonSettings(formData: FormData) {
   const contestId = formData.get('contest_id') as string
   const seasonLength = formData.get('season_length') as string
 
-  if (seasonLength !== 'full' && seasonLength !== 'half') {
+  if (
+    seasonLength !== 'full' &&
+    seasonLength !== 'first_half' &&
+    seasonLength !== 'second_half'
+  ) {
     redirect(`/contests/${contestId}/edit?error=Choose a valid season length.`)
   }
 

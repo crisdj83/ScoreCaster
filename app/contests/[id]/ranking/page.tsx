@@ -2,7 +2,11 @@ import { createClient } from '../../../../lib/supabase/server'
 import { getTranslations } from '../../../../lib/i18n'
 import { getServerLocale } from '../../../../lib/i18n-server'
 import { getPLMatches, getPLStandings } from '../../../../lib/football'
-import { isMatchInContestSeason } from '../../../../lib/contest-season'
+import {
+  getSeasonLengthLabelKey,
+  isMatchInContestSeason,
+  normalizeSeasonLength,
+} from '../../../../lib/contest-season'
 import {
   calculatePoints,
   getOfficialScore,
@@ -16,6 +20,9 @@ import { Trophy, Medal, Target, Activity, CheckCircle2, Gauge } from 'lucide-rea
 import RankingInsights from './RankingInsights'
 import CurrentGameweek from './CurrentGameweek'
 import LiveRefresh from '../../../components/LiveRefresh'
+import { RankTable, type RankColumn } from '@/components/ui/rank-table'
+import { ScoreBadge } from '@/components/ui/badge'
+import { PageHeader } from '@/components/ui/page-header'
 
 type Match = {
   id: number | string
@@ -79,13 +86,13 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
     .eq('id', params.id)
     .single()
 
-  if (!contest) return <div className="p-6 text-sm text-red-600">Error loading contest data.</div>
+  if (!contest) return <div className="p-6 text-sm text-red-400">Error loading contest data.</div>
 
   const scoring = resolveContestScoring(contest)
   const ptsExact = scoring.exact
   const ptsClose = scoring.close
   const ptsResult = scoring.result
-  const seasonLength = contest.season_length === 'half' ? 'half' : 'full'
+  const seasonLength = normalizeSeasonLength(contest.season_length)
   const [matchData, standingsData] = await Promise.all([
     getPLMatches(),
     getPLStandings().catch(() => null),
@@ -100,8 +107,9 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
     .select('user_id, users(username, email, quote, avatar_url)')
     .eq('contest_id', params.id)
 
-  if (membersError || !members) return <div className="p-6 text-sm text-red-600">Error loading leaderboard.</div>
+  if (membersError || !members) return <div className="p-6 text-sm text-red-400">Error loading leaderboard.</div>
 
+  // Admin client bypasses RLS for cross-member prediction aggregation (reveal rules enforced in app).
   let db = supabase
   try {
     db = createAdminClient()
@@ -119,14 +127,21 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
     ...prediction,
     points_earned: prediction.points,
   })) as Prediction[]
+  const matchById = new Map(matches.map(match => [String(match.id), match]))
   const memberNames = new Map(members.map((member: any) => [member.user_id, displayName(member)]))
-  const predictionFor = (userId: string, matchId: string) => predictions.find(prediction => prediction.user_id === userId && String(prediction.match_id) === matchId)
+  const memberByUserId = new Map(members.map((member: any) => [member.user_id, member]))
+  const predictionsByUser = new Map<string, Prediction[]>()
+  for (const prediction of predictions) {
+    const list = predictionsByUser.get(prediction.user_id)
+    if (list) list.push(prediction)
+    else predictionsByUser.set(prediction.user_id, [prediction])
+  }
   const players = members.map((member: any) => {
-    const userPredictions = predictions.filter(prediction => prediction.user_id === member.user_id)
+    const userPredictions = predictionsByUser.get(member.user_id) || []
     const evaluatedPredictions = userPredictions
       .map(prediction => ({
         prediction,
-        match: matches.find(match => String(match.id) === String(prediction.match_id)),
+        match: matchById.get(String(prediction.match_id)),
       }))
       .map(item => ({
         ...item,
@@ -137,7 +152,7 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
       ['FINISHED', 'IN_PLAY', 'PAUSED'].includes(item.match?.status || '')
     ))
     const lockedPredictions = userPredictions.filter(prediction => {
-      const match = matches.find(item => String(item.id) === String(prediction.match_id))
+      const match = matchById.get(String(prediction.match_id))
       return !!match && isPredictionLocked(match.utcDate)
     })
     const exactResults = playedPredictions.filter(item => item.points === ptsExact).length
@@ -159,46 +174,67 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
     }
   }).sort((a, b) => b.totalPoints - a.totalPoints || b.exactResults - a.exactResults || b.closeResults - a.closeResults || b.accuracy - a.accuracy || a.username.localeCompare(b.username))
 
-  const rankFor = (userId: string, matchday: number) => {
-    const totals = members.map((member: any) => {
-      const memberResults = predictions
-        .filter(prediction => prediction.user_id === member.user_id)
-        .map(prediction => {
-          const match = matches.find(item => String(item.id) === String(prediction.match_id))
-          if (!match || match.status !== 'FINISHED' || Number(match.matchday) > matchday) return null
-          return pointsForPrediction(prediction, match, scoring)
-        })
-        .filter((result): result is NonNullable<typeof result> => result !== null)
-      return {
-        playerId: member.user_id,
-        points: memberResults.reduce((sum, result) => sum + result.points, 0),
-        exact: memberResults.filter(result => outcomeFromPoints(result.points, scoring) === 'E').length,
-        close: memberResults.filter(result => outcomeFromPoints(result.points, scoring) === 'C').length,
-        accuracy: memberResults.length
-          ? memberResults.filter(result => result.points > 0).length / memberResults.length
-          : 0,
-      }
-    }).sort((a, b) => b.points - a.points || b.exact - a.exact || b.close - a.close || b.accuracy - a.accuracy)
-    const player = totals.find(item => item.playerId === userId)
-    return {
-      rank: player
-        ? totals.findIndex(item => item.points === player.points && item.exact === player.exact && item.close === player.close && item.accuracy === player.accuracy) + 1
-        : totals.length,
-      points: player?.points || 0,
+  type MatchdayTotals = { points: number; exact: number; close: number; scored: number; correct: number }
+  const matchdayTotals = new Map<string, Map<number, MatchdayTotals>>()
+  for (const prediction of predictions) {
+    const match = matchById.get(String(prediction.match_id))
+    if (!match || match.status !== 'FINISHED') continue
+    const result = pointsForPrediction(prediction, match, scoring)
+    if (!result) continue
+    const matchday = Number(match.matchday)
+    let byMatchday = matchdayTotals.get(prediction.user_id)
+    if (!byMatchday) {
+      byMatchday = new Map()
+      matchdayTotals.set(prediction.user_id, byMatchday)
     }
+    const current = byMatchday.get(matchday) || { points: 0, exact: 0, close: 0, scored: 0, correct: 0 }
+    current.points += result.points
+    current.scored += 1
+    if (result.points > 0) current.correct += 1
+    if (outcomeFromPoints(result.points, scoring) === 'E') current.exact += 1
+    if (outcomeFromPoints(result.points, scoring) === 'C') current.close += 1
+    byMatchday.set(matchday, current)
   }
   const playedMatchdays = Array.from(new Set(matches.filter(match => match.status === 'FINISHED').map(match => Number(match.matchday)))).sort((a, b) => a - b)
-  const evolution = playedMatchdays.map(matchday => ({
-    matchday,
-    standings: members.map((member: any) => ({ playerId: member.user_id, ...rankFor(member.user_id, matchday) })),
-  }))
+  const cumulative = new Map(members.map((member: any) => [member.user_id, { points: 0, exact: 0, close: 0, scored: 0, correct: 0 }]))
+  const evolution = playedMatchdays.map(matchday => {
+    members.forEach((member: any) => {
+      const totals = cumulative.get(member.user_id)!
+      const delta = matchdayTotals.get(member.user_id)?.get(matchday)
+      if (delta) {
+        totals.points += delta.points
+        totals.exact += delta.exact
+        totals.close += delta.close
+        totals.scored += delta.scored
+        totals.correct += delta.correct
+      }
+    })
+    const ranked = members.map((member: any) => {
+      const totals = cumulative.get(member.user_id)!
+      return {
+        playerId: member.user_id,
+        points: totals.points,
+        exact: totals.exact,
+        close: totals.close,
+        accuracy: totals.scored ? totals.correct / totals.scored : 0,
+      }
+    }).sort((a, b) => b.points - a.points || b.exact - a.exact || b.close - a.close || b.accuracy - a.accuracy)
+    return {
+      matchday,
+      standings: ranked.map(player => ({
+        playerId: player.playerId,
+        rank: ranked.findIndex(item => item.points === player.points && item.exact === player.exact && item.close === player.close && item.accuracy === player.accuracy) + 1,
+        points: player.points,
+      })),
+    }
+  })
 
   const table: any[] = standingsData?.standings?.find((standing: any) => standing.type === 'TOTAL')?.table || standingsData?.standings?.[0]?.table || []
   const teamById = new Map(table.map((row: any) => [String(row.team?.id), row]))
   const teamByName = new Map(table.map((row: any) => [row.team?.name, row]))
   const teamInfo = (team: Match['homeTeam']) => {
     const row = (team.id && teamById.get(String(team.id))) || teamByName.get(team.name)
-    return { name: team.name, shortName: team.shortName, crest: team.crest, rank: row?.position }
+    return { name: team.name, shortName: team.shortName, crest: team.crest, rank: row?.position, form: row?.form }
   }
   const now = Date.now()
   const playersByMatch = Object.fromEntries(matches.map(match => {
@@ -217,7 +253,7 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
           points,
           outcome: (points === ptsExact ? 'exact' : points === ptsClose ? 'close' : points === ptsResult ? 'result' : 'zero') as 'zero' | 'close' | 'exact' | 'result',
           avatar: (() => {
-            const member = members.find((item: any) => item.user_id === prediction.user_id)
+            const member = memberByUserId.get(prediction.user_id)
             const profile = Array.isArray(member?.users) ? member.users[0] : member?.users
             return profile?.avatar_url || null
           })(),
@@ -308,6 +344,7 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
     averageScore: t('Average score'),
     draw: t('Draw'),
     popularScore: t('Popular score'),
+    form: t('Form'),
     otherPredictions: t("Other players' predictions"),
     submitted: t('submitted'),
     noPredictions: t('No predictions submitted yet.'),
@@ -316,66 +353,148 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
     finalScore: t('Final score'),
   }
 
+  type PlayerRow = (typeof players)[number] & { rank: number }
+
+  const rankedPlayers: PlayerRow[] = players.map((player) => ({
+    ...player,
+    rank:
+      players.findIndex(
+        (other) =>
+          other.totalPoints === player.totalPoints &&
+          other.exactResults === player.exactResults &&
+          other.closeResults === player.closeResults &&
+          other.accuracy === player.accuracy
+      ) + 1,
+  }))
+
+  const columns: RankColumn<PlayerRow>[] = [
+    {
+      key: 'rank',
+      header: t('Rank'),
+      headerClassName: 'text-center w-16',
+      className: 'text-center',
+      cell: (player) => (
+        <div className="flex items-center justify-center gap-2 font-bold text-zinc-100">
+          {player.rank === 1 ? (
+            <Trophy className="h-5 w-5 text-yellow-500" />
+          ) : player.rank === 2 ? (
+            <Medal className="h-5 w-5 text-zinc-400" />
+          ) : player.rank === 3 ? (
+            <Medal className="h-5 w-5 text-amber-600" />
+          ) : (
+            <span className="h-5 w-5" />
+          )}
+          <span>{player.rank}</span>
+        </div>
+      ),
+    },
+    {
+      key: 'player',
+      header: t('Player'),
+      mobilePrimary: true,
+      cell: (player) => (
+        <div>
+          <div className="font-bold text-zinc-100">{player.username}</div>
+          {player.motto ? (
+            <div className="mt-0.5 max-w-[18ch] truncate text-xs italic text-scorecaster-accent">
+              &ldquo;{player.motto}&rdquo;
+            </div>
+          ) : null}
+        </div>
+      ),
+    },
+    {
+      key: 'points',
+      header: t('Total Points'),
+      headerClassName: 'text-center',
+      className: 'text-center',
+      cell: (player) => (
+        <ScoreBadge className="text-base">
+          {player.totalPoints.toFixed(1).replace('.0', '')}
+        </ScoreBadge>
+      ),
+    },
+    {
+      key: 'exact',
+      header: (
+        <span className="inline-flex items-center gap-1">
+          <Target className="h-4 w-4 text-scorecaster-accent" />
+          {t('Exact Score')}
+        </span>
+      ),
+      headerClassName: 'text-center',
+      className: 'text-center font-bold text-zinc-200',
+      cell: (player) => player.exactResults,
+    },
+    {
+      key: 'close',
+      header: (
+        <span className="inline-flex items-center gap-1">
+          <Activity className="h-4 w-4 text-sky-400" />
+          {t('Close Prediction')}
+        </span>
+      ),
+      headerClassName: 'text-center',
+      className: 'text-center font-bold text-zinc-200',
+      cell: (player) => player.closeResults,
+    },
+    {
+      key: 'result',
+      header: (
+        <span className="inline-flex items-center gap-1">
+          <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+          {t('Correct Result')}
+        </span>
+      ),
+      headerClassName: 'text-center',
+      className: 'text-center font-bold text-zinc-200',
+      cell: (player) => player.rightOutcome,
+    },
+    {
+      key: 'avg',
+      header: t('Average points'),
+      headerClassName: 'text-center',
+      className: 'text-center font-bold text-zinc-200',
+      cell: (player) => player.averagePoints.toFixed(1),
+    },
+  ]
+
   return (
     <div className="p-0">
-      <LiveRefresh refreshAfter={matches.map(match => match.utcDate)} always />
-      <div className="mb-8">
-        <div className="mb-2 flex items-center gap-2 text-orange-600">
-          <Gauge className="h-5 w-5" />
-          <span className="text-xs font-black uppercase tracking-widest">{t('Season')}: {seasonLength === 'half' ? t('Half season') : t('Full season')}</span>
-        </div>
-        <h2 className="text-2xl font-bold text-scorecaster-text">PL RANKING</h2>
-        <p className="mt-1 text-sm text-gray-500">
-          {t('Tiered Scoring')}: {t('Exact Score')} ({ptsExact}pts) • {t('Close Prediction')} ({ptsClose}pts) • {t('Correct Result')} ({ptsResult}pts)
-        </p>
-      </div>
+      <LiveRefresh refreshAfter={matches.map((match) => match.utcDate)} always />
+      <PageHeader
+        title="PL RANKING"
+        description={`${t('Tiered Scoring')}: ${t('Exact Score')} (${ptsExact}pts) • ${t('Close Prediction')} (${ptsClose}pts) • ${t('Correct Result')} (${ptsResult}pts)`}
+        actions={
+          <div className="flex items-center gap-2 text-scorecaster-accent">
+            <Gauge className="h-5 w-5" />
+            <span className="text-xs font-black uppercase tracking-widest">
+              {t('Season')}: {t(getSeasonLengthLabelKey(seasonLength))}
+            </span>
+          </div>
+        }
+      />
       <CurrentGameweek
         fixtures={currentGameweekFixtures}
         playersByMatch={playersByMatch}
         selectedMatchId={searchParams.matchId}
       />
 
-      <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-lg">
-        <table className="w-full min-w-[1080px] text-sm text-left">
-          <thead className="bg-gray-950 text-xs font-semibold uppercase tracking-wider text-gray-300">
-            <tr>
-              <th className="px-4 py-4 text-center w-16">{t('Rank')}</th>
-              <th className="px-4 py-4">{t('Player')}</th>
-              <th className="px-4 py-4 text-center">{t('Total Points')}</th>
-              <th className="px-4 py-4 text-center"><Target className="mr-1 inline h-4 w-4 text-[#d4ff00]" />{t('Exact Score')}</th>
-              <th className="px-4 py-4 text-center"><Activity className="mr-1 inline h-4 w-4 text-blue-400" />{t('Close Prediction')}</th>
-              <th className="px-4 py-4 text-center"><CheckCircle2 className="mr-1 inline h-4 w-4 text-emerald-400" />{t('Correct Result')}</th>
-              <th className="px-4 py-4 text-center">{t('Average points')}</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {players.length === 0 ? (
-              <tr><td colSpan={7} className="px-6 py-10 text-center text-gray-500">{t('No players found in this contest.')}</td></tr>
-            ) : players.map((player, index) => {
-              const tiedRank = players.findIndex(other => other.totalPoints === player.totalPoints && other.exactResults === player.exactResults && other.closeResults === player.closeResults && other.accuracy === player.accuracy) + 1
-              return (
-                <tr key={player.id} className="transition-colors hover:bg-orange-50/50">
-                  <td className="px-4 py-4 text-center font-bold text-gray-900">
-                    <div className="flex items-center justify-center gap-2">
-                      {tiedRank === 1 ? <Trophy className="h-6 w-6 text-yellow-500" /> : tiedRank === 2 ? <Medal className="h-6 w-6 text-gray-400" /> : tiedRank === 3 ? <Medal className="h-6 w-6 text-amber-600" /> : <span className="h-6 w-6" />}
-                      <span>{tiedRank}</span>
-                    </div>
-                  </td>
-                  <td className="px-4 py-4">
-                    <div className="font-bold text-gray-900">{player.username}</div>
-                    {player.motto && <div className="mt-0.5 max-w-[18ch] truncate text-xs italic text-orange-500">&ldquo;{player.motto}&rdquo;</div>}
-                  </td>
-                  <td className="px-4 py-4 text-center text-xl font-black text-orange-600">{player.totalPoints.toFixed(1).replace('.0', '')}</td>
-                  <td className="px-4 py-4 text-center font-bold text-gray-700">{player.exactResults}</td>
-                  <td className="px-4 py-4 text-center font-bold text-gray-700">{player.closeResults}</td>
-                  <td className="px-4 py-4 text-center font-bold text-gray-700">{player.rightOutcome}</td>
-                  <td className="px-4 py-4 text-center font-bold text-gray-700">{player.averagePoints.toFixed(1)}</td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
-      </div>
+      <RankTable
+        rows={rankedPlayers}
+        columns={columns}
+        getRowKey={(player) => player.id}
+        emptyMessage={t('No players found in this contest.')}
+        mobileTitle={(player) => (
+          <span className="inline-flex items-center gap-2">
+            <span className="font-mono text-scorecaster-accent">#{player.rank}</span>
+            {player.username}
+          </span>
+        )}
+        mobileSubtitle={(player) =>
+          player.motto ? `"${player.motto}"` : undefined
+        }
+      />
       <RankingInsights players={players} evolution={evolution} trends={trends} labels={labels} />
     </div>
   )

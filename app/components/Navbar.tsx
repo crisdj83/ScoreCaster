@@ -5,77 +5,58 @@ import NavLinks from './NavLinks'
 import LanguageSwitcher from './LanguageSwitcher'
 import { getTranslations } from '../../lib/i18n'
 import { getServerLocale } from '../../lib/i18n-server'
-import { LocaleProvider } from './LocaleProvider'
+import { cn } from '@/lib/utils'
+import { tabActive } from '@/lib/tab-styles'
 
 export default async function Navbar() {
   const t = getTranslations(getServerLocale())
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  const { data: profile } = user
-    ? await supabase.from('users').select('is_global_admin').eq('id', user.id).single()
-    : { data: null }
   let hasUnreadMessages = false
+  let isAdmin = false
   if (user) {
     const { data: memberships } = await supabase.from('contest_members').select('contest_id').eq('user_id', user.id)
     const contestIds = (memberships || []).map(membership => membership.contest_id)
-    const [{ data: latestMessage }, { data: latestReply }] = await Promise.all([
+    const [{ data: profile }, { data: latestMessage }, { data: latestReply }, { data: messageReadState }] = await Promise.all([
+      supabase.from('users').select('is_global_admin').eq('id', user.id).single(),
       contestIds.length
         ? supabase.from('messages').select('created_at').in('contest_id', contestIds).order('created_at', { ascending: false }).limit(1).maybeSingle()
         : Promise.resolve({ data: null }),
       contestIds.length
-        ? supabase.from('message_replies').select('created_at').order('created_at', { ascending: false }).limit(1).maybeSingle()
+        ? supabase.from('message_replies').select('created_at, messages!inner(contest_id)').in('messages.contest_id', contestIds).order('created_at', { ascending: false }).limit(1).maybeSingle()
         : Promise.resolve({ data: null }),
+      supabase.from('message_reads').select('last_read_at').eq('user_id', user.id).maybeSingle(),
     ])
-    const { data: messageReadState } = await supabase.from('message_reads').select('last_read_at').eq('user_id', user.id).maybeSingle()
+    isAdmin = profile?.is_global_admin === true
     const lastRead = messageReadState?.last_read_at ? new Date(messageReadState.last_read_at).getTime() : 0
     hasUnreadMessages = [latestMessage?.created_at, latestReply?.created_at]
       .some(createdAt => createdAt && new Date(createdAt).getTime() > lastRead)
   }
 
   return (
-    <LocaleProvider initialLocale={getServerLocale()}>
-      <div className="flex justify-center px-2 pt-3 sm:px-4 sm:pt-5">
-        <nav className="flex w-full max-w-7xl flex-wrap items-center justify-center gap-2 sm:gap-2.5">
-          <NavLinks isAdmin={profile?.is_global_admin === true} isLoggedIn={Boolean(user)} hasUnreadMessages={hasUnreadMessages} />
-          <div className="flex flex-wrap items-center justify-center gap-2.5">
-            {user && (
-              <form action={signOut}>
-                <button className="flex items-center gap-2 rounded-full border border-orange-500/50 bg-orange-500/10 px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-orange-300 shadow-sm transition-colors hover:bg-orange-500/20">
-                  <LogOut className="h-4 w-4" /> {t('Sign Out')}
-                </button>
-              </form>
-            )}
-            <LanguageSwitcher />
-            <div className="flex items-center gap-2 px-1">
-          <a
-            href="https://instagram.com/cristiansfariac"
-            target="_blank"
-            rel="noreferrer"
-            aria-label="Instagram"
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-orange-500/50 bg-orange-500/10 text-orange-300 shadow-sm transition-all hover:border-orange-400 hover:bg-orange-500/20 hover:text-orange-200"
-          >
-            <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5 fill-none stroke-current" strokeWidth="1.75">
-              <rect x="3" y="3" width="18" height="18" rx="5" />
-              <circle cx="12" cy="12" r="4" />
-              <circle cx="17.5" cy="6.5" r="0.75" className="fill-current stroke-none" />
-            </svg>
-          </a>
-          <a
-            href="https://youtube.com/@SyntiX-Dj"
-            target="_blank"
-            rel="noreferrer"
-            aria-label="YouTube"
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-orange-500/50 bg-orange-500/10 text-orange-300 shadow-sm transition-all hover:border-orange-400 hover:bg-orange-500/20 hover:text-orange-200"
-          >
-            <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5 fill-none stroke-current" strokeWidth="1.75">
-              <rect x="3" y="6" width="18" height="12" rx="3" />
-              <path d="m10 9 5 3-5 3z" className="fill-current stroke-none" />
-            </svg>
-          </a>
-            </div>
-          </div>
-        </nav>
+    <header className="sticky top-0 z-40 w-full border-b border-zinc-800/60 bg-scorecaster-bg/95 backdrop-blur-md">
+      <div className="flex w-full flex-wrap items-center gap-2 px-3 py-3 sm:gap-2.5 sm:px-5 lg:px-8 xl:px-10">
+        <NavLinks isAdmin={isAdmin} isLoggedIn={Boolean(user)} hasUnreadMessages={hasUnreadMessages} />
+
+        <div className="ml-auto flex flex-wrap items-center gap-1.5 sm:gap-2">
+          <LanguageSwitcher />
+          {user ? (
+            <form action={signOut} className="inline-flex">
+              <button
+                type="submit"
+                title={t('Sign Out')}
+                aria-label={t('Sign Out')}
+                className={cn(
+                  tabActive,
+                  'inline-flex h-10 w-10 items-center justify-center rounded-full outline-none transition-colors hover:bg-white/15 sm:h-11 sm:w-11'
+                )}
+              >
+                <LogOut className="h-4 w-4" />
+              </button>
+            </form>
+          ) : null}
+        </div>
       </div>
-    </LocaleProvider>
+    </header>
   )
 }

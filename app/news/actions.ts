@@ -1,11 +1,10 @@
 'use server'
 
 import { createClient } from '../../lib/supabase/server'
-import { createClient as createServiceClient } from '@supabase/supabase-js'
+import { createAdminClient } from '../../lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
-
-const OWNER_EMAIL = 'cris.the.dj@gmail.com'
+import { isSiteOwner } from '../../lib/owner'
 
 async function getUserAndAdmin() {
   const supabase = await createClient()
@@ -16,7 +15,7 @@ async function getUserAndAdmin() {
 }
 
 function getServiceDb() {
-  return createServiceClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
+  return createAdminClient()
 }
 
 async function getMessageAccess(messageId: string, userId: string) {
@@ -152,17 +151,26 @@ export async function deleteMessageReply(formData: FormData) {
 
 export async function markMessagesRead() {
   const { user } = await getUserAndAdmin()
-  const { error } = await getServiceDb().from('message_reads').upsert({
-    user_id: user.id,
-    last_read_at: new Date().toISOString(),
-  })
-  if (error) throw new Error(`Unable to mark messages as read: ${error.message}`)
-  revalidatePath('/news')
+  try {
+    const { error } = await getServiceDb().from('message_reads').upsert({
+      user_id: user.id,
+      last_read_at: new Date().toISOString(),
+    })
+    // Table may not exist yet if messages.sql hasn't been applied — never crash the UI.
+    if (error) {
+      console.warn('markMessagesRead skipped:', error.message)
+      return
+    }
+    revalidatePath('/news')
+    revalidatePath('/')
+  } catch (error) {
+    console.warn('markMessagesRead failed:', error)
+  }
 }
 
 export async function createNewsPost(formData: FormData) {
   const { user } = await getUserAndAdmin()
-  if (user.email?.toLowerCase() !== OWNER_EMAIL) redirect('/news?error=Only the ScoreCaster owner can publish website updates.')
+  if (!isSiteOwner(user.email)) redirect('/news?error=Only the ScoreCaster owner can publish website updates.')
   const title = String(formData.get('title') || '').trim()
   const body = String(formData.get('body') || '').trim()
   if (!title || !body) redirect('/news?error=Title and update text are required.')
@@ -176,7 +184,7 @@ export async function createNewsPost(formData: FormData) {
 
 export async function deleteNewsPost(formData: FormData) {
   const { user, isAdmin } = await getUserAndAdmin()
-  if (!isAdmin && user.email?.toLowerCase() !== OWNER_EMAIL) redirect('/news?error=Only the ScoreCaster owner can delete website updates.')
+  if (!isAdmin && !isSiteOwner(user.email)) redirect('/news?error=Only the ScoreCaster owner can delete website updates.')
   const postId = String(formData.get('post_id') || '')
   if (!postId) redirect('/news?error=Update not found.')
   const { error } = await getServiceDb().from('news_posts').delete().eq('id', postId)
@@ -189,7 +197,7 @@ export async function deleteNewsPost(formData: FormData) {
 
 export async function updateNewsPost(formData: FormData) {
   const { user } = await getUserAndAdmin()
-  if (user.email?.toLowerCase() !== OWNER_EMAIL) redirect('/news?error=Only the ScoreCaster owner can edit website updates.')
+  if (!isSiteOwner(user.email)) redirect('/news?error=Only the ScoreCaster owner can edit website updates.')
   const postId = String(formData.get('post_id') || '')
   const title = String(formData.get('title') || '').trim()
   const body = String(formData.get('body') || '').trim()

@@ -3,6 +3,9 @@
 import { useState } from 'react'
 import { deleteMessage, updateMessage } from './actions'
 import { useTranslations } from '../components/LocaleProvider'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Button } from '@/components/ui/button'
 
 export default function MessageActions({
   messageId,
@@ -24,24 +27,49 @@ export default function MessageActions({
     return (
       <form action={updateMessage} className="flex max-w-sm flex-col gap-2">
         <input type="hidden" name="message_id" value={messageId} />
-        <input name="title" defaultValue={title} required maxLength={120} className="rounded-lg border border-gray-200 px-3 py-2 text-sm" />
-        <textarea name="body" defaultValue={body} required maxLength={5000} rows={3} className="rounded-lg border border-gray-200 px-3 py-2 text-sm" />
+        <Input name="title" defaultValue={title} required maxLength={120} />
+        <Textarea name="body" defaultValue={body} required maxLength={5000} rows={3} className="min-h-24" />
         <div className="flex gap-2">
-          <button className="rounded-lg bg-gray-900 px-3 py-2 text-xs font-bold text-white">{t('Save')}</button>
-          <button type="button" onClick={() => setEditing(false)} className="rounded-lg border border-gray-200 px-3 py-2 text-xs font-bold text-gray-600">{t('Cancel')}</button>
+          <Button type="submit" size="sm" className="min-h-11 uppercase tracking-wider">
+            {t('Save')}
+          </Button>
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            className="min-h-11"
+            onClick={() => setEditing(false)}
+          >
+            {t('Cancel')}
+          </Button>
         </div>
       </form>
     )
   }
 
   return (
-    <div className="flex shrink-0 gap-3">
-      {canEdit && <button type="button" onClick={() => setEditing(true)} className="text-xs font-bold text-gray-500 hover:text-gray-900">{t('Edit')}</button>}
-      <form action={deleteMessage} onSubmit={(event) => {
-        if (!window.confirm(t('Delete this message?'))) event.preventDefault()
-      }}>
+    <div className="flex shrink-0 gap-2">
+      {canEdit && (
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="min-h-11 text-zinc-400 hover:text-zinc-100"
+          onClick={() => setEditing(true)}
+        >
+          {t('Edit')}
+        </Button>
+      )}
+      <form
+        action={deleteMessage}
+        onSubmit={(event) => {
+          if (!window.confirm(t('Delete this message?'))) event.preventDefault()
+        }}
+      >
         <input type="hidden" name="message_id" value={messageId} />
-        <button className="text-xs font-bold text-red-600 hover:text-red-800">{canModerate ? t('Remove') : t('Delete')}</button>
+        <Button type="submit" variant="destructive" size="sm" className="min-h-11">
+          {canModerate ? t('Remove') : t('Delete')}
+        </Button>
       </form>
     </div>
   )
