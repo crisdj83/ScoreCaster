@@ -77,7 +77,7 @@ export default function ProfileForm({ user, profile, messages }: any) {
           <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
             <User className="h-4 w-4 text-gray-400" /> {t('Username')}
           </label>
-          <input type="text" name="username" defaultValue={profile?.username || ''} placeholder="e.g. Dracula's Revenge FC" className="w-full rounded-xl px-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-scorecaster-green" />
+          <input type="text" name="username" defaultValue={profile?.username || ''} placeholder="e.g. Dracula's Revenge FC" className="focus-frost w-full rounded-xl border border-zinc-700 bg-zinc-900/80 px-4 py-3 outline-none ring-0 focus:ring-0" />
         </div>
 
         {/* Custom Team Dropdown */}
@@ -130,7 +130,7 @@ export default function ProfileForm({ user, profile, messages }: any) {
             maxLength={18}
             onChange={(event) => setMotto(event.target.value.slice(0, 18))}
             placeholder="Football is a simple game. Twenty-two men chase a ball for 90 minutes..." 
-            className="w-full rounded-md px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-scorecaster-green resize-none" 
+            className="focus-frost w-full resize-none rounded-xl border border-zinc-700 bg-zinc-900/80 px-4 py-2 outline-none ring-0 focus:ring-0" 
           />
           <button type="button" onClick={() => setMotto(['Play to win', 'Trust the process', 'Never stop scoring', 'Own the table'][Math.floor(Math.random() * 4)])} className="rounded-xl bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700">{t('Generate motto')}</button>
         </div>

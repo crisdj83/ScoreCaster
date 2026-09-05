@@ -1,8 +1,7 @@
 'use server'
 
 import { createClient } from '../../lib/supabase/server'
-import { createClient as createServiceClient } from '@supabase/supabase-js'
-import { revalidatePath } from 'next/cache'
+import { createAdminClient } from '../../lib/supabase/admin'
 import { redirect } from 'next/navigation'
 
 // Helper function to generate a 7-character alphanumeric string (e.g., "btyfwtx")
@@ -18,10 +17,7 @@ export async function createContest(formData: FormData) {
 
   const name = formData.get('name') as string
   const contestKey = generateContestKey()
-  const serviceSupabase = createServiceClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
+  const serviceSupabase = createAdminClient()
 
   // 1. Create the contest
   const { data: newContest, error: contestError } = await serviceSupabase

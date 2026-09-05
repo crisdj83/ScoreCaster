@@ -13,7 +13,7 @@ export default function LiveRefresh({ refreshAfter, always = false }: { refreshA
         router.refresh()
       }
     }
-    const interval = window.setInterval(refresh, 5 * 60 * 1000)
+    const interval = window.setInterval(refresh, always ? 60 * 1000 : 5 * 60 * 1000)
     return () => window.clearInterval(interval)
   }, [always, refreshAfter, router])
 

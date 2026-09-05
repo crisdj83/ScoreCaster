@@ -1,8 +1,9 @@
 // Fixed both imports to go up 4 folders instead of 5!
 import { createClient } from '../../../../lib/supabase/server'
-import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { getPLMatches } from '../../../../lib/football'
-import { isMatchInContestSeason } from '../../../../lib/contest-season'
+import { isMatchInContestSeason, normalizeSeasonLength } from '../../../../lib/contest-season'
+import { isPredictionRevealable } from '../../../../lib/scoring'
+import { createAdminClient } from '../../../../lib/supabase/admin'
 import PredictionCard from './PredictionCard'
 import { getTranslations } from '../../../../lib/i18n'
 import { getServerLocale } from '../../../../lib/i18n-server'
@@ -22,7 +23,7 @@ export default async function PredictionsPage(props: { params: Promise<{ id: str
     .select('season_length')
     .eq('id', params.id)
     .single()
-  const seasonLength = contest?.season_length === 'half' ? 'half' : 'full'
+  const seasonLength = normalizeSeasonLength(contest?.season_length)
 
   // 2. Fetch the live matches from football-data.org and enforce the contest season.
   const data = await getPLMatches()
@@ -61,12 +62,9 @@ export default async function PredictionsPage(props: { params: Promise<{ id: str
     : { data: [] }
 
   const revealableMatchIds = matchdayFixtures
-    .filter((match: any) => Date.now() >= new Date(match.utcDate).getTime() - 30 * 60 * 1000)
-    .map((match: any) => String(match.id))
-  const serviceSupabase = createServiceClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
+    .filter((match: { utcDate: string }) => isPredictionRevealable(match.utcDate))
+    .map((match: { id: number | string }) => String(match.id))
+  const serviceSupabase = createAdminClient()
   const { data: revealedPredictionsRaw, error: revealedPredictionsError } = revealableMatchIds.length
     ? await serviceSupabase
       .from('predictions')
@@ -83,12 +81,12 @@ export default async function PredictionsPage(props: { params: Promise<{ id: str
   }))
 
   return (
-    <div className="rounded-b-xl bg-[#151515] p-6 md:p-8">
+    <div className="rounded-b-xl bg-zinc-950 p-6 md:p-8">
       <LiveRefresh refreshAfter={matchdayFixtures.map((match: any) => match.utcDate)} />
-      <div className="flex justify-between items-center mb-8">
+      <div className="mb-8 flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-scorecaster-text">{t('Matchday')} {currentMatchday}</h2>
-          <p className="text-gray-500 text-sm mt-1">{t('Predictions lock one hour before kickoff. Results are revealed 30 minutes before each game.')}</p>
+          <h2 className="text-2xl font-bold text-zinc-100">{t('Matchday')} {currentMatchday}</h2>
+          <p className="mt-1 text-sm text-zinc-500">{t('Predictions lock one hour before kickoff. Results are revealed 30 minutes before each game.')}</p>
         </div>
       </div>
       

@@ -2,89 +2,93 @@ import { login, signup, resetPassword } from './actions'
 import { Trophy } from 'lucide-react'
 import { getTranslations } from '../../lib/i18n'
 import { getServerLocale } from '../../lib/i18n-server'
+import { Card, CardContent } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { buttonVariants } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 
 export default async function LoginPage(props: { searchParams: Promise<{ message?: string }> }) {
-  const searchParams = await props.searchParams;
+  const searchParams = await props.searchParams
   const t = getTranslations(getServerLocale())
-  
-  // A simple check to see if the message is an error or a success message
-  const isSuccessMessage = searchParams?.message?.includes('Check your email');
+  const isSuccessMessage = searchParams?.message?.includes('Check your email')
 
   return (
-    <div className="flex-1 flex flex-col w-full max-w-md justify-center mx-auto py-8">
-      <div className="bg-white border border-gray-200 rounded-2xl shadow-xl p-6 md:p-8">
-        <div className="flex flex-col items-center mb-8">
-          <div className="rounded-2xl bg-gray-900 p-3 mb-3">
-            <Trophy className="h-8 w-8 text-[#d4ff00]" />
+    <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center py-8">
+      <Card>
+        <CardContent className="p-6 md:p-8">
+          <div className="mb-8 flex flex-col items-center">
+            <div className="mb-3 rounded-xl bg-zinc-950 p-3">
+              <Trophy className="h-8 w-8 text-scorecaster-accent" />
+            </div>
+            <h1 className="text-2xl font-black uppercase tracking-tight text-zinc-100">
+              {t('Welcome to ScoreCaster')}
+            </h1>
+            <p className="mt-1 text-sm text-zinc-400">{t('Sign in to predict and compete')}</p>
           </div>
-          <h1 className="text-2xl font-black uppercase tracking-tight text-gray-900">{t('Welcome to ScoreCaster')}</h1>
-          <p className="text-gray-500 text-sm mt-1">{t('Sign in to predict and compete')}</p>
-        </div>
 
-      <form className="flex flex-col w-full gap-4 text-scorecaster-text">
-        <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium" htmlFor="email">
-            {t('Email')}
-          </label>
-          <input
-            className="rounded-xl px-4 py-3 bg-gray-50 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-scorecaster-green"
-            name="email"
-            placeholder="you@example.com"
-            required
-            type="email"
-          />
-        </div>
-        
-        <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium" htmlFor="password">
-            {t('Password')}
-          </label>
-          <input
-            className="rounded-xl px-4 py-3 bg-gray-50 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-scorecaster-green"
-            type="password"
-            name="password"
-            placeholder="••••••••"
-            minLength={6}
-          />
-          <span className="text-xs text-gray-500 mt-1">
-            {t('Password must be at least 6 characters.')}
-          </span>
-        </div>
-        
-        {/* Error / Success Message Display */}
-        {searchParams?.message && (
-          <div           className={`p-3 rounded-xl text-sm text-center ${isSuccessMessage ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
-            {searchParams.message}
-          </div>
-        )}
+          <form className="flex w-full flex-col gap-4 text-zinc-100">
+            <div>
+              <Label htmlFor="email">{t('Email')}</Label>
+              <Input id="email" name="email" placeholder="you@example.com" required type="email" />
+            </div>
 
-        <div className="flex flex-col gap-2 mt-4">
-          <button
-            formAction={login}
-            className="bg-gray-900 hover:bg-gray-800 text-white rounded-xl px-4 py-3 font-black uppercase tracking-wider text-xs transition-colors"
-          >
-            {t('Sign In')}
-          </button>
-          <button
-            formAction={signup}
-            className="border border-scorecaster-green text-scorecaster-green hover:bg-green-50 rounded-xl px-4 py-3 font-black uppercase tracking-wider text-xs transition-colors"
-          >
-            {t('Sign Up')}
-          </button>
-        </div>
-        
-        {/* Forgot Password Button */}
-        <div className="text-center mt-2">
-          <button
-            formAction={resetPassword}
-            formNoValidate // Allows clicking this without filling in the password
-            className="text-sm text-gray-500 hover:text-scorecaster-green underline transition-colors"
-          >
-            {t('Forgot Password?')}
-          </button>
-        </div>
-      </form>
-      </div>
+            <div>
+              <Label htmlFor="password">{t('Password')}</Label>
+              <Input
+                id="password"
+                type="password"
+                name="password"
+                placeholder="••••••••"
+                minLength={6}
+              />
+              <span className="mt-1 block text-xs text-zinc-500">
+                {t('Password must be at least 6 characters.')}
+              </span>
+            </div>
+
+            {searchParams?.message && (
+              <div
+                className={`rounded-xl p-3 text-center text-sm ${
+                  isSuccessMessage
+                    ? 'border border-emerald-500/30 bg-emerald-500/10 text-emerald-300'
+                    : 'border border-red-500/30 bg-red-500/10 text-red-300'
+                }`}
+              >
+                {searchParams.message}
+              </div>
+            )}
+
+            <div className="mt-2 flex flex-col gap-2">
+              <button
+                formAction={login}
+                className={cn(buttonVariants(), 'w-full uppercase tracking-wider')}
+              >
+                {t('Sign In')}
+              </button>
+              <button
+                formAction={signup}
+                className={cn(
+                  buttonVariants({ variant: 'outline' }),
+                  'w-full border-scorecaster-accent text-scorecaster-accent uppercase tracking-wider hover:bg-scorecaster-accent/10'
+                )}
+              >
+                {t('Sign Up')}
+              </button>
+            </div>
+
+            <div className="mt-2 text-center">
+              <button
+                formAction={resetPassword}
+                formNoValidate
+                className="min-h-11 text-sm text-zinc-500 underline transition-colors hover:text-scorecaster-accent"
+              >
+                {t('Forgot Password?')}
+              </button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   )
 }

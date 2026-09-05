@@ -1,10 +1,13 @@
 'use client'
 
 import { useEffect, useState, useTransition } from 'react'
+import Image from 'next/image'
 import { Plus, Minus, Clock, Eye, MapPin } from 'lucide-react'
 import { savePrediction } from './actions'
 import Link from 'next/link'
 import { useLocale, useTranslations } from '../../../components/LocaleProvider'
+import { Badge } from '@/components/ui/badge'
+import { MatchCard } from '@/components/ui/match-row'
 
 export default function PredictionCard({ match, contestId, existingPrediction, revealedPredictions = [] }: any) {
   const [homeScore, setHomeScore] = useState(existingPrediction?.predicted_home_score ?? 0)
@@ -13,26 +16,35 @@ export default function PredictionCard({ match, contestId, existingPrediction, r
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saved'>('idle')
   const [saveError, setSaveError] = useState('')
   const [bounceDirection, setBounceDirection] = useState<'up' | 'down' | null>(null)
-  const [now, setNow] = useState(() => Date.now())
+  const [now, setNow] = useState<number | null>(null)
   const t = useTranslations()
   const { locale } = useLocale()
 
-  // Check if the match has already started (lock the inputs)
   const kickoffTime = new Date(match.utcDate)
   useEffect(() => {
+    setNow(Date.now())
     const timer = window.setInterval(() => setNow(Date.now()), 1000)
     return () => window.clearInterval(timer)
   }, [])
-  const millisecondsUntilKickoff = kickoffTime.getTime() - now
+
+  const clock = now ?? kickoffTime.getTime()
+  const millisecondsUntilKickoff = kickoffTime.getTime() - clock
   const isLocked = millisecondsUntilKickoff <= 60 * 60 * 1000
   const canReveal = millisecondsUntilKickoff <= 30 * 60 * 1000
   const isHurryUp = millisecondsUntilKickoff > 0 && millisecondsUntilKickoff <= 2 * 60 * 60 * 1000
-  const countdown = millisecondsUntilKickoff <= 0
-    ? t('Started')
-    : `${Math.floor(millisecondsUntilKickoff / 86400000)}d ${String(Math.floor((millisecondsUntilKickoff % 86400000) / 3600000)).padStart(2, '0')}:${String(Math.floor((millisecondsUntilKickoff % 3600000) / 60000)).padStart(2, '0')}:${String(Math.floor((millisecondsUntilKickoff % 60000) / 1000)).padStart(2, '0')}`
-  // Format the date nicely
+  const countdown =
+    now === null
+      ? '…'
+      : millisecondsUntilKickoff <= 0
+        ? t('Started')
+        : `${Math.floor(millisecondsUntilKickoff / 86400000)}d ${String(Math.floor((millisecondsUntilKickoff % 86400000) / 3600000)).padStart(2, '0')}:${String(Math.floor((millisecondsUntilKickoff % 3600000) / 60000)).padStart(2, '0')}:${String(Math.floor((millisecondsUntilKickoff % 60000) / 1000)).padStart(2, '0')}`
+
   const dateFormatted = new Intl.DateTimeFormat(locale === 'en' ? 'en-GB' : locale, {
-    weekday: 'short', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'
+    weekday: 'short',
+    day: '2-digit',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
   }).format(kickoffTime)
 
   const handleScoreChange = (team: 'home' | 'away', change: number) => {
@@ -51,7 +63,6 @@ export default function PredictionCard({ match, contestId, existingPrediction, r
     setBounceDirection(change > 0 ? 'up' : 'down')
     window.setTimeout(() => setBounceDirection(null), 450)
 
-    // Save to database in the background without freezing the UI
     setSaveStatus('idle')
     setSaveError('')
     startTransition(async () => {
@@ -65,101 +76,162 @@ export default function PredictionCard({ match, contestId, existingPrediction, r
     })
   }
 
+  const stepperBtn =
+    'inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-zinc-700 bg-zinc-800 text-zinc-200 transition-colors hover:border-scorecaster-accent hover:text-scorecaster-accent disabled:opacity-50'
+
   return (
-    <div className={`prediction-fixture p-4 md:p-6 border rounded-xl flex flex-col transition-all ${isHurryUp ? 'bg-red-950/30 border-red-500/70' : isLocked ? 'bg-[#242424] border-white/15' : 'bg-[#242424] border-white/15 hover:border-orange-400 hover:shadow-md'}`}>
-      
-      {/* Top Bar: Date & Status */}
-      <div className="flex flex-wrap justify-between items-center gap-3 mb-6 pb-4 border-b border-gray-100 text-sm">
-        <div className="flex items-center text-gray-500 font-medium">
-          <Clock className="h-4 w-4 mr-2" />
+    <div
+      className={`flex flex-col rounded-xl border p-4 transition-all md:p-6 ${
+        isHurryUp
+          ? 'border-red-500/70 bg-red-950/30'
+          : 'border-zinc-800 bg-zinc-900 hover:border-scorecaster-accent/50'
+      }`}
+    >
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-zinc-800 pb-4 text-sm">
+        <div className="flex items-center font-medium text-zinc-400">
+          <Clock className="mr-2 h-4 w-4" />
           {dateFormatted}
         </div>
-        <div className={`rounded-full px-3 py-1 text-xs font-black tabular-nums ${isHurryUp ? 'bg-red-600 text-white' : 'bg-gray-950 text-orange-200'}`}>
+        <Badge variant={isHurryUp ? 'danger' : 'accent'} className="rounded-full tabular-nums">
           {isHurryUp && <span className="mr-2">{t('Hurry up!')}</span>}
           {countdown}
-        </div>
+        </Badge>
         {isLocked ? (
-          <span className="text-red-600 font-bold bg-red-50 px-3 py-1 rounded-full text-xs">{t('LOCKED')}</span>
+          <Badge variant="danger">{t('LOCKED')}</Badge>
         ) : (
-          <div className="h-6 flex items-center">
-             {isPending ? (
-               <span className="text-gray-400 text-xs italic animate-pulse">{t('Saving...')}</span>
-             ) : saveError ? (
-               <span className="text-red-600 text-xs font-bold">{saveError}</span>
-             ) : saveStatus === 'saved' ? (
-               <span className="text-scorecaster-green text-xs font-bold">✓ {t('Saved')}</span>
-             ) : null}
+          <div className="flex h-6 items-center">
+            {isPending ? (
+              <span className="animate-pulse text-xs italic text-zinc-500">{t('Saving...')}</span>
+            ) : saveError ? (
+              <span className="text-xs font-bold text-red-400">{saveError}</span>
+            ) : saveStatus === 'saved' ? (
+              <span className="text-xs font-bold text-scorecaster-accent">✓ {t('Saved')}</span>
+            ) : null}
           </div>
         )}
       </div>
 
-      {/* Main Row: Teams and Score Stepper */}
-      <div className="prediction-fixture-content flex flex-col rounded-xl bg-[#242424] p-1 transition-colors md:flex-row items-center justify-between gap-6 md:gap-4">
-        
-        {/* Home Team */}
-        <div className="flex flex-col items-center flex-1 text-center w-full">
-          <img src={match.homeTeam.crest} alt={match.homeTeam.name} className={`h-16 w-16 object-contain mb-3 ${isLocked ? 'opacity-50' : ''}`} />
-          <span className="font-bold text-gray-100 text-lg">{match.homeTeam.shortName || match.homeTeam.name}</span>
-          <span className="text-xs text-gray-400 uppercase tracking-wider font-semibold mt-1">{t('Home')}</span>
+      <MatchCard className="flex flex-col items-center justify-between gap-6 md:flex-row md:gap-4">
+        <div className="flex w-full flex-1 flex-col items-center text-center">
+          {match.homeTeam.crest ? (
+            <Image
+              src={match.homeTeam.crest}
+              alt={match.homeTeam.name}
+              width={64}
+              height={64}
+              className={`mb-3 h-16 w-16 object-contain ${isLocked ? 'opacity-50' : ''}`}
+            />
+          ) : null}
+          <span className="text-lg font-bold text-zinc-100">
+            {match.homeTeam.shortName || match.homeTeam.name}
+          </span>
+          <span className="mt-1 text-xs font-semibold uppercase tracking-wider text-zinc-500">
+            {t('Home')}
+          </span>
         </div>
 
-        {/* Score Stepper */}
-        <div className="relative flex items-center justify-center gap-4 bg-[#1b1b1b] p-3 rounded-2xl border border-gray-100">
-          {bounceDirection && <span className={`absolute -top-7 text-xl ${bounceDirection === 'up' ? 'animate-bounce' : 'scorecaster-ball-down'}`} aria-hidden="true">⚽</span>}
-          
-          {/* Home Controls */}
+        <div className="relative flex items-center justify-center gap-4 rounded-2xl border border-zinc-800 bg-zinc-950 p-3">
+          {bounceDirection && (
+            <span
+              className={`absolute -top-7 text-xl ${
+                bounceDirection === 'up' ? 'animate-bounce' : 'scorecaster-ball-down'
+              }`}
+              aria-hidden="true"
+            >
+              ⚽
+            </span>
+          )}
+
           <div className="flex flex-col gap-2">
-            <button type="button" disabled={isLocked || isPending} onClick={() => handleScoreChange('home', 1)} className="p-2 bg-[#2d2d2d] rounded-lg border border-gray-200 text-gray-200 hover:text-scorecaster-green hover:border-scorecaster-green disabled:opacity-50 transition-colors shadow-sm">
+            <button
+              type="button"
+              disabled={isLocked || isPending}
+              onClick={() => handleScoreChange('home', 1)}
+              className={stepperBtn}
+              aria-label="Increase home score"
+            >
               <Plus className="h-5 w-5" />
             </button>
-            <div className="w-12 h-14 bg-[#0d0d0d] border border-gray-200 rounded-lg flex items-center justify-center text-2xl font-black text-white shadow-inner">
+            <div className="flex h-14 w-12 items-center justify-center rounded-lg border border-zinc-700 bg-zinc-950 text-2xl font-black text-white shadow-inner">
               {homeScore}
             </div>
-            <button type="button" disabled={isLocked || isPending} onClick={() => handleScoreChange('home', -1)} className="p-2 bg-[#2d2d2d] rounded-lg border border-gray-200 text-gray-200 hover:text-red-500 hover:border-red-500 disabled:opacity-50 transition-colors shadow-sm">
+            <button
+              type="button"
+              disabled={isLocked || isPending}
+              onClick={() => handleScoreChange('home', -1)}
+              className={stepperBtn}
+              aria-label="Decrease home score"
+            >
               <Minus className="h-5 w-5" />
             </button>
           </div>
 
-          <span className="text-gray-300 font-black text-xl">:</span>
+          <span className="text-xl font-black text-zinc-500">:</span>
 
-          {/* Away Controls */}
           <div className="flex flex-col gap-2">
-            <button type="button" disabled={isLocked || isPending} onClick={() => handleScoreChange('away', 1)} className="p-2 bg-[#2d2d2d] rounded-lg border border-gray-200 text-gray-200 hover:text-scorecaster-green hover:border-scorecaster-green disabled:opacity-50 transition-colors shadow-sm">
+            <button
+              type="button"
+              disabled={isLocked || isPending}
+              onClick={() => handleScoreChange('away', 1)}
+              className={stepperBtn}
+              aria-label="Increase away score"
+            >
               <Plus className="h-5 w-5" />
             </button>
-            <div className="w-12 h-14 bg-[#0d0d0d] border border-gray-200 rounded-lg flex items-center justify-center text-2xl font-black text-white shadow-inner">
+            <div className="flex h-14 w-12 items-center justify-center rounded-lg border border-zinc-700 bg-zinc-950 text-2xl font-black text-white shadow-inner">
               {awayScore}
             </div>
-            <button type="button" disabled={isLocked || isPending} onClick={() => handleScoreChange('away', -1)} className="p-2 bg-[#2d2d2d] rounded-lg border border-gray-200 text-gray-200 hover:text-red-500 hover:border-red-500 disabled:opacity-50 transition-colors shadow-sm">
+            <button
+              type="button"
+              disabled={isLocked || isPending}
+              onClick={() => handleScoreChange('away', -1)}
+              className={stepperBtn}
+              aria-label="Decrease away score"
+            >
               <Minus className="h-5 w-5" />
             </button>
           </div>
         </div>
 
-        {/* Away Team */}
-        <div className="flex flex-col items-center flex-1 text-center w-full">
-          <img src={match.awayTeam.crest} alt={match.awayTeam.name} className={`h-16 w-16 object-contain mb-3 ${isLocked ? 'opacity-50' : ''}`} />
-          <span className="font-bold text-gray-100 text-lg">{match.awayTeam.shortName || match.awayTeam.name}</span>
-          <span className="text-xs text-gray-400 uppercase tracking-wider font-semibold mt-1">{t('Away')}</span>
+        <div className="flex w-full flex-1 flex-col items-center text-center">
+          {match.awayTeam.crest ? (
+            <Image
+              src={match.awayTeam.crest}
+              alt={match.awayTeam.name}
+              width={64}
+              height={64}
+              className={`mb-3 h-16 w-16 object-contain ${isLocked ? 'opacity-50' : ''}`}
+            />
+          ) : null}
+          <span className="text-lg font-bold text-zinc-100">
+            {match.awayTeam.shortName || match.awayTeam.name}
+          </span>
+          <span className="mt-1 text-xs font-semibold uppercase tracking-wider text-zinc-500">
+            {t('Away')}
+          </span>
         </div>
-      </div>
+      </MatchCard>
+
       {match.venue && (
-        <div className="mt-4 flex items-center justify-center gap-2 text-xs font-semibold text-gray-400">
-          <MapPin className="h-4 w-4 text-orange-400" />
+        <div className="mt-4 flex items-center justify-center gap-2 text-xs font-semibold text-zinc-400">
+          <MapPin className="h-4 w-4 text-scorecaster-accent" />
           <span>{match.venue}</span>
         </div>
       )}
-      <div className="mt-6 border-t border-gray-100 pt-4">
+
+      <div className="mt-6 border-t border-zinc-800 pt-4">
         {canReveal ? (
           <Link
             href={`/contests/${contestId}/ranking?matchId=${match.id}`}
-            className="flex w-full items-center justify-between rounded-xl bg-gray-950 px-4 py-3 text-left text-xs font-black uppercase tracking-wider text-white transition-colors hover:bg-gray-900"
+            className="flex min-h-11 w-full items-center justify-between rounded-xl bg-zinc-950 px-4 py-3 text-left text-xs font-black uppercase tracking-wider text-zinc-100 transition-colors hover:bg-zinc-800"
           >
-            <span className="flex items-center gap-2"><Eye className="h-4 w-4 text-[#d4ff00]" /> {t("View everyone's predictions")}</span>
-            <span className="text-[#d4ff00]">{revealedPredictions.length}</span>
+            <span className="flex items-center gap-2">
+              <Eye className="h-4 w-4 text-scorecaster-accent" /> {t("View everyone's predictions")}
+            </span>
+            <span className="text-scorecaster-accent">{revealedPredictions.length}</span>
           </Link>
         ) : (
-          <div className="flex w-full items-center gap-2 rounded-xl bg-gray-100 px-4 py-3 text-left text-xs font-black uppercase tracking-wider text-gray-400">
+          <div className="flex min-h-11 w-full items-center gap-2 rounded-xl bg-zinc-800/50 px-4 py-3 text-left text-xs font-black uppercase tracking-wider text-zinc-500">
             <Eye className="h-4 w-4" /> {t('Predictions hidden until 30 minutes before kickoff')}
           </div>
         )}

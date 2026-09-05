@@ -1,6 +1,6 @@
 const BASE_URL = 'https://api.football-data.org/v4';
 
-async function fetchFootballData(path: string) {
+async function fetchFootballData(path: string, revalidateSeconds = 300) {
   const apiKey = process.env.FOOTBALL_DATA_API_KEY;
   if (!apiKey) {
     throw new Error('FOOTBALL_DATA_API_KEY is not configured');
@@ -10,7 +10,7 @@ async function fetchFootballData(path: string) {
     headers: {
       'X-Auth-Token': apiKey,
     },
-    next: { revalidate: 300 },
+    next: { revalidate: revalidateSeconds, tags: ['football-data'] },
   });
 
   if (!res.ok) {
@@ -30,9 +30,9 @@ export async function getPLMatches() {
 
 // Function 2: Gets the Live League Table (New!)
 export async function getPLStandings() {
-  return fetchFootballData('/competitions/PL/standings');
+  return fetchFootballData('/competitions/PL/standings', 600);
 }
 
 export async function getPLScorers() {
-  return fetchFootballData('/competitions/PL/scorers?limit=50');
+  return fetchFootballData('/competitions/PL/scorers?limit=50', 600);
 }

@@ -4,48 +4,51 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Trophy, BarChart2, BookOpen, Shield, Settings, CalendarDays } from 'lucide-react'
 import { useTranslations } from '../../components/LocaleProvider'
+import { cn } from '@/lib/utils'
+import { segmentActive, segmentBase, segmentInactive } from '@/lib/tab-styles'
 
 export default function ContestNav({ contestId, isAdmin }: { contestId: string; isAdmin: boolean }) {
   const pathname = usePathname()
   const t = useTranslations()
   const links = [
-    { href: `/contests/${contestId}/predictions`, label: t('Predictions'), icon: Trophy },
-    { href: `/contests/${contestId}/fixtures`, label: t('Fixtures'), icon: CalendarDays },
-    { href: `/contests/${contestId}/ranking`, label: t('Ranking'), icon: BarChart2 },
-    { href: `/contests/${contestId}/championship`, label: t('PL Standings'), icon: Shield },
-    { href: `/contests/${contestId}/rules`, label: t('Rules'), icon: BookOpen },
+    { href: `/contests/${contestId}/predictions`, label: t('Predictions'), short: 'Tips', icon: Trophy },
+    { href: `/contests/${contestId}/fixtures`, label: t('Fixtures'), short: 'Fix', icon: CalendarDays },
+    { href: `/contests/${contestId}/ranking`, label: t('Ranking'), short: 'Rank', icon: BarChart2 },
+    { href: `/contests/${contestId}/championship`, label: t('PL Standings'), short: 'PL', icon: Shield },
+    { href: `/contests/${contestId}/rules`, label: t('Rules'), short: 'Rules', icon: BookOpen },
   ]
 
   return (
-    <div className="bg-gray-950 p-2 rounded-2xl shadow-lg flex overflow-x-auto hide-scrollbar gap-1 border border-orange-500">
-      {links.map(({ href, label, icon: Icon }) => {
-        const active = pathname === href
-        return (
+    <div className="sticky top-[57px] z-20 -mx-1 overflow-x-auto hide-scrollbar rounded-xl border border-white/10 bg-zinc-950/70 p-1.5 shadow-lg backdrop-blur-md sm:mx-0">
+      <div className="flex min-w-max gap-1">
+        {links.map(({ href, label, short, icon: Icon }) => {
+          const active = pathname === href
+          return (
+            <Link
+              key={href}
+              href={href}
+              className={cn(segmentBase, active ? segmentActive : segmentInactive)}
+            >
+              <Icon className="h-4 w-4 shrink-0" />
+              <span className="sm:hidden">{short}</span>
+              <span className="hidden sm:inline">{label}</span>
+            </Link>
+          )
+        })}
+        {isAdmin && (
           <Link
-            key={href}
-            href={href}
-            className={`flex items-center gap-2 px-5 py-3 text-xs md:text-sm font-bold uppercase tracking-wider rounded-xl transition-all whitespace-nowrap ${
-              active
-                ? href === `/contests/${contestId}/championship`
-                  ? 'rounded-full bg-orange-500 text-black shadow-sm'
-                  : 'bg-[#d4ff00] text-black shadow-sm'
-                : 'text-gray-400 hover:text-white hover:bg-gray-900'
-            }`}
+            href={`/contests/${contestId}/edit`}
+            className={cn(
+              segmentBase,
+              'ml-auto',
+              pathname === `/contests/${contestId}/edit` ? segmentActive : segmentInactive
+            )}
           >
-            <Icon className="h-4 w-4" /> {label}
+            <Settings className="h-4 w-4" />
+            <span className="hidden sm:inline">{t('Settings')}</span>
           </Link>
-        )
-      })}
-      {isAdmin && (
-        <Link
-          href={`/contests/${contestId}/edit`}
-          className={`flex items-center gap-2 px-5 py-3 text-xs md:text-sm font-bold uppercase tracking-wider rounded-xl transition-all whitespace-nowrap ml-auto ${
-            pathname === `/contests/${contestId}/edit` ? 'bg-orange-500 text-black' : 'text-orange-300 hover:text-white hover:bg-orange-500/20'
-          }`}
-        >
-          <Settings className="h-4 w-4" /> {t('Settings')}
-        </Link>
-      )}
+        )}
+      </div>
     </div>
   )
 }
