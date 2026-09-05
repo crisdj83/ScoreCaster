@@ -4,7 +4,6 @@ import { createClient } from '../../lib/supabase/server'
 import { createAdminClient } from '../../lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
-import { isSiteOwner } from '../../lib/owner'
 
 async function getUserAndAdmin() {
   const supabase = await createClient()
@@ -166,46 +165,4 @@ export async function markMessagesRead() {
   } catch (error) {
     console.warn('markMessagesRead failed:', error)
   }
-}
-
-export async function createNewsPost(formData: FormData) {
-  const { user } = await getUserAndAdmin()
-  if (!isSiteOwner(user.email)) redirect('/news?error=Only the ScoreCaster owner can publish website updates.')
-  const title = String(formData.get('title') || '').trim()
-  const body = String(formData.get('body') || '').trim()
-  if (!title || !body) redirect('/news?error=Title and update text are required.')
-  const { error } = await getServiceDb().from('news_posts').insert({ author_id: user.id, title, body })
-  if (error) redirect(`/news?error=${encodeURIComponent(error.message)}`)
-  revalidatePath('/news')
-  revalidatePath('/')
-  const redirectTo = String(formData.get('redirect_to') || '/news')
-  redirect(redirectTo === '/' ? '/?success=Update+saved.' : '/news')
-}
-
-export async function deleteNewsPost(formData: FormData) {
-  const { user, isAdmin } = await getUserAndAdmin()
-  if (!isAdmin && !isSiteOwner(user.email)) redirect('/news?error=Only the ScoreCaster owner can delete website updates.')
-  const postId = String(formData.get('post_id') || '')
-  if (!postId) redirect('/news?error=Update not found.')
-  const { error } = await getServiceDb().from('news_posts').delete().eq('id', postId)
-  if (error) redirect(`/news?error=${encodeURIComponent(error.message)}`)
-  revalidatePath('/news')
-  revalidatePath('/')
-  const redirectTo = String(formData.get('redirect_to') || '/news')
-  redirect(redirectTo === '/' ? '/?success=Update+saved.' : '/news')
-}
-
-export async function updateNewsPost(formData: FormData) {
-  const { user } = await getUserAndAdmin()
-  if (!isSiteOwner(user.email)) redirect('/news?error=Only the ScoreCaster owner can edit website updates.')
-  const postId = String(formData.get('post_id') || '')
-  const title = String(formData.get('title') || '').trim()
-  const body = String(formData.get('body') || '').trim()
-  if (!postId || !title || !body) redirect('/news?error=Title and update text are required.')
-  const { error } = await getServiceDb().from('news_posts').update({ title, body }).eq('id', postId)
-  if (error) redirect(`/news?error=${encodeURIComponent(error.message)}`)
-  revalidatePath('/news')
-  revalidatePath('/')
-  const redirectTo = String(formData.get('redirect_to') || '/news')
-  redirect(redirectTo === '/' ? '/?success=Update+saved.' : '/news')
 }

@@ -3,13 +3,13 @@ import { createClient } from '../../lib/supabase/server'
 import { createAdminClient } from '../../lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { approveAvatar, rejectAvatar } from './actions'
-import { ShieldCheck, Check, X, ArrowLeft, Clock } from 'lucide-react'
-import Link from 'next/link'
+import { ShieldCheck, Check, X, Clock } from 'lucide-react'
 import { getTranslations } from '../../lib/i18n'
 import { getServerLocale } from '../../lib/i18n-server'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { PageHeader } from '@/components/ui/page-header'
+import { Breadcrumb } from '@/components/ui/breadcrumb'
 
 type PendingUser = {
   id: string
@@ -50,12 +50,7 @@ export default async function AdminDashboard(props: { searchParams: Promise<{ su
   return (
     <div className="mx-auto w-full space-y-6 pb-12 pt-6">
       <div>
-        <Link
-          href="/"
-          className="mb-3 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-zinc-500 transition-colors hover:text-scorecaster-accent"
-        >
-          <ArrowLeft className="h-4 w-4" /> {t('Back to Dashboard')}
-        </Link>
+        <Breadcrumb items={[{ label: t('Admin') }]} className="mb-3" />
         <div className="flex items-center gap-3">
           <ShieldCheck className="h-8 w-8 shrink-0 text-scorecaster-accent" />
           <PageHeader

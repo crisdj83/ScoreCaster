@@ -11,32 +11,42 @@ export default async function Navbar() {
   const t = getTranslations(getServerLocale())
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  let hasUnreadMessages = false
+  let unreadMessageCount = 0
   let isAdmin = false
   if (user) {
     const { data: memberships } = await supabase.from('contest_members').select('contest_id').eq('user_id', user.id)
     const contestIds = (memberships || []).map(membership => membership.contest_id)
-    const [{ data: profile }, { data: latestMessage }, { data: latestReply }, { data: messageReadState }] = await Promise.all([
+    const [{ data: profile }, { data: messageReadState }] = await Promise.all([
       supabase.from('users').select('is_global_admin').eq('id', user.id).single(),
-      contestIds.length
-        ? supabase.from('messages').select('created_at').in('contest_id', contestIds).order('created_at', { ascending: false }).limit(1).maybeSingle()
-        : Promise.resolve({ data: null }),
-      contestIds.length
-        ? supabase.from('message_replies').select('created_at, messages!inner(contest_id)').in('messages.contest_id', contestIds).order('created_at', { ascending: false }).limit(1).maybeSingle()
-        : Promise.resolve({ data: null }),
       supabase.from('message_reads').select('last_read_at').eq('user_id', user.id).maybeSingle(),
     ])
     isAdmin = profile?.is_global_admin === true
-    const lastRead = messageReadState?.last_read_at ? new Date(messageReadState.last_read_at).getTime() : 0
-    hasUnreadMessages = [latestMessage?.created_at, latestReply?.created_at]
-      .some(createdAt => createdAt && new Date(createdAt).getTime() > lastRead)
+    const lastRead = messageReadState?.last_read_at || '1970-01-01T00:00:00.000Z'
+
+    const [{ count: newMessageCount }, { count: newReplyCount }] = await Promise.all([
+      contestIds.length
+        ? supabase
+          .from('messages')
+          .select('id', { count: 'exact', head: true })
+          .in('contest_id', contestIds)
+          .gt('created_at', lastRead)
+        : Promise.resolve({ count: 0 }),
+      contestIds.length
+        ? supabase
+          .from('message_replies')
+          .select('id, messages!inner(contest_id)', { count: 'exact', head: true })
+          .in('messages.contest_id', contestIds)
+          .gt('created_at', lastRead)
+        : Promise.resolve({ count: 0 }),
+    ])
+    unreadMessageCount = (newMessageCount || 0) + (newReplyCount || 0)
   }
 
   return (
     <>
       <header className="sticky top-0 z-40 w-full border-b border-white/10 bg-scorecaster-bg/70 backdrop-blur-xl">
         <div className="flex w-full flex-wrap items-center gap-2 px-3 py-3 sm:gap-2.5 sm:px-5 lg:px-8 xl:px-10">
-          <NavLinks isAdmin={isAdmin} isLoggedIn={Boolean(user)} hasUnreadMessages={hasUnreadMessages} />
+          <NavLinks isAdmin={isAdmin} isLoggedIn={Boolean(user)} unreadMessageCount={unreadMessageCount} />
 
           <div className="ml-auto flex flex-wrap items-center gap-1.5 sm:gap-2">
             <LanguageSwitcher />
@@ -55,7 +65,7 @@ export default async function Navbar() {
           </div>
         </div>
       </header>
-      <BottomNav isAdmin={isAdmin} isLoggedIn={Boolean(user)} hasUnreadMessages={hasUnreadMessages} />
+      <BottomNav isAdmin={isAdmin} isLoggedIn={Boolean(user)} unreadMessageCount={unreadMessageCount} />
     </>
   )
 }

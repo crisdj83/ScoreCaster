@@ -8,9 +8,6 @@ import ScoreCasterLogo from './components/ScoreCasterLogo'
 import { getPLMatches } from '../lib/football'
 import { getTranslations } from '../lib/i18n'
 import { getServerLocale } from '../lib/i18n-server'
-import { createAdminClient } from '../lib/supabase/admin'
-import { isSiteOwner } from '../lib/owner'
-import HomepageUpdates from './components/HomepageUpdates'
 import ContestIcon from './components/ContestIcon'
 import { getSeasonLengthLabelKey } from '../lib/contest-season'
 
@@ -129,7 +126,7 @@ export default async function Home(props: { searchParams: Promise<{ success?: st
     redirect('/login')
   }
 
-  const [{ data: profile }, { data: myContests }, plData, analytics, websiteUpdatesResult] = await Promise.all([
+  const [{ data: profile }, { data: myContests }, plData, analytics] = await Promise.all([
     supabase.from('users').select('username, email, avatar_url, favorite_team, is_global_admin').eq('id', user.id).single(),
     supabase.from('contest_members').select(`
       contest_id,
@@ -143,20 +140,8 @@ export default async function Home(props: { searchParams: Promise<{ success?: st
     `).eq('user_id', user.id),
     fetchPLData(),
     fetchAnalytics(),
-    (async () => {
-      try {
-        return await createAdminClient()
-          .from('news_posts')
-          .select('id, title, body, created_at')
-          .order('created_at', { ascending: false })
-          .limit(8)
-      } catch {
-        return { data: [] as Array<{ id: string; title: string; body: string; created_at: string }> }
-      }
-    })(),
   ])
   const { recentScores, nextMatch } = plData
-  const websiteUpdates = websiteUpdatesResult.data
   const contestIds = (myContests || []).map(membership => membership.contest_id)
   const { data: contestPredictions } = contestIds.length
     ? await supabase.from('predictions').select('contest_id, user_id, points').in('contest_id', contestIds)
@@ -284,10 +269,6 @@ export default async function Home(props: { searchParams: Promise<{ success?: st
           )}
         </div>
       </div>
-      <HomepageUpdates
-        updates={websiteUpdates || []}
-        isOwner={isSiteOwner(user.email)}
-      />
       <section className="flex items-center justify-between gap-4 rounded-2xl border border-zinc-800 bg-gradient-to-r from-zinc-900 to-zinc-950 p-5 shadow-lg shadow-black/20">
         <div className="flex items-center gap-3">
           <BarChart3 className="h-5 w-5 text-scorecaster-accent" aria-hidden="true" />

@@ -169,10 +169,6 @@ export default function HeroBanner({
 
       {/* RIGHT SIDE: Scrolling Latest Scores Feed */}
       <div className="relative flex h-[350px] w-full flex-col overflow-hidden bg-transparent lg:h-auto lg:min-h-[420px] lg:w-1/2">
-        <div className="absolute right-5 top-5 z-20 rounded-full border border-white/15 bg-zinc-800/65 px-4 py-2 text-xs font-black uppercase tracking-[0.2em] text-white shadow-lg backdrop-blur-md">
-          {t('Latest Scores')}
-        </div>
-        
         {recentScores.length > 0 ? (
           <div className="absolute inset-0 overflow-hidden">
             <div className="animate-marquee-y flex min-h-full w-full flex-col gap-3 p-4 sm:p-6">

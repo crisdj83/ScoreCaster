@@ -20,10 +20,10 @@ import { tabActive, tabBase, tabInactive } from '@/lib/tab-styles'
 type NavLinksProps = {
   isAdmin: boolean
   isLoggedIn: boolean
-  hasUnreadMessages: boolean
+  unreadMessageCount: number
 }
 
-export default function NavLinks({ isAdmin, isLoggedIn, hasUnreadMessages }: NavLinksProps) {
+export default function NavLinks({ isAdmin, isLoggedIn, unreadMessageCount }: NavLinksProps) {
   const pathname = usePathname()
   const t = useTranslations()
 
@@ -58,8 +58,10 @@ export default function NavLinks({ isAdmin, isLoggedIn, hasUnreadMessages }: Nav
       <Link href="/news" className={linkClass('/news')}>
         <span className="relative">
           <MessageSquare className="h-4 w-4" />
-          {hasUnreadMessages && (
-            <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-zinc-900" />
+          {unreadMessageCount > 0 && (
+            <span className="absolute -right-2 -top-2 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-black leading-none text-white ring-2 ring-zinc-900">
+              {unreadMessageCount > 9 ? '9+' : unreadMessageCount}
+            </span>
           )}
         </span>
         {t('Messages')}

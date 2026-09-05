@@ -3,8 +3,7 @@
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { updateProfile } from './actions'
-import { User, Shield, Image as ImageIcon, RefreshCw, ArrowLeft, Clock, ChevronDown } from 'lucide-react'
-import Link from 'next/link'
+import { User, Shield, Image as ImageIcon, RefreshCw, Clock, ChevronDown } from 'lucide-react'
 import { createClient } from '../../lib/supabase/client'
 import { useTranslations } from '../components/LocaleProvider'
 import { Card, CardContent } from '@/components/ui/card'
@@ -13,6 +12,7 @@ import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Breadcrumb } from '@/components/ui/breadcrumb'
 
 // All 20 Premier League Teams (Using enterprise-grade ESPN CDN for 100% uptime)
 const TEAMS = [
@@ -156,12 +156,7 @@ function ProfilePageInner() {
     <div className="mx-auto max-w-3xl space-y-6 pb-12 pt-2">
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <Link
-            href="/"
-            className="mb-2 flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-zinc-500 transition-colors hover:text-scorecaster-accent"
-          >
-            <ArrowLeft className="h-4 w-4" /> {t('Back to Dashboard')}
-          </Link>
+          <Breadcrumb items={[{ label: t('Your Profile') }]} className="mb-2" />
           <h1 className="flex items-center gap-3 text-3xl font-black uppercase tracking-tight text-zinc-100 md:text-4xl">
             <User className="h-8 w-8 text-scorecaster-accent" />
             {t('Your Profile')}
