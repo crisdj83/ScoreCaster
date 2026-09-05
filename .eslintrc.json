@@ -1,4 +1,13 @@
 {
   "extends": ["next/core-web-vitals", "next/typescript"],
+<<<<<<< HEAD
   "ignorePatterns": ["_v1/"]
+=======
+  "ignorePatterns": ["_v1/"],
+  "rules": {
+    "@typescript-eslint/no-explicit-any": "warn",
+    "@next/next/no-img-element": "warn",
+    "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }]
+  }
+>>>>>>> cursor/unify-scoring-and-harden-sync
 }
