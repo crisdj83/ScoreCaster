@@ -17,12 +17,9 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npx tsc --noEmit
-<<<<<<< HEAD
-=======
       - run: npm run lint
       - run: npm run build
         env:
           NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
           NEXT_PUBLIC_SUPABASE_ANON_KEY: example-anon-key
           NEXT_PUBLIC_SITE_URL: http://localhost:3000
->>>>>>> cursor/unify-scoring-and-harden-sync
