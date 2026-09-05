@@ -18,7 +18,7 @@ export function PageHeader({ title, description, actions, className }: PageHeade
       )}
     >
       <div>
-        <h1 className="text-2xl font-black tracking-tight text-zinc-100 sm:text-3xl">
+        <h1 className="text-gradient-accent text-2xl font-black tracking-tight sm:text-3xl">
           {title}
         </h1>
         {description ? (
@@ -41,7 +41,7 @@ export function EmptyState({ title, description, action, className }: EmptyState
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center rounded-xl border border-dashed border-zinc-700 bg-zinc-900/40 px-6 py-12 text-center",
+        "flex flex-col items-center justify-center rounded-2xl border border-dashed border-white/15 bg-white/5 px-6 py-12 text-center backdrop-blur-xl",
         className
       )}
     >

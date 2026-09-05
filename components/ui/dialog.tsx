@@ -53,7 +53,7 @@ export function Dialog({
       <button
         type="button"
         aria-label="Close dialog"
-        className="absolute inset-0 bg-black/70"
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
         onClick={() => onOpenChange(false)}
       />
       <div
@@ -61,11 +61,11 @@ export function Dialog({
         aria-modal="true"
         aria-labelledby="dialog-title"
         className={cn(
-          "relative z-10 w-full max-w-md rounded-xl border border-zinc-800 bg-zinc-900 p-5 shadow-2xl sm:p-6",
+          "relative z-10 w-full max-w-md rounded-2xl border border-white/15 bg-zinc-900/70 p-5 shadow-2xl shadow-black/50 backdrop-blur-2xl animate-in fade-in zoom-in-95 slide-in-from-bottom-2 duration-300 sm:p-6",
           className
         )}
       >
-        <h2 id="dialog-title" className="text-lg font-black text-zinc-100">
+        <h2 id="dialog-title" className="text-lg font-bold tracking-tight text-white">
           {title}
         </h2>
         {description ? (

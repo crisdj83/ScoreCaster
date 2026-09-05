@@ -5,22 +5,22 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-bold transition-[colors,box-shadow,border-color] outline-none ring-0 focus:ring-0 focus-visible:ring-0 focus-visible:border-orange-400/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-bold transition-all duration-300 outline-none ring-0 focus:ring-0 focus-visible:ring-0 focus-visible:border-orange-400/50 active:scale-95 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
         default:
-          "bg-scorecaster-accent text-scorecaster-bg hover:bg-[#ff922f]",
+          "bg-gradient-to-b from-orange-400 to-orange-600 text-white shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 hover:brightness-110",
         secondary:
-          "bg-zinc-800 text-zinc-100 border border-zinc-700 hover:bg-zinc-700",
+          "border border-white/10 bg-white/[0.07] text-zinc-100 backdrop-blur-md hover:bg-white/[0.12]",
         outline:
-          "border border-zinc-700 bg-transparent text-zinc-100 hover:bg-zinc-800/80",
-        ghost: "text-zinc-300 hover:bg-zinc-800 hover:text-zinc-100",
+          "border border-white/15 bg-transparent text-zinc-100 backdrop-blur-md hover:bg-white/10",
+        ghost: "text-zinc-300 hover:bg-white/10 hover:text-zinc-100",
         destructive:
-          "bg-red-500/15 text-red-400 border border-red-500/30 hover:bg-red-500/25",
+          "bg-red-500/15 text-red-300 border border-red-500/30 backdrop-blur-md hover:bg-red-500/25",
         link: "text-scorecaster-accent underline-offset-4 hover:underline",
         glass:
-          "border border-orange-500/40 bg-orange-500/10 text-orange-200 hover:bg-orange-500/20",
+          "border border-orange-500/30 bg-orange-500/10 text-orange-200 backdrop-blur-md hover:bg-orange-500/20",
       },
       size: {
         default: "min-h-11 h-11 px-5",

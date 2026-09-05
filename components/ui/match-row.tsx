@@ -22,7 +22,7 @@ type MatchRowProps = {
 function Crest({ src, name }: { src?: string | null; name: string }) {
   if (!src) {
     return (
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-zinc-800 text-[10px] font-bold text-zinc-400">
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-[10px] font-bold text-zinc-400 backdrop-blur-md">
         {name.slice(0, 2).toUpperCase()}
       </div>
     )
@@ -51,7 +51,7 @@ export function MatchRow({
   return (
     <div
       className={cn(
-        "fixture-calendar-game rounded-xl border border-zinc-800 bg-zinc-900/60 px-4 py-4 transition-colors",
+        "fixture-calendar-game rounded-2xl border border-white/10 bg-white/5 px-4 py-4 backdrop-blur-xl transition-all duration-300",
         className
       )}
     >
@@ -97,7 +97,7 @@ export function MatchCard({
   return (
     <div
       className={cn(
-        "prediction-fixture-content overflow-hidden rounded-xl border border-zinc-800 p-4 md:p-5",
+        "prediction-fixture-content overflow-hidden rounded-2xl border border-white/10 p-4 md:p-5",
         className
       )}
       {...props}

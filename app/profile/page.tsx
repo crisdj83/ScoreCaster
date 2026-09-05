@@ -106,7 +106,7 @@ function ProfilePageInner() {
 
         const { data, error: profileError } = await supabase
           .from('users')
-          .select('*')
+          .select('id, email, username, avatar_url, pending_avatar_url, favorite_team, country, quote, is_global_admin')
           .eq('id', user.id)
           .single()
         if (profileError) throw profileError

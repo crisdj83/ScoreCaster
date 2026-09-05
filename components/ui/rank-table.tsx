@@ -35,7 +35,7 @@ export function RankTable<T>({
 }: RankTableProps<T>) {
   if (rows.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed border-zinc-700 bg-zinc-900/40 px-4 py-10 text-center text-sm text-zinc-500">
+      <div className="rounded-2xl border border-dashed border-white/15 bg-white/5 px-4 py-10 text-center text-sm text-zinc-500 backdrop-blur-xl">
         {emptyMessage}
       </div>
     )
@@ -50,10 +50,10 @@ export function RankTable<T>({
         {rows.map((row, index) => (
           <li
             key={getRowKey(row, index)}
-            className="rounded-xl border border-zinc-800 bg-zinc-900 p-4"
+            className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-xl transition-all duration-300 active:scale-[0.98]"
           >
             {(mobileTitle || mobileSubtitle) && (
-              <div className="mb-3 flex items-start justify-between gap-3 border-b border-zinc-800 pb-3">
+              <div className="mb-3 flex items-start justify-between gap-3 border-b border-white/10 pb-3">
                 <div className="min-w-0">
                   {mobileTitle ? (
                     <div className="truncate font-bold text-zinc-100">
@@ -85,9 +85,9 @@ export function RankTable<T>({
       </ul>
 
       {/* Desktop table */}
-      <div className="hidden overflow-x-auto rounded-xl border border-zinc-800 md:block">
+      <div className="hidden overflow-x-auto rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl md:block">
         <table className="w-full text-left text-sm">
-          <thead className="bg-zinc-950/80 text-[11px] font-black uppercase tracking-wider text-zinc-500">
+          <thead className="bg-white/[0.04] text-[11px] font-black uppercase tracking-wider text-zinc-500">
             <tr>
               {columns.map((col) => (
                 <th
@@ -99,11 +99,11 @@ export function RankTable<T>({
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-zinc-800">
+          <tbody className="divide-y divide-white/10">
             {rows.map((row, index) => (
               <tr
                 key={getRowKey(row, index)}
-                className="bg-zinc-900/60 transition-colors hover:bg-zinc-800/40"
+                className="transition-colors duration-300 hover:bg-white/[0.06]"
               >
                 {columns.map((col) => (
                   <td key={col.key} className={cn("px-4 py-3", col.className)}>

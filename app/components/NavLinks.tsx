@@ -28,7 +28,7 @@ export default function NavLinks({ isAdmin, isLoggedIn, hasUnreadMessages }: Nav
   const t = useTranslations()
 
   const linkClass = (path: string) =>
-    cn(tabBase, 'h-10 sm:h-11', pathname === path ? tabActive : tabInactive)
+    cn(tabBase, 'hidden h-10 sm:h-11 lg:inline-flex', pathname === path ? tabActive : tabInactive)
 
   return (
     <>
@@ -37,11 +37,11 @@ export default function NavLinks({ isAdmin, isLoggedIn, hasUnreadMessages }: Nav
         aria-label="ScoreCaster home"
         className="inline-flex h-10 items-center gap-2 outline-none sm:h-11"
       >
-        <span className="relative flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-zinc-950/80 text-scorecaster-accent backdrop-blur-md">
+        <span className="relative flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-scorecaster-accent shadow-lg shadow-orange-500/10 backdrop-blur-md">
           <Activity className="h-5 w-5" strokeWidth={3} />
           <CircleDot className="absolute right-1 top-1 h-2.5 w-2.5" fill="currentColor" strokeWidth={2.5} />
         </span>
-        <span className="hidden font-black uppercase tracking-tight text-zinc-100 lg:inline">
+        <span className="text-gradient-accent hidden font-black uppercase tracking-tight lg:inline">
           ScoreCaster
         </span>
       </Link>

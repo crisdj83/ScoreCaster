@@ -2,6 +2,7 @@ import { LogOut } from 'lucide-react'
 import { createClient } from '../../lib/supabase/server'
 import { signOut } from '../actions'
 import NavLinks from './NavLinks'
+import BottomNav from './BottomNav'
 import LanguageSwitcher from './LanguageSwitcher'
 import { getTranslations } from '../../lib/i18n'
 import { getServerLocale } from '../../lib/i18n-server'
@@ -32,26 +33,30 @@ export default async function Navbar() {
   }
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-zinc-800/60 bg-scorecaster-bg/95 backdrop-blur-md">
-      <div className="flex w-full flex-wrap items-center gap-2 px-3 py-3 sm:gap-2.5 sm:px-5 lg:px-8 xl:px-10">
-        <NavLinks isAdmin={isAdmin} isLoggedIn={Boolean(user)} hasUnreadMessages={hasUnreadMessages} />
+    <>
+      <header className="sticky top-0 z-40 w-full border-b border-white/10 bg-scorecaster-bg/70 backdrop-blur-xl">
+        <div className="flex w-full flex-wrap items-center gap-2 px-3 py-3 sm:gap-2.5 sm:px-5 lg:px-8 xl:px-10">
+          <NavLinks isAdmin={isAdmin} isLoggedIn={Boolean(user)} hasUnreadMessages={hasUnreadMessages} />
 
-        <div className="ml-auto flex flex-wrap items-center gap-1.5 sm:gap-2">
-          <LanguageSwitcher />
-          {user ? (
-            <form action={signOut} className="inline-flex">
-              <button
-                type="submit"
-                title={t('Sign Out')}
-                aria-label={t('Sign Out')}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-orange-500/40 bg-orange-500/10 text-orange-200 shadow-sm backdrop-blur-md outline-none transition-colors hover:bg-orange-500/20 sm:h-11 sm:w-11"
-              >
-                <LogOut className="h-4 w-4" />
-              </button>
-            </form>
-          ) : null}
+          <div className="ml-auto flex flex-wrap items-center gap-1.5 sm:gap-2">
+            <LanguageSwitcher />
+            {user ? (
+              <form action={signOut} className="inline-flex">
+                <button
+                  type="submit"
+                  title={t('Sign Out')}
+                  aria-label={t('Sign Out')}
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-orange-500/30 bg-orange-500/10 text-orange-200 shadow-sm backdrop-blur-md outline-none transition-all duration-300 hover:bg-orange-500/20 active:scale-90 sm:h-11 sm:w-11"
+                >
+                  <LogOut className="h-4 w-4" />
+                </button>
+              </form>
+            ) : null}
+          </div>
         </div>
-      </div>
-    </header>
+      </header>
+      <BottomNav isAdmin={isAdmin} isLoggedIn={Boolean(user)} hasUnreadMessages={hasUnreadMessages} />
+    </>
   )
 }
+

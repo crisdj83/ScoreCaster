@@ -1,3 +1,13 @@
+export type ContestPredictionRow = {
+  user_id: string
+  match_id: number
+  predicted_home_score: number | null
+  predicted_away_score: number | null
+  points: number
+  is_exact: boolean
+  is_correct: boolean
+}
+
 export const PREDICTION_LOCK_MS = 60 * 60 * 1000
 export const PREDICTION_REVEAL_MS = 30 * 60 * 1000
 

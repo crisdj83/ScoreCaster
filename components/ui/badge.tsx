@@ -4,15 +4,15 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 
 const badgeVariants = cva(
-  "inline-flex items-center justify-center rounded-lg px-2.5 py-1 text-xs font-bold whitespace-nowrap",
+  "inline-flex items-center justify-center rounded-lg px-2.5 py-1 text-xs font-bold whitespace-nowrap backdrop-blur-md",
   {
     variants: {
       variant: {
-        default: "bg-zinc-800 text-zinc-200 border border-zinc-700",
-        accent: "bg-scorecaster-accent/15 text-scorecaster-accent border border-scorecaster-accent/30",
-        success: "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30",
-        danger: "bg-red-500/15 text-red-400 border border-red-500/30",
-        muted: "bg-zinc-800/60 text-zinc-400 border border-zinc-800",
+        default: "bg-white/[0.07] text-zinc-200 border border-white/10",
+        accent: "bg-scorecaster-accent/15 text-orange-300 border border-scorecaster-accent/30",
+        success: "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30",
+        danger: "bg-red-500/15 text-red-300 border border-red-500/30",
+        muted: "bg-white/[0.03] text-zinc-400 border border-white/[0.06]",
       },
     },
     defaultVariants: {
@@ -37,7 +37,7 @@ function ScoreBadge({
   return (
     <span
       className={cn(
-        "inline-flex min-w-[2.5rem] items-center justify-center rounded-lg bg-scorecaster-accent px-2.5 py-1 text-sm font-black text-scorecaster-bg",
+        "inline-flex min-w-[2.5rem] items-center justify-center rounded-lg bg-gradient-to-b from-orange-400 to-orange-600 px-2.5 py-1 text-sm font-black text-white shadow-md shadow-orange-500/25",
         className
       )}
       {...props}
@@ -56,7 +56,7 @@ function StatPill({
   return (
     <div
       className={cn(
-        "inline-flex flex-col items-center rounded-xl border border-zinc-800 bg-zinc-900/80 px-3 py-2",
+        "inline-flex flex-col items-center rounded-xl border border-white/10 bg-white/5 px-3 py-2 backdrop-blur-md",
         className
       )}
       {...props}

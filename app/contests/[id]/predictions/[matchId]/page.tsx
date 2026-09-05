@@ -1,8 +1,7 @@
 import { createClient } from '../../../../../lib/supabase/server'
 import { getPLMatches } from '../../../../../lib/football'
 import { isMatchInContestSeason } from '../../../../../lib/contest-season'
-import { isPredictionRevealable } from '../../../../../lib/scoring'
-import { createAdminClient } from '../../../../../lib/supabase/admin'
+import { isPredictionRevealable, type ContestPredictionRow } from '../../../../../lib/scoring'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Clock, Eye, Lock, Trophy } from 'lucide-react'
@@ -36,20 +35,22 @@ export default async function MatchPredictionsPage({ params }: PageProps) {
   }
 
   const canReveal = isPredictionRevealable(match.utcDate)
-  // Admin client aggregates all members' predictions; reveal window is enforced above.
-  const db = createAdminClient()
-  const { data: members } = await db
+  // Membership is visible to any authenticated user via RLS; cross-member
+  // prediction aggregation goes through a SECURITY DEFINER RPC that verifies
+  // membership server-side (get_contest_predictions), instead of a
+  // service-role client bypass.
+  const { data: members } = await supabase
     .from('contest_members')
     .select('user_id, users(username, email)')
     .eq('contest_id', id)
   const { data: predictions } = canReveal
-    ? await db.from('predictions')
-      .select('user_id, predicted_home_score, predicted_away_score, points')
-      .eq('contest_id', id)
-      .eq('match_id', matchId)
-    : { data: [] }
+    ? await supabase.rpc('get_contest_predictions', {
+        p_contest_id: id,
+        p_match_ids: [Number(matchId)],
+      })
+    : { data: [] as ContestPredictionRow[] }
 
-  const predictionByUser = new Map((predictions || []).map(prediction => [prediction.user_id, prediction]))
+  const predictionByUser = new Map<string, ContestPredictionRow>((predictions || []).map((prediction: ContestPredictionRow) => [prediction.user_id, prediction]))
   const players = (members || []).map(member => {
     const player = Array.isArray(member.users) ? member.users[0] : member.users
     const prediction = predictionByUser.get(member.user_id)

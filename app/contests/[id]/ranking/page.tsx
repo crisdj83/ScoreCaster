@@ -1,4 +1,5 @@
 import { createClient } from '../../../../lib/supabase/server'
+import { notFound } from 'next/navigation'
 import { getTranslations } from '../../../../lib/i18n'
 import { getServerLocale } from '../../../../lib/i18n-server'
 import { getPLMatches, getPLStandings } from '../../../../lib/football'
@@ -15,7 +16,6 @@ import {
   resolveContestScoring,
   type ContestScoring,
 } from '../../../../lib/scoring'
-import { createAdminClient } from '../../../../lib/supabase/admin'
 import { Trophy, Medal, Target, Activity, CheckCircle2, Gauge } from 'lucide-react'
 import RankingInsights from './RankingInsights'
 import CurrentGameweek from './CurrentGameweek'
@@ -86,7 +86,7 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
     .eq('id', params.id)
     .single()
 
-  if (!contest) return <div className="p-6 text-sm text-red-400">Error loading contest data.</div>
+  if (!contest) notFound()
 
   const scoring = resolveContestScoring(contest)
   const ptsExact = scoring.exact
@@ -107,22 +107,23 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
     .select('user_id, users(username, email, quote, avatar_url)')
     .eq('contest_id', params.id)
 
-  if (membersError || !members) return <div className="p-6 text-sm text-red-400">Error loading leaderboard.</div>
-
-  // Admin client bypasses RLS for cross-member prediction aggregation (reveal rules enforced in app).
-  let db = supabase
-  try {
-    db = createAdminClient()
-  } catch {
-    db = supabase
+  if (membersError || !members) {
+    throw new Error(membersError?.message || 'Error loading leaderboard.')
   }
-  const { data: rawPredictions } = allowedMatchIds.length
-    ? await db
-      .from('predictions')
-      .select('user_id, match_id, predicted_home_score, predicted_away_score, points, is_exact, is_correct')
-      .eq('contest_id', params.id)
-      .in('match_id', allowedMatchIds)
-    : { data: [] }
+
+  // Cross-member prediction aggregation is enforced via a SECURITY DEFINER
+  // Postgres RPC (get_contest_predictions) that verifies contest membership
+  // server-side, rather than a service-role client bypass with an app-layer
+  // fallback.
+  const { data: rawPredictions, error: predictionsError } = allowedMatchIds.length
+    ? await supabase.rpc('get_contest_predictions', {
+        p_contest_id: params.id,
+        p_match_ids: allowedMatchIds.map(id => Number(id)),
+      })
+    : { data: [], error: null }
+  if (predictionsError) {
+    throw new Error(predictionsError.message)
+  }
   const predictions: Prediction[] = (rawPredictions || []).map((prediction: any) => ({
     ...prediction,
     points_earned: prediction.points,

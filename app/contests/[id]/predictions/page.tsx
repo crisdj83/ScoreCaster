@@ -3,7 +3,6 @@ import { createClient } from '../../../../lib/supabase/server'
 import { getPLMatches } from '../../../../lib/football'
 import { isMatchInContestSeason, normalizeSeasonLength } from '../../../../lib/contest-season'
 import { isPredictionRevealable } from '../../../../lib/scoring'
-import { createAdminClient } from '../../../../lib/supabase/admin'
 import PredictionCard from './PredictionCard'
 import { getTranslations } from '../../../../lib/i18n'
 import { getServerLocale } from '../../../../lib/i18n-server'
@@ -55,7 +54,7 @@ export default async function PredictionsPage(props: { params: Promise<{ id: str
   const { data: myPredictions } = allowedMatchIds.length
     ? await supabase
       .from('predictions')
-      .select('*')
+      .select('id, contest_id, match_id, user_id, predicted_home_score, predicted_away_score, points, is_exact, is_correct')
       .eq('contest_id', params.id)
       .eq('user_id', user.id)
       .in('match_id', allowedMatchIds)
@@ -63,15 +62,16 @@ export default async function PredictionsPage(props: { params: Promise<{ id: str
 
   const revealableMatchIds = matchdayFixtures
     .filter((match: { utcDate: string }) => isPredictionRevealable(match.utcDate))
-    .map((match: { id: number | string }) => String(match.id))
-  const serviceSupabase = createAdminClient()
+    .map((match: { id: number | string }) => Number(match.id))
+  // Cross-member prediction aggregation is enforced via a SECURITY DEFINER
+  // Postgres RPC (get_contest_predictions) that verifies contest membership
+  // server-side, rather than a service-role client bypass.
   const { data: revealedPredictionsRaw, error: revealedPredictionsError } = revealableMatchIds.length
-    ? await serviceSupabase
-      .from('predictions')
-      .select('match_id, user_id, predicted_home_score, predicted_away_score, points, users(username, email)')
-      .eq('contest_id', params.id)
-      .in('match_id', revealableMatchIds)
-    : { data: [] }
+    ? await supabase.rpc('get_contest_predictions', {
+        p_contest_id: params.id,
+        p_match_ids: revealableMatchIds,
+      })
+    : { data: [], error: null }
   if (revealedPredictionsError) {
     throw new Error(`Unable to load revealed predictions: ${revealedPredictionsError.message}`)
   }

@@ -29,10 +29,12 @@ export default function RootLayout({
       <body className={`${outfit.className} bg-scorecaster-bg text-scorecaster-text min-h-screen flex flex-col`}>
         <LocaleProvider initialLocale={locale}>
           <Navbar />
-          <main className="mx-auto w-full flex-grow px-3 py-5 sm:px-5 sm:py-6 lg:px-8 lg:py-8 xl:px-10">
+          <main className="mx-auto w-full flex-grow px-3 py-5 pb-24 sm:px-5 sm:py-6 lg:px-8 lg:py-8 lg:pb-8 xl:px-10">
             {children}
           </main>
-          <SiteFooter />
+          <div className="hidden lg:block">
+            <SiteFooter />
+          </div>
         </LocaleProvider>
         <Analytics />
       </body>
