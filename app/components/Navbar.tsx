@@ -5,8 +5,6 @@ import NavLinks from './NavLinks'
 import LanguageSwitcher from './LanguageSwitcher'
 import { getTranslations } from '../../lib/i18n'
 import { getServerLocale } from '../../lib/i18n-server'
-import { cn } from '@/lib/utils'
-import { tabActive } from '@/lib/tab-styles'
 
 export default async function Navbar() {
   const t = getTranslations(getServerLocale())
@@ -46,10 +44,7 @@ export default async function Navbar() {
                 type="submit"
                 title={t('Sign Out')}
                 aria-label={t('Sign Out')}
-                className={cn(
-                  tabActive,
-                  'inline-flex h-10 w-10 items-center justify-center rounded-full outline-none transition-colors hover:bg-white/15 sm:h-11 sm:w-11'
-                )}
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-orange-500/40 bg-orange-500/10 text-orange-200 shadow-sm backdrop-blur-md outline-none transition-colors hover:bg-orange-500/20 sm:h-11 sm:w-11"
               >
                 <LogOut className="h-4 w-4" />
               </button>
