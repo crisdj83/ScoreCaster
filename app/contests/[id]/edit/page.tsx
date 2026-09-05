@@ -5,6 +5,12 @@ import DeleteLeagueButton from '../DeleteLeagueButton'
 import { Settings, Shield, Key, RefreshCw, Target, Trash2 } from 'lucide-react'
 import { getTranslations } from '../../../../lib/i18n'
 import { getServerLocale } from '../../../../lib/i18n-server'
+import { Card, CardContent } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Button } from '@/components/ui/button'
+import { PageHeader } from '@/components/ui/page-header'
+import { normalizeSeasonLength } from '../../../../lib/contest-season'
 
 export default async function EditContestPage(props: { 
   params: Promise<{ id: string }>, 
@@ -44,172 +50,255 @@ export default async function EditContestPage(props: {
     id: string;
     name: string;
     contest_key: string;
-    season_length: 'full' | 'half';
+    season_length: string;
     points_exact: number;
     points_close: number;
     points_result: number;
   }
+  const seasonLength = normalizeSeasonLength(contest.season_length)
 
   return (
-    <div className="space-y-6 max-w-3xl">
+    <div className="max-w-3xl space-y-6">
       <div className="mb-2 flex items-center gap-3">
-        <div className="bg-orange-500/10 p-2.5 rounded-xl">
-          <Settings className="h-6 w-6 text-orange-600" />
+        <div className="rounded-xl bg-scorecaster-accent/10 p-2.5">
+          <Settings className="h-6 w-6 text-scorecaster-accent" />
         </div>
-        <div>
-          <h2 className="text-2xl font-black uppercase tracking-tight text-gray-900">{t('Contest Settings')}</h2>
-          <p className="text-gray-500 text-sm mt-0.5">{t('Manage your league details, rules, and invites.')}</p>
-        </div>
+        <PageHeader
+          className="mb-0"
+          title={t('Contest Settings')}
+          description={t('Manage your league details, rules, and invites.')}
+        />
       </div>
 
       {searchParams?.success && (
-        <div className="p-4 bg-green-50 text-green-700 border border-green-200 rounded-xl text-sm font-medium flex items-center gap-2 shadow-sm">
+        <div className="flex items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm font-medium text-emerald-300">
           <Shield className="h-4 w-4" /> {searchParams.success}
         </div>
       )}
       
       {searchParams?.error && (
-        <div className="p-4 bg-red-50 text-red-700 border border-red-200 rounded-xl text-sm font-medium shadow-sm">
+        <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm font-medium text-red-300">
           {searchParams.error}
         </div>
       )}
 
       <div className="space-y-6">
-        
-        {/* FORM 1: Update Contest Name */}
-        <div className="bg-white p-6 md:p-8 rounded-2xl border border-gray-200 shadow-lg">
-          <h3 className="text-lg font-extrabold uppercase tracking-tight text-gray-900 mb-4">{t('League Details')}</h3>
-          <form action={updateContestSettings} className="space-y-4">
-            <input type="hidden" name="contest_id" value={contest.id} />
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">{t('Contest Name')}</label>
-              <input 
-                type="text" 
-                name="name" 
-                defaultValue={contest.name}
-                required
-                className="w-full rounded-xl px-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500 bg-gray-50 font-medium"
-              />
-            </div>
-            <div className="flex justify-end pt-2">
-              <button type="submit" className="bg-gray-900 hover:bg-gray-800 text-white rounded-xl px-6 py-3 font-black uppercase tracking-wider text-xs transition-colors shadow-md">
-                {t('Save Name')}
-              </button>
-            </div>
-          </form>
-        </div>
-
-        {/* FORM 2: Season Length */}
-        <div className="bg-white p-6 md:p-8 rounded-2xl border border-gray-200 shadow-lg">
-          <div className="flex items-center gap-2 mb-3">
-            <Shield className="h-5 w-5 text-orange-600" />
-            <h3 className="text-lg font-extrabold uppercase tracking-tight text-gray-900">{t('Season Length')}</h3>
-          </div>
-          <p className="text-xs text-gray-500 mb-6 leading-relaxed">{t('Choose whether this contest uses the full Premier League season or only the first half.')}</p>
-          <form action={updateSeasonSettings} className="space-y-4">
-            <input type="hidden" name="contest_id" value={contest.id} />
-            <div className="space-y-3">
-              <label className="flex items-start gap-3 rounded-xl border border-gray-200 bg-gray-50 p-4 cursor-pointer">
-                <input type="radio" name="season_length" value="full" defaultChecked={contest.season_length !== 'half'} className="mt-1 accent-orange-600" />
-                <span>
-                  <span className="block font-bold text-gray-900">{t('Full season')}</span>
-                  <span className="block text-xs text-gray-500 mt-1">{t('All 38 Premier League matchdays.')}</span>
-                </span>
-              </label>
-              <label className="flex items-start gap-3 rounded-xl border border-gray-200 bg-gray-50 p-4 cursor-pointer">
-                <input type="radio" name="season_length" value="half" defaultChecked={contest.season_length === 'half'} className="mt-1 accent-orange-600" />
-                <span>
-                  <span className="block font-bold text-gray-900">{t('Half season')}</span>
-                  <span className="block text-xs text-gray-500 mt-1">{t('The first 19 Premier League matchdays.')}</span>
-                </span>
-              </label>
-            </div>
-            <div className="flex justify-end pt-4 mt-2 border-t border-gray-100">
-              <button type="submit" className="bg-gray-900 hover:bg-gray-800 text-white rounded-xl px-6 py-3 font-black uppercase tracking-wider text-xs transition-colors shadow-md">
-                {t('Save Season Length')}
-              </button>
-            </div>
-          </form>
-        </div>
-
-        {/* FORM 2: Custom Scoring System */}
-        <div className="bg-white p-6 md:p-8 rounded-2xl border border-gray-200 shadow-lg">
-          <div className="flex items-center gap-2 mb-3">
-            <Target className="h-5 w-5 text-orange-600" />
-            <h3 className="text-lg font-extrabold uppercase tracking-tight text-gray-900">{t('Scoring System')}</h3>
-          </div>
-          <p className="text-xs text-gray-500 mb-6 leading-relaxed">
-            {t('Customize the points awarded. Exact and Result must be whole numbers. Close can use 0.5 increments.')} <strong className="text-gray-800">{t('Maximum 5 points per category.')}</strong>
-          </p>
-
-          <form action={updateScoringSettings} className="space-y-4">
-            <input type="hidden" name="contest_id" value={contest.id} />
-            
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <Card>
+          <CardContent className="p-6 md:p-8">
+            <h3 className="mb-4 text-lg font-extrabold uppercase tracking-tight text-zinc-100">
+              {t('League Details')}
+            </h3>
+            <form action={updateContestSettings} className="space-y-4">
+              <input type="hidden" name="contest_id" value={contest.id} />
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">{t('Exact Score')}</label>
-                <input type="number" step="1" min="0" max="5" name="points_exact" defaultValue={contest.points_exact ?? 3} required
-                  className="w-full rounded-xl px-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500 font-mono bg-gray-50 font-bold" />
+                <Label htmlFor="contest-name">{t('Contest Name')}</Label>
+                <Input
+                  id="contest-name"
+                  type="text"
+                  name="name"
+                  defaultValue={contest.name}
+                  required
+                />
               </div>
-              
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">{t('Close Prediction')}</label>
-                <input type="number" step="0.5" min="0" max="5" name="points_close" defaultValue={contest.points_close ?? 1.5} required
-                  className="w-full rounded-xl px-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500 font-mono bg-gray-50 font-bold" />
+              <div className="flex justify-end pt-2">
+                <Button type="submit" className="uppercase tracking-wider">
+                  {t('Save Name')}
+                </Button>
               </div>
-              
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">{t('Correct Result')}</label>
-                <input type="number" step="1" min="0" max="5" name="points_result" defaultValue={contest.points_result ?? 1} required
-                  className="w-full rounded-xl px-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500 font-mono bg-gray-50 font-bold" />
+            </form>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6 md:p-8">
+            <div className="mb-3 flex items-center gap-2">
+              <Shield className="h-5 w-5 text-scorecaster-accent" />
+              <h3 className="text-lg font-extrabold uppercase tracking-tight text-zinc-100">
+                {t('Season Length')}
+              </h3>
+            </div>
+            <p className="mb-6 text-xs leading-relaxed text-zinc-500">
+              {t('Choose full season, first half, or second half of the Premier League.')}
+            </p>
+            <form action={updateSeasonSettings} className="space-y-4">
+              <input type="hidden" name="contest_id" value={contest.id} />
+              <div className="space-y-3">
+                <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-zinc-800 bg-zinc-950/60 p-4">
+                  <input
+                    type="radio"
+                    name="season_length"
+                    value="full"
+                    defaultChecked={seasonLength === 'full'}
+                    className="mt-1 accent-scorecaster-accent"
+                  />
+                  <span>
+                    <span className="block font-bold text-zinc-100">{t('Full season')}</span>
+                    <span className="mt-1 block text-xs text-zinc-500">
+                      {t('All 38 Premier League matchdays.')}
+                    </span>
+                  </span>
+                </label>
+                <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-zinc-800 bg-zinc-950/60 p-4">
+                  <input
+                    type="radio"
+                    name="season_length"
+                    value="first_half"
+                    defaultChecked={seasonLength === 'first_half'}
+                    className="mt-1 accent-scorecaster-accent"
+                  />
+                  <span>
+                    <span className="block font-bold text-zinc-100">{t('First half')}</span>
+                    <span className="mt-1 block text-xs text-zinc-500">
+                      {t('The first 19 Premier League matchdays.')}
+                    </span>
+                  </span>
+                </label>
+                <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-zinc-800 bg-zinc-950/60 p-4">
+                  <input
+                    type="radio"
+                    name="season_length"
+                    value="second_half"
+                    defaultChecked={seasonLength === 'second_half'}
+                    className="mt-1 accent-scorecaster-accent"
+                  />
+                  <span>
+                    <span className="block font-bold text-zinc-100">{t('Second half')}</span>
+                    <span className="mt-1 block text-xs text-zinc-500">
+                      {t('Matchdays 20 through 38.')}
+                    </span>
+                  </span>
+                </label>
               </div>
+              <div className="mt-2 flex justify-end border-t border-zinc-800 pt-4">
+                <Button type="submit" className="uppercase tracking-wider">
+                  {t('Save Season Length')}
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6 md:p-8">
+            <div className="mb-3 flex items-center gap-2">
+              <Target className="h-5 w-5 text-scorecaster-accent" />
+              <h3 className="text-lg font-extrabold uppercase tracking-tight text-zinc-100">
+                {t('Scoring System')}
+              </h3>
             </div>
+            <p className="mb-6 text-xs leading-relaxed text-zinc-500">
+              {t('Customize the points awarded. Exact and Result must be whole numbers. Close can use 0.5 increments.')}{' '}
+              <strong className="text-zinc-300">{t('Maximum 5 points per category.')}</strong>
+            </p>
 
-            <div className="flex justify-end pt-4 mt-2 border-t border-gray-100">
-              <button type="submit" className="bg-gray-900 hover:bg-gray-800 text-white rounded-xl px-6 py-3 font-black uppercase tracking-wider text-xs transition-colors shadow-md">
-                {t('Save Scoring Rules')}
-              </button>
+            <form action={updateScoringSettings} className="space-y-4">
+              <input type="hidden" name="contest_id" value={contest.id} />
+
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <div>
+                  <Label htmlFor="points_exact">{t('Exact Score')}</Label>
+                  <Input
+                    id="points_exact"
+                    type="number"
+                    step="1"
+                    min="0"
+                    max="5"
+                    name="points_exact"
+                    defaultValue={contest.points_exact ?? 3}
+                    required
+                    className="font-mono font-bold"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="points_close">{t('Close Prediction')}</Label>
+                  <Input
+                    id="points_close"
+                    type="number"
+                    step="0.5"
+                    min="0"
+                    max="5"
+                    name="points_close"
+                    defaultValue={contest.points_close ?? 1.5}
+                    required
+                    className="font-mono font-bold"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="points_result">{t('Correct Result')}</Label>
+                  <Input
+                    id="points_result"
+                    type="number"
+                    step="1"
+                    min="0"
+                    max="5"
+                    name="points_result"
+                    defaultValue={contest.points_result ?? 1}
+                    required
+                    className="font-mono font-bold"
+                  />
+                </div>
+              </div>
+
+              <div className="mt-2 flex justify-end border-t border-zinc-800 pt-4">
+                <Button type="submit" className="uppercase tracking-wider">
+                  {t('Save Scoring Rules')}
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+
+        <Card className="border-l-4 border-l-scorecaster-accent">
+          <CardContent className="p-6 md:p-8">
+            <div className="mb-2 flex items-center gap-2">
+              <Key className="h-5 w-5 text-scorecaster-accent" />
+              <h3 className="text-lg font-extrabold uppercase tracking-tight text-zinc-100">
+                {t('Secret Invite Key')}
+              </h3>
             </div>
-          </form>
-        </div>
-
-        {/* FORM 3: Generate Random Invite Key */}
-        <div className="bg-white p-6 md:p-8 rounded-2xl border border-gray-200 shadow-lg border-l-4 border-l-orange-500">
-          <div className="flex items-center gap-2 mb-2">
-            <Key className="h-5 w-5 text-orange-600" />
-            <h3 className="text-lg font-extrabold uppercase tracking-tight text-gray-900">{t('Secret Invite Key')}</h3>
-          </div>
-          <p className="text-xs text-gray-500 mb-6">
-            {t('Share this key with friends. If the key leaks, you can generate a new secure code below.')}
-          </p>
-          <div className="bg-gray-950 text-white p-6 rounded-2xl border border-gray-800 text-center mb-6 shadow-inner">
-            <span className="text-[10px] text-gray-400 font-black uppercase tracking-widest block mb-2">{t('Current Active Key')}</span>
-            <span className="text-3xl md:text-4xl font-mono font-black text-[#d4ff00] tracking-widest">{contest.contest_key}</span>
-          </div>
-          <form action={generateNewInviteKey}>
-            <input type="hidden" name="contest_id" value={contest.id} />
-            <div className="flex justify-end pt-4 border-t border-gray-100">
-              <button type="submit" className="flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white rounded-xl px-6 py-3 font-black uppercase tracking-wider text-xs transition-colors shadow-md">
-                <RefreshCw className="h-4 w-4" />
-                {t('Generate New Key')}
-              </button>
+            <p className="mb-6 text-xs text-zinc-500">
+              {t('Share this key with friends. If the key leaks, you can generate a new secure code below.')}
+            </p>
+            <div className="mb-6 rounded-xl border border-zinc-800 bg-zinc-950 p-6 text-center shadow-inner">
+              <span className="mb-2 block text-[10px] font-black uppercase tracking-widest text-zinc-500">
+                {t('Current Active Key')}
+              </span>
+              <span className="font-mono text-3xl font-black tracking-widest text-scorecaster-accent md:text-4xl">
+                {contest.contest_key}
+              </span>
             </div>
-          </form>
-        </div>
+            <form action={generateNewInviteKey}>
+              <input type="hidden" name="contest_id" value={contest.id} />
+              <div className="flex justify-end border-t border-zinc-800 pt-4">
+                <Button type="submit" variant="glass" className="uppercase tracking-wider">
+                  <RefreshCw className="h-4 w-4" />
+                  {t('Generate New Key')}
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
 
-        <div className="bg-red-50 p-6 md:p-8 rounded-2xl border border-red-200">
-          <div className="flex items-center gap-2 mb-2">
-            <Trash2 className="h-5 w-5 text-red-600" />
-            <h3 className="text-lg font-extrabold uppercase tracking-tight text-red-900">{t('Danger Zone')}</h3>
-          </div>
-          <p className="text-xs text-red-700 mb-5">
-            {t('Permanently delete this league and all of its members, predictions, and settings. This cannot be undone.')}
-          </p>
-          <div className="flex justify-end">
-            <DeleteLeagueButton action={deleteContest} contestId={contest.id} />
-          </div>
-        </div>
-
+        <Card className="border-red-500/30 bg-red-500/5">
+          <CardContent className="p-6 md:p-8">
+            <div className="mb-2 flex items-center gap-2">
+              <Trash2 className="h-5 w-5 text-red-400" />
+              <h3 className="text-lg font-extrabold uppercase tracking-tight text-red-300">
+                {t('Danger Zone')}
+              </h3>
+            </div>
+            <p className="mb-5 text-xs text-red-300/80">
+              {t(
+                'Permanently delete this league and all of its members, predictions, and settings. This cannot be undone.'
+              )}
+            </p>
+            <div className="flex justify-end">
+              <DeleteLeagueButton action={deleteContest} contestId={contest.id} />
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )

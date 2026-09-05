@@ -2,6 +2,9 @@ import { Target, Activity, CheckCircle2, Clock, AlertCircle } from 'lucide-react
 import { createClient } from '../../../../lib/supabase/server'
 import { getTranslations } from '../../../../lib/i18n'
 import { getServerLocale } from '../../../../lib/i18n-server'
+import { Card, CardContent } from '@/components/ui/card'
+import { PageHeader } from '@/components/ui/page-header'
+import { Badge } from '@/components/ui/badge'
 
 export default async function RulesPage(props: { params: Promise<{ id: string }> }) {
   const { id } = await props.params
@@ -17,114 +20,140 @@ export default async function RulesPage(props: { params: Promise<{ id: string }>
   const pointsClose = Number(contest?.points_close ?? 1.5)
   const pointsResult = Number(contest?.points_result ?? 1)
   return (
-    <div className="space-y-6 max-w-4xl">
-      <div className="mb-2">
-        <h2 className="text-2xl font-black uppercase tracking-tight text-gray-900">{t('Contest Rules & Scoring')}</h2>
-        <p className="text-gray-500 text-sm mt-0.5">{t('Everything you need to know to dominate the leaderboard.')}</p>
-      </div>
+    <div className="max-w-4xl space-y-6">
+      <PageHeader
+        title={t('Contest Rules & Scoring')}
+        description={t('Everything you need to know to dominate the leaderboard.')}
+      />
 
       <div className="space-y-6">
-        
-        {/* Section 1: How to Play */}
-        <div className="bg-white p-6 md:p-8 rounded-2xl border border-gray-200 shadow-lg">
-          <h3 className="text-lg font-extrabold uppercase tracking-tight text-gray-900 mb-4 flex items-center gap-2.5">
-            <div className="bg-orange-500/10 p-2 rounded-xl">
-              <AlertCircle className="h-5 w-5 text-orange-600" />
-            </div>
-            {t('How to Play')}
-          </h3>
-          <ul className="space-y-3 text-gray-600 text-sm ml-7 list-disc marker:text-orange-500 font-medium">
-            <li>{t('Navigate to the Predictions tab to see the upcoming Premier League fixtures.')}</li>
-            <li>{t('Use the + and - buttons to set your predicted score for the Home and Away teams.')}</li>
-            <li>{t('Your predictions are saved automatically as you change them.')}</li>
-            <li><strong className="text-gray-900">{t('Lockout Time:')}</strong> {t('You can change your prediction as many times as you want up until the exact minute the match kicks off. Once a match begins, predictions are locked.')}</li>
-          </ul>
-        </div>
-
-        {/* Section 2: The Custom Tiered Scoring System */}
-        <div className="bg-white p-6 md:p-8 rounded-2xl border border-gray-200 shadow-lg">
-          <h3 className="text-lg font-extrabold uppercase tracking-tight text-gray-900 mb-3 flex items-center gap-2.5">
-            <div className="bg-orange-500/10 p-2 rounded-xl">
-              <Target className="h-5 w-5 text-orange-600" />
-            </div>
-            {t('Tiered Scoring System')}
-          </h3>
-          <p className="text-gray-500 text-sm mb-6">
-            {t('Points are awarded after the final whistle based on how accurate your prediction was compared to the real-world result.')}
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            
-            {/* Exact Card */}
-            <div className="bg-gray-50/70 p-5 rounded-2xl border border-gray-200 shadow-sm relative overflow-hidden group hover:border-orange-500 transition-all flex flex-col">
-              <div className="absolute top-0 right-0 bg-orange-600 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-bl-xl shadow">
-                +{pointsExact} PTS
+        <Card>
+          <CardContent className="p-6 md:p-8">
+            <h3 className="mb-4 flex items-center gap-2.5 text-lg font-extrabold uppercase tracking-tight text-zinc-100">
+              <div className="rounded-xl bg-scorecaster-accent/10 p-2">
+                <AlertCircle className="h-5 w-5 text-scorecaster-accent" />
               </div>
-              <Target className="h-7 w-7 text-orange-600 mb-3" />
-              <h4 className="font-extrabold uppercase tracking-tight text-gray-900 mb-1.5">{t('Exact Score')}</h4>
-              <p className="text-xs text-gray-600 leading-relaxed">
-                {t('You correctly predict the exact final score of the match.')}
-              </p>
-              <div className="mt-auto pt-4 bg-white p-3 rounded-xl border border-gray-200 text-xs text-gray-500 shadow-inner">
-                <span className="block font-extrabold uppercase tracking-wider text-gray-700 mb-1">{t('Example')}</span>
-                {t('Predicted')} 2 - 1 <br />
-                {t('Actual')} 2 - 1
+              {t('How to Play')}
+            </h3>
+            <ul className="ml-7 list-disc space-y-3 text-sm font-medium text-zinc-400 marker:text-scorecaster-accent">
+              <li>{t('Navigate to the Predictions tab to see the upcoming Premier League fixtures.')}</li>
+              <li>{t('Use the + and - buttons to set your predicted score for the Home and Away teams.')}</li>
+              <li>{t('Your predictions are saved automatically as you change them.')}</li>
+              <li>
+                <strong className="text-zinc-100">{t('Lockout Time:')}</strong>{' '}
+                {t(
+                  'You can change your prediction as many times as you want up until the exact minute the match kicks off. Once a match begins, predictions are locked.'
+                )}
+              </li>
+            </ul>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6 md:p-8">
+            <h3 className="mb-3 flex items-center gap-2.5 text-lg font-extrabold uppercase tracking-tight text-zinc-100">
+              <div className="rounded-xl bg-scorecaster-accent/10 p-2">
+                <Target className="h-5 w-5 text-scorecaster-accent" />
+              </div>
+              {t('Tiered Scoring System')}
+            </h3>
+            <p className="mb-6 text-sm text-zinc-500">
+              {t(
+                'Points are awarded after the final whistle based on how accurate your prediction was compared to the real-world result.'
+              )}
+            </p>
+
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
+              <div className="group relative flex flex-col overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950/60 p-5 transition-all hover:border-scorecaster-accent">
+                <Badge variant="accent" className="absolute right-0 top-0 rounded-none rounded-bl-xl">
+                  +{pointsExact} PTS
+                </Badge>
+                <Target className="mb-3 h-7 w-7 text-scorecaster-accent" />
+                <h4 className="mb-1.5 font-extrabold uppercase tracking-tight text-zinc-100">
+                  {t('Exact Score')}
+                </h4>
+                <p className="text-xs leading-relaxed text-zinc-400">
+                  {t('You correctly predict the exact final score of the match.')}
+                </p>
+                <div className="mt-auto rounded-xl border border-zinc-800 bg-zinc-900 p-3 pt-4 text-xs text-zinc-500">
+                  <span className="mb-1 block font-extrabold uppercase tracking-wider text-zinc-300">
+                    {t('Example')}
+                  </span>
+                  {t('Predicted')} 2 - 1 <br />
+                  {t('Actual')} 2 - 1
+                </div>
+              </div>
+
+              <div className="group relative flex flex-col overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950/60 p-5 transition-all hover:border-scorecaster-accent">
+                <Badge variant="accent" className="absolute right-0 top-0 rounded-none rounded-bl-xl">
+                  +{pointsClose} PTS
+                </Badge>
+                <Activity className="mb-3 h-7 w-7 text-orange-400" />
+                <h4 className="mb-1.5 font-extrabold uppercase tracking-tight text-zinc-100">
+                  {t('Close Prediction')}
+                </h4>
+                <p className="text-xs leading-relaxed text-zinc-400">
+                  {t(
+                    'You predict the right outcome (Win/Draw/Loss), AND total goals scored is off by no more than 1.'
+                  )}
+                </p>
+                <div className="mt-auto rounded-xl border border-zinc-800 bg-zinc-900 p-3 pt-4 text-xs text-zinc-500">
+                  <span className="mb-1 block font-extrabold uppercase tracking-wider text-zinc-300">
+                    {t('Example')}
+                  </span>
+                  {t('Predicted')} 1 - 0 (Total: 1) <br />
+                  {t('Actual')} 2 - 0 (Total: 2)
+                </div>
+              </div>
+
+              <div className="group relative flex flex-col overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950/60 p-5 transition-all hover:border-zinc-600">
+                <Badge className="absolute right-0 top-0 rounded-none rounded-bl-xl">
+                  +{pointsResult} PT{pointsResult === 1 ? '' : 'S'}
+                </Badge>
+                <CheckCircle2 className="mb-3 h-7 w-7 text-zinc-400" />
+                <h4 className="mb-1.5 font-extrabold uppercase tracking-tight text-zinc-100">
+                  {t('Correct Result')}
+                </h4>
+                <p className="text-xs leading-relaxed text-zinc-400">
+                  {t('You predict the right outcome (Win/Draw/Loss), but total goals are not close.')}
+                </p>
+                <div className="mt-auto rounded-xl border border-zinc-800 bg-zinc-900 p-3 pt-4 text-xs text-zinc-500">
+                  <span className="mb-1 block font-extrabold uppercase tracking-wider text-zinc-300">
+                    {t('Example')}
+                  </span>
+                  {t('Predicted')} 1 - 0 (Total: 1)
+                  <br />
+                  {t('Actual')} 4 - 0 (Total: 4)
+                </div>
               </div>
             </div>
+          </CardContent>
+        </Card>
 
-            {/* Close Card */}
-            <div className="bg-gray-50/70 p-5 rounded-2xl border border-gray-200 shadow-sm relative overflow-hidden group hover:border-orange-500 transition-all flex flex-col">
-              <div className="absolute top-0 right-0 bg-orange-600 text-black text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-bl-xl shadow">
-                +{pointsClose} PTS
+        <Card>
+          <CardContent className="p-6 md:p-8">
+            <h3 className="mb-3 flex items-center gap-2.5 text-lg font-extrabold uppercase tracking-tight text-zinc-100">
+              <div className="rounded-xl bg-scorecaster-accent/10 p-2">
+                <Clock className="h-5 w-5 text-scorecaster-accent" />
               </div>
-              <Activity className="h-7 w-7 text-orange-400 mb-3" />
-              <h4 className="font-extrabold uppercase tracking-tight text-gray-900 mb-1.5">{t('Close Prediction')}</h4>
-              <p className="text-xs text-gray-600 leading-relaxed">
-                {t('You predict the right outcome (Win/Draw/Loss), AND total goals scored is off by no more than 1.')}
-              </p>
-              <div className="mt-auto pt-4 bg-white p-3 rounded-xl border border-gray-200 text-xs text-gray-500 shadow-inner">
-                <span className="block font-extrabold uppercase tracking-wider text-gray-700 mb-1">{t('Example')}</span>
-                {t('Predicted')} 1 - 0 (Total: 1) <br />
-                {t('Actual')} 2 - 0 (Total: 2)
-              </div>
-            </div>
-
-            {/* Result Card */}
-            <div className="bg-gray-50/70 p-5 rounded-2xl border border-gray-200 shadow-sm relative overflow-hidden group hover:border-gray-500 transition-all flex flex-col">
-              <div className="absolute top-0 right-0 bg-gray-700 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-bl-xl shadow">
-                +{pointsResult} PT{pointsResult === 1 ? '' : 'S'}
-              </div>
-              <CheckCircle2 className="h-7 w-7 text-gray-700 mb-3" />
-              <h4 className="font-extrabold uppercase tracking-tight text-gray-900 mb-1.5">{t('Correct Result')}</h4>
-              <p className="text-xs text-gray-600 leading-relaxed">
-                {t('You predict the right outcome (Win/Draw/Loss), but total goals are not close.')}
-              </p>
-              <div className="mt-auto pt-4 bg-white p-3 rounded-xl border border-gray-200 text-xs text-gray-500 shadow-inner">
-                <span className="block font-extrabold uppercase tracking-wider text-gray-700 mb-1">{t('Example')}</span>
-                {t('Predicted')} 1 - 0 (Total: 1)<br />
-                {t('Actual')} 4 - 0 (Total: 4)
-              </div>
-            </div>
-
-          </div>
-        </div>
-
-        {/* Section 3: Tiebreakers */}
-        <div className="bg-white p-6 md:p-8 rounded-2xl border border-gray-200 shadow-lg">
-          <h3 className="text-lg font-extrabold uppercase tracking-tight text-gray-900 mb-3 flex items-center gap-2.5">
-            <div className="bg-orange-500/10 p-2 rounded-xl">
-              <Clock className="h-5 w-5 text-orange-600" />
-            </div>
-            {t('Leaderboard Tiebreakers')}
-          </h3>
-          <p className="text-gray-500 text-sm mb-4">{t('If two or more players have the exact same Total Points, the leaderboard will rank them based on:')}</p>
-          <ol className="space-y-2 text-sm text-gray-700 ml-7 list-decimal marker:text-orange-600 font-bold">
-            <li>{t('Highest number of Exact Scores')} (+{pointsExact} pts)</li>
-            <li>{t('Highest number of Close Predictions')} (+{pointsClose} pts)</li>
-            <li>{t('Highest overall prediction accuracy percentage')}</li>
-          </ol>
-        </div>
-
+              {t('Leaderboard Tiebreakers')}
+            </h3>
+            <p className="mb-4 text-sm text-zinc-500">
+              {t(
+                'If two or more players have the exact same Total Points, the leaderboard will rank them based on:'
+              )}
+            </p>
+            <ol className="ml-7 list-decimal space-y-2 text-sm font-bold text-zinc-300 marker:text-scorecaster-accent">
+              <li>
+                {t('Highest number of Exact Scores')} (+{pointsExact} pts)
+              </li>
+              <li>
+                {t('Highest number of Close Predictions')} (+{pointsClose} pts)
+              </li>
+              <li>{t('Highest overall prediction accuracy percentage')}</li>
+            </ol>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )

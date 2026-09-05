@@ -2,7 +2,6 @@
 
 import { createClient } from '../../lib/supabase/server'
 import { createAdminClient } from '../../lib/supabase/admin'
-import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
 // Helper function to generate a 7-character alphanumeric string (e.g., "btyfwtx")

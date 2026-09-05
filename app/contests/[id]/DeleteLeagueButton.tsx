@@ -1,19 +1,41 @@
 'use client'
 
+import { useState } from 'react'
 import { useTranslations } from '../../components/LocaleProvider'
+import { Button } from '@/components/ui/button'
+import { Dialog } from '@/components/ui/dialog'
 
-export default function DeleteLeagueButton({ action, contestId }: { action: (formData: FormData) => void; contestId: string }) {
+export default function DeleteLeagueButton({
+  action,
+  contestId,
+}: {
+  action: (formData: FormData) => void | Promise<void>
+  contestId: string
+}) {
   const t = useTranslations()
+  const [open, setOpen] = useState(false)
+
   return (
-    <form action={action} onSubmit={(event) => {
-      if (!window.confirm(t('Delete this league permanently? All members, predictions, and settings will be removed.'))) {
-        event.preventDefault()
-      }
-    }}>
-      <input type="hidden" name="contest_id" value={contestId} />
-      <button type="submit" className="rounded-xl border border-red-200 bg-red-50 px-6 py-3 text-xs font-black uppercase tracking-wider text-red-700 transition-colors hover:bg-red-100">
+    <>
+      <Button type="button" variant="destructive" className="uppercase tracking-wider" onClick={() => setOpen(true)}>
         {t('Delete League')}
-      </button>
-    </form>
+      </Button>
+      <Dialog
+        open={open}
+        onOpenChange={setOpen}
+        title={t('Delete League')}
+        description={t(
+          'Delete this league permanently? All members, predictions, and settings will be removed.'
+        )}
+        confirmLabel={t('Delete League')}
+        cancelLabel={t('Cancel')}
+        destructive
+        onConfirm={async () => {
+          const formData = new FormData()
+          formData.set('contest_id', contestId)
+          await action(formData)
+        }}
+      />
+    </>
   )
 }

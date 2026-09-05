@@ -4,7 +4,6 @@ import { useMemo, useState } from 'react'
 import {
   BarChart3,
   ChevronDown,
-  Eye,
   EyeOff,
   TrendingUp,
   Users,
@@ -41,8 +40,8 @@ type PredictionTrend = {
   matchday: number
   kickoff: string
   status: string
-  homeTeam: { name: string; shortName?: string; crest?: string; rank?: number }
-  awayTeam: { name: string; shortName?: string; crest?: string; rank?: number }
+  homeTeam: { name: string; shortName?: string; crest?: string; rank?: number; form?: string }
+  awayTeam: { name: string; shortName?: string; crest?: string; rank?: number; form?: string }
   actualScore: string | null
   revealed: boolean
   predictionCount: number
@@ -152,7 +151,7 @@ export default function RankingInsights({
                 ))}
                 {series.map(({ player, points }) => {
                   if (selectedPlayer !== 'all' && player.id !== selectedPlayer) return null
-                  const colour = player.id === selectedPlayer ? '#d4ff00' : '#fb923c'
+                  const colour = player.id === selectedPlayer ? '#ff7a18' : '#fb923c'
                   const line = points.map((point, index) => `${xFor(index)},${yFor(point.rank)}`).join(' ')
                   return (
                     <g key={player.id}>
@@ -258,7 +257,7 @@ export default function RankingInsights({
                               <span className="truncate font-semibold text-gray-700">{prediction.username}</span>
                               <span className="ml-3 flex items-center gap-2 font-mono font-black text-gray-900">
                                 {prediction.homeScore} : {prediction.awayScore}
-                                {prediction.points !== null && <span className="rounded-full bg-[#d4ff00] px-1.5 py-0.5 font-sans text-[10px] text-black">+{prediction.points}</span>}
+                                {prediction.points !== null && <span className="rounded-full bg-scorecaster-accent px-1.5 py-0.5 font-sans text-[10px] text-scorecaster-bg">+{prediction.points}</span>}
                               </span>
                             </div>
                           ))}

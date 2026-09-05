@@ -1,3 +1,8 @@
+/**
+ * Server-only Supabase client with the service role key.
+ * Never import this module from Client Components — it bypasses RLS.
+ * Prefer createClient() from ./server for membership-scoped reads.
+ */
 import { createClient } from '@supabase/supabase-js'
 
 export function createAdminClient() {
@@ -6,5 +11,7 @@ export function createAdminClient() {
   if (!url || !serviceRoleKey) {
     throw new Error('Missing Supabase admin credentials')
   }
-  return createClient(url, serviceRoleKey)
+  return createClient(url, serviceRoleKey, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  })
 }
