@@ -425,6 +425,7 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
       ),
       headerClassName: 'text-center',
       className: 'text-center font-bold text-zinc-200',
+      mobileExpandable: true,
       cell: (player) => player.exactResults,
     },
     {
@@ -437,6 +438,7 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
       ),
       headerClassName: 'text-center',
       className: 'text-center font-bold text-zinc-200',
+      mobileExpandable: true,
       cell: (player) => player.closeResults,
     },
     {
@@ -449,6 +451,7 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
       ),
       headerClassName: 'text-center',
       className: 'text-center font-bold text-zinc-200',
+      mobileExpandable: true,
       cell: (player) => player.rightOutcome,
     },
     {
@@ -456,6 +459,7 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
       header: t('Average points'),
       headerClassName: 'text-center',
       className: 'text-center font-bold text-zinc-200',
+      mobileExpandable: true,
       cell: (player) => player.averagePoints.toFixed(1),
     },
   ]
@@ -486,15 +490,24 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
         columns={columns}
         getRowKey={(player) => player.id}
         emptyMessage={t('No players found in this contest.')}
-        mobileTitle={(player) => (
-          <span className="inline-flex items-center gap-2">
-            <span className="font-mono text-scorecaster-accent">#{player.rank}</span>
-            {player.username}
-          </span>
+        mobileRank={(player) => (
+          <div className="flex h-8 w-8 items-center justify-center">
+            {player.rank === 1 ? (
+              <Trophy className="h-[18px] w-[18px] text-yellow-500" />
+            ) : player.rank === 2 ? (
+              <Medal className="h-[18px] w-[18px] text-zinc-400" />
+            ) : player.rank === 3 ? (
+              <Medal className="h-[18px] w-[18px] text-amber-600" />
+            ) : (
+              <span className="font-mono text-sm font-bold text-zinc-500">{player.rank}</span>
+            )}
+          </div>
         )}
-        mobileSubtitle={(player) =>
-          player.motto ? `"${player.motto}"` : undefined
-        }
+        mobileTitle={(player) => player.username}
+        mobileSubtitle={(player) => (player.motto ? `"${player.motto}"` : undefined)}
+        mobileEnd={(player) => (
+          <span className="text-base">{player.totalPoints.toFixed(1).replace('.0', '')}</span>
+        )}
       />
       <RankingInsights players={players} evolution={evolution} trends={trends} labels={labels} />
     </div>

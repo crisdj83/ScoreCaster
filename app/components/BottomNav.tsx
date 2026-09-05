@@ -30,13 +30,13 @@ export default function BottomNav({ isAdmin, isLoggedIn, hasUnreadMessages }: Bo
   const t = useTranslations()
 
   const items = [
-    { href: '/', label: t('Dashboard'), icon: HomeIcon },
-    { href: '/contests', label: t('Contests'), icon: Trophy },
-    { href: '/profile', label: t('Profile'), icon: UserIcon },
-    { href: '/news', label: t('Messages'), icon: MessageSquare, dot: hasUnreadMessages },
-    { href: '/help', label: t('Help'), icon: CircleHelp },
-    ...(isAdmin ? [{ href: '/admin', label: t('Admin'), icon: ShieldCheck }] : []),
-    ...(!isLoggedIn ? [{ href: '/login', label: t('Sign In'), icon: LogIn }] : []),
+    { href: '/', label: t('Dashboard'), short: t('Home'), icon: HomeIcon },
+    { href: '/contests', label: t('Contests'), short: t('Leagues'), icon: Trophy },
+    { href: '/profile', label: t('Profile'), short: t('Profile'), icon: UserIcon },
+    { href: '/news', label: t('Messages'), short: t('News'), icon: MessageSquare, dot: hasUnreadMessages },
+    { href: '/help', label: t('Help'), short: t('Help'), icon: CircleHelp },
+    ...(isAdmin ? [{ href: '/admin', label: t('Admin'), short: t('Admin'), icon: ShieldCheck }] : []),
+    ...(!isLoggedIn ? [{ href: '/login', label: t('Sign In'), short: t('Sign In'), icon: LogIn }] : []),
   ]
 
   return (
@@ -44,8 +44,8 @@ export default function BottomNav({ isAdmin, isLoggedIn, hasUnreadMessages }: Bo
       aria-label="Primary"
       className="ios-tab-bar fixed inset-x-0 bottom-0 z-40 pb-[env(safe-area-inset-bottom)] lg:hidden"
     >
-      <div className="mx-auto flex max-w-2xl items-stretch gap-1 px-2 py-2">
-        {items.map(({ href, label, icon: Icon, dot }) => {
+      <div className="mx-auto flex max-w-2xl items-stretch gap-0.5 px-1 py-2 sm:gap-1 sm:px-2">
+        {items.map(({ href, label, short, icon: Icon, dot }) => {
           const active = pathname === href
           return (
             <Link
@@ -63,7 +63,7 @@ export default function BottomNav({ isAdmin, isLoggedIn, hasUnreadMessages }: Bo
                   <span className="absolute -right-1 -top-1 h-2 w-2 rounded-full bg-red-500 ring-2 ring-zinc-950/70" />
                 ) : null}
               </span>
-              <span className="truncate">{label}</span>
+              <span className="truncate">{short}</span>
             </Link>
           )
         })}

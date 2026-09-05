@@ -10,7 +10,7 @@ export const tabInactive =
 
 /** Contest / hub tabs use rounded-xl but the same frosted selected look */
 export const segmentBase =
-  'inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border px-3 py-2.5 text-xs font-bold uppercase tracking-wider outline-none transition-all duration-300 active:scale-95 focus-visible:outline-none whitespace-nowrap md:px-4 md:text-sm'
+  'inline-flex min-h-11 items-center justify-center gap-1 rounded-xl border py-2.5 text-[10px] font-bold uppercase tracking-wider outline-none transition-all duration-300 active:scale-95 focus-visible:outline-none whitespace-nowrap sm:gap-2 sm:text-xs md:px-4 md:text-sm'
 
 export const segmentActive =
   'border-white/20 bg-white/10 text-orange-200 shadow-lg shadow-orange-500/10 backdrop-blur-md'
@@ -20,4 +20,4 @@ export const segmentInactive =
 
 /** iOS-style bottom tab bar item (mobile floating nav) */
 export const iosTabItem =
-  'flex min-h-11 min-w-11 flex-1 flex-col items-center justify-center gap-0.5 rounded-2xl py-1.5 text-[10px] font-bold uppercase tracking-wide transition-all duration-300 active:scale-90'
+  'flex min-h-11 min-w-11 flex-1 flex-col items-center justify-center gap-0.5 rounded-2xl px-0.5 py-1.5 text-[9px] font-bold uppercase tracking-normal transition-all duration-300 active:scale-90'

@@ -89,7 +89,7 @@ export default async function ChampionshipPage() {
       header: 'W',
       headerClassName: 'text-center',
       className: 'text-center text-zinc-300',
-      hideOnMobile: true,
+      mobileExpandable: true,
       cell: (row) => row.won,
     },
     {
@@ -97,7 +97,7 @@ export default async function ChampionshipPage() {
       header: 'D',
       headerClassName: 'text-center',
       className: 'text-center text-zinc-300',
-      hideOnMobile: true,
+      mobileExpandable: true,
       cell: (row) => row.draw,
     },
     {
@@ -105,7 +105,7 @@ export default async function ChampionshipPage() {
       header: 'L',
       headerClassName: 'text-center',
       className: 'text-center text-zinc-300',
-      hideOnMobile: true,
+      mobileExpandable: true,
       cell: (row) => row.lost,
     },
     {
@@ -113,7 +113,7 @@ export default async function ChampionshipPage() {
       header: 'GF',
       headerClassName: 'text-center',
       className: 'text-center text-zinc-300',
-      hideOnMobile: true,
+      mobileExpandable: true,
       cell: (row) => row.goalsFor,
     },
     {
@@ -121,7 +121,7 @@ export default async function ChampionshipPage() {
       header: 'GA',
       headerClassName: 'text-center',
       className: 'text-center text-zinc-300',
-      hideOnMobile: true,
+      mobileExpandable: true,
       cell: (row) => row.goalsAgainst,
     },
     {
@@ -129,6 +129,7 @@ export default async function ChampionshipPage() {
       header: 'GD',
       headerClassName: 'text-center',
       className: 'text-center font-bold text-zinc-200',
+      mobileExpandable: true,
       cell: (row) => row.goalDifference,
     },
     {
@@ -143,6 +144,7 @@ export default async function ChampionshipPage() {
       header: t('Form'),
       headerClassName: 'text-center',
       className: 'text-center',
+      mobileExpandable: true,
       cell: (row) => <FormPills form={row.form} />,
     },
   ]
@@ -156,13 +158,19 @@ export default async function ChampionshipPage() {
         columns={columns}
         getRowKey={(row) => String(row.team.id)}
         emptyMessage={t('No fixtures available for this season.')}
+        mobileRank={(row) => (
+          <span className="font-mono text-sm font-bold text-zinc-500">{row.position}</span>
+        )}
         mobileTitle={(row) => (
           <span className="inline-flex items-center gap-2">
-            <span className="font-mono text-scorecaster-accent">#{row.position}</span>
+            {row.team.crest ? (
+              <Image src={row.team.crest} alt="" width={20} height={20} className="h-5 w-5 object-contain" />
+            ) : null}
             {row.team.shortName || row.team.name}
           </span>
         )}
         mobileSubtitle={(row) => `${row.playedGames} MP · GD ${row.goalDifference}`}
+        mobileEnd={(row) => row.points}
       />
 
       <div className="grid gap-6 md:grid-cols-2">

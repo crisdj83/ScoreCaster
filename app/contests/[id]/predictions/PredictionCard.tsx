@@ -77,7 +77,7 @@ export default function PredictionCard({ match, contestId, existingPrediction, r
   }
 
   const stepperBtn =
-    'inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-zinc-700 bg-zinc-800 text-zinc-200 transition-colors hover:border-scorecaster-accent hover:text-scorecaster-accent disabled:opacity-50'
+    'inline-flex h-8 w-8 items-center justify-center rounded-full border border-zinc-700 bg-zinc-800 text-zinc-200 transition-colors hover:border-scorecaster-accent hover:text-scorecaster-accent active:scale-90 disabled:opacity-50 sm:h-11 sm:w-11 sm:rounded-lg'
 
   return (
     <div
@@ -111,29 +111,149 @@ export default function PredictionCard({ match, contestId, existingPrediction, r
         )}
       </div>
 
-      <MatchCard className="flex flex-col items-center justify-between gap-6 md:flex-row md:gap-4">
-        <div className="flex w-full flex-1 flex-col items-center text-center">
-          {match.homeTeam.crest ? (
-            <Image
-              src={match.homeTeam.crest}
-              alt={match.homeTeam.name}
-              width={64}
-              height={64}
-              className={`mb-3 h-16 w-16 object-contain ${isLocked ? 'opacity-50' : ''}`}
-            />
-          ) : null}
-          <span className="text-lg font-bold text-zinc-100">
-            {match.homeTeam.shortName || match.homeTeam.name}
-          </span>
-          <span className="mt-1 text-xs font-semibold uppercase tracking-wider text-zinc-500">
-            {t('Home')}
-          </span>
+      <MatchCard className="flex flex-col items-stretch gap-3 sm:gap-6">
+        <div className="flex flex-col gap-2 sm:hidden">
+          <div className="flex items-center justify-center gap-4">
+            <div className="flex flex-1 items-center justify-end gap-2 text-right">
+              {match.homeTeam.crest ? (
+                <Image
+                  src={match.homeTeam.crest}
+                  alt={match.homeTeam.name}
+                  width={26}
+                  height={26}
+                  className={`h-[26px] w-[26px] shrink-0 object-contain ${isLocked ? 'opacity-50' : ''}`}
+                />
+              ) : null}
+            </div>
+            <span className="shrink-0 text-xs font-black uppercase tracking-wider text-zinc-600">vs</span>
+            <div className="flex flex-1 items-center justify-start gap-2 text-left">
+              {match.awayTeam.crest ? (
+                <Image
+                  src={match.awayTeam.crest}
+                  alt={match.awayTeam.name}
+                  width={26}
+                  height={26}
+                  className={`h-[26px] w-[26px] shrink-0 object-contain ${isLocked ? 'opacity-50' : ''}`}
+                />
+              ) : null}
+            </div>
+          </div>
+          <div className="flex items-start justify-center gap-4 text-center">
+            <span className="flex-1 truncate text-sm font-bold leading-tight text-zinc-100">
+              {match.homeTeam.shortName || match.homeTeam.name}
+            </span>
+            <span className="w-4 shrink-0" />
+            <span className="flex-1 truncate text-sm font-bold leading-tight text-zinc-100">
+              {match.awayTeam.shortName || match.awayTeam.name}
+            </span>
+          </div>
         </div>
 
-        <div className="relative flex items-center justify-center gap-4 rounded-2xl border border-zinc-800 bg-zinc-950 p-3">
+        <div className="hidden items-center justify-between gap-2 sm:flex">
+          <div className="flex min-w-0 flex-1 flex-col items-center gap-2 text-center">
+            {match.homeTeam.crest ? (
+              <Image
+                src={match.homeTeam.crest}
+                alt={match.homeTeam.name}
+                width={56}
+                height={56}
+                className={`h-14 w-14 object-contain ${isLocked ? 'opacity-50' : ''}`}
+              />
+            ) : null}
+            <span className="text-lg font-bold text-zinc-100">
+              {match.homeTeam.shortName || match.homeTeam.name}
+            </span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+              {t('Home')}
+            </span>
+          </div>
+
+          <div className="relative flex shrink-0 items-center justify-center gap-4 rounded-2xl border border-zinc-800 bg-zinc-950 p-3">
+            {bounceDirection && (
+              <span
+                className={`absolute -top-7 text-xl ${
+                  bounceDirection === 'up' ? 'animate-bounce' : 'scorecaster-ball-down'
+                }`}
+                aria-hidden="true"
+              >
+                ⚽
+              </span>
+            )}
+
+            <div className="flex flex-col gap-2">
+              <button
+                type="button"
+                disabled={isLocked || isPending}
+                onClick={() => handleScoreChange('home', 1)}
+                className={stepperBtn}
+                aria-label="Increase home score"
+              >
+                <Plus className="h-5 w-5" />
+              </button>
+              <div className="flex h-14 w-12 items-center justify-center rounded-lg border border-zinc-700 bg-zinc-950 text-2xl font-black text-white shadow-inner">
+                {homeScore}
+              </div>
+              <button
+                type="button"
+                disabled={isLocked || isPending}
+                onClick={() => handleScoreChange('home', -1)}
+                className={stepperBtn}
+                aria-label="Decrease home score"
+              >
+                <Minus className="h-5 w-5" />
+              </button>
+            </div>
+
+            <span className="text-xl font-black text-zinc-500">:</span>
+
+            <div className="flex flex-col gap-2">
+              <button
+                type="button"
+                disabled={isLocked || isPending}
+                onClick={() => handleScoreChange('away', 1)}
+                className={stepperBtn}
+                aria-label="Increase away score"
+              >
+                <Plus className="h-5 w-5" />
+              </button>
+              <div className="flex h-14 w-12 items-center justify-center rounded-lg border border-zinc-700 bg-zinc-950 text-2xl font-black text-white shadow-inner">
+                {awayScore}
+              </div>
+              <button
+                type="button"
+                disabled={isLocked || isPending}
+                onClick={() => handleScoreChange('away', -1)}
+                className={stepperBtn}
+                aria-label="Decrease away score"
+              >
+                <Minus className="h-5 w-5" />
+              </button>
+            </div>
+          </div>
+
+          <div className="flex min-w-0 flex-1 flex-col items-center gap-2 text-center">
+            {match.awayTeam.crest ? (
+              <Image
+                src={match.awayTeam.crest}
+                alt={match.awayTeam.name}
+                width={56}
+                height={56}
+                className={`h-14 w-14 object-contain ${isLocked ? 'opacity-50' : ''}`}
+              />
+            ) : null}
+            <span className="text-lg font-bold text-zinc-100">
+              {match.awayTeam.shortName || match.awayTeam.name}
+            </span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+              {t('Away')}
+            </span>
+          </div>
+        </div>
+
+        <div className="relative flex items-center justify-center gap-4 rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2.5 sm:hidden">
           {bounceDirection && (
             <span
-              className={`absolute -top-7 text-xl ${
+              className={`absolute -top-6 text-base ${
                 bounceDirection === 'up' ? 'animate-bounce' : 'scorecaster-ball-down'
               }`}
               aria-hidden="true"
@@ -142,19 +262,7 @@ export default function PredictionCard({ match, contestId, existingPrediction, r
             </span>
           )}
 
-          <div className="flex flex-col gap-2">
-            <button
-              type="button"
-              disabled={isLocked || isPending}
-              onClick={() => handleScoreChange('home', 1)}
-              className={stepperBtn}
-              aria-label="Increase home score"
-            >
-              <Plus className="h-5 w-5" />
-            </button>
-            <div className="flex h-14 w-12 items-center justify-center rounded-lg border border-zinc-700 bg-zinc-950 text-2xl font-black text-white shadow-inner">
-              {homeScore}
-            </div>
+          <div className="flex items-center gap-1.5">
             <button
               type="button"
               disabled={isLocked || isPending}
@@ -162,25 +270,23 @@ export default function PredictionCard({ match, contestId, existingPrediction, r
               className={stepperBtn}
               aria-label="Decrease home score"
             >
-              <Minus className="h-5 w-5" />
+              <Minus className="h-3.5 w-3.5" />
             </button>
-          </div>
-
-          <span className="text-xl font-black text-zinc-500">:</span>
-
-          <div className="flex flex-col gap-2">
+            <span className="w-6 text-center text-xl font-black text-white">{homeScore}</span>
             <button
               type="button"
               disabled={isLocked || isPending}
-              onClick={() => handleScoreChange('away', 1)}
+              onClick={() => handleScoreChange('home', 1)}
               className={stepperBtn}
-              aria-label="Increase away score"
+              aria-label="Increase home score"
             >
-              <Plus className="h-5 w-5" />
+              <Plus className="h-3.5 w-3.5" />
             </button>
-            <div className="flex h-14 w-12 items-center justify-center rounded-lg border border-zinc-700 bg-zinc-950 text-2xl font-black text-white shadow-inner">
-              {awayScore}
-            </div>
+          </div>
+
+          <span className="text-lg font-black text-zinc-600">:</span>
+
+          <div className="flex items-center gap-1.5">
             <button
               type="button"
               disabled={isLocked || isPending}
@@ -188,27 +294,19 @@ export default function PredictionCard({ match, contestId, existingPrediction, r
               className={stepperBtn}
               aria-label="Decrease away score"
             >
-              <Minus className="h-5 w-5" />
+              <Minus className="h-3.5 w-3.5" />
+            </button>
+            <span className="w-6 text-center text-xl font-black text-white">{awayScore}</span>
+            <button
+              type="button"
+              disabled={isLocked || isPending}
+              onClick={() => handleScoreChange('away', 1)}
+              className={stepperBtn}
+              aria-label="Increase away score"
+            >
+              <Plus className="h-3.5 w-3.5" />
             </button>
           </div>
-        </div>
-
-        <div className="flex w-full flex-1 flex-col items-center text-center">
-          {match.awayTeam.crest ? (
-            <Image
-              src={match.awayTeam.crest}
-              alt={match.awayTeam.name}
-              width={64}
-              height={64}
-              className={`mb-3 h-16 w-16 object-contain ${isLocked ? 'opacity-50' : ''}`}
-            />
-          ) : null}
-          <span className="text-lg font-bold text-zinc-100">
-            {match.awayTeam.shortName || match.awayTeam.name}
-          </span>
-          <span className="mt-1 text-xs font-semibold uppercase tracking-wider text-zinc-500">
-            {t('Away')}
-          </span>
         </div>
       </MatchCard>
 
