@@ -97,7 +97,7 @@ export function MatchCard({
   return (
     <div
       className={cn(
-        "prediction-fixture-content overflow-hidden rounded-2xl border border-white/10 p-4 md:p-5",
+        "prediction-fixture-content overflow-hidden rounded-[1.25rem] border border-white/10 p-3 md:p-4",
         className
       )}
       {...props}

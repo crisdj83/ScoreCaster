@@ -50,7 +50,7 @@ export default async function AdminDashboard(props: { searchParams: Promise<{ su
   return (
     <div className="mx-auto w-full space-y-6 pb-12 pt-6">
       <div>
-        <Breadcrumb items={[{ label: t('Admin') }]} className="mb-3" />
+        <Breadcrumb items={[{ label: t('Admin') }]} className="mb-3 hidden md:flex" />
         <div className="flex items-center gap-3">
           <ShieldCheck className="h-8 w-8 shrink-0 text-scorecaster-accent" />
           <PageHeader

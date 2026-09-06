@@ -2,14 +2,12 @@ import { createClient } from '../lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
-import { BarChart3, ChevronRight, ExternalLink, ShieldCheck } from 'lucide-react'
+import { ShieldCheck } from 'lucide-react'
 import HeroBanner from './components/HeroBanner'
 import ScoreCasterLogo from './components/ScoreCasterLogo'
 import { getPLMatches } from '../lib/football'
 import { getTranslations } from '../lib/i18n'
 import { getServerLocale } from '../lib/i18n-server'
-import ContestIcon from './components/ContestIcon'
-import { getSeasonLengthLabelKey } from '../lib/contest-season'
 
 const TEAMS = [
   { name: 'Arsenal', crest: 'https://a.espncdn.com/i/teamlogos/soccer/500/359.png' },
@@ -33,41 +31,6 @@ const TEAMS = [
   { name: 'West Ham United', crest: 'https://a.espncdn.com/i/teamlogos/soccer/500/371.png' },
   { name: 'Wolverhampton Wanderers', crest: 'https://a.espncdn.com/i/teamlogos/soccer/500/380.png' }
 ]
-
-async function fetchAnalytics() {
-  const token = process.env.VERCEL_API_TOKEN
-  const projectId = process.env.VERCEL_PROJECT_ID
-  if (!token || !projectId) return null
-
-  const params = new URLSearchParams({
-    projectId,
-    since: new Date(new Date().setHours(0, 0, 0, 0)).toISOString(),
-    until: new Date().toISOString(),
-  })
-  if (process.env.VERCEL_TEAM_ID) params.set('teamId', process.env.VERCEL_TEAM_ID)
-
-  let response: Response
-  try {
-    response = await fetch(
-      `https://api.vercel.com/v1/query/web-analytics/visits/count?${params}`,
-      { headers: { Authorization: `Bearer ${token}` }, next: { revalidate: 300 } }
-    )
-  } catch (error) {
-    console.error('Vercel Analytics Request Error:', error)
-    return null
-  }
-  if (!response.ok) {
-    console.error('Vercel Analytics API Error:', response.status)
-    return null
-  }
-
-  const payload = await response.json() as { data?: Array<{ pageviews?: number; visitors?: number }> | { pageviews?: number; visitors?: number } }
-  const rows = Array.isArray(payload.data) ? payload.data : payload.data ? [payload.data] : []
-  return {
-    pageviews: rows.reduce((total, row) => total + (Number(row.pageviews) || 0), 0),
-    visitors: rows.reduce((total, row) => total + (Number(row.visitors) || 0), 0),
-  }
-}
 
 // Fetch both the recent scores AND the next scheduled match
 async function fetchPLData() {
@@ -126,7 +89,7 @@ export default async function Home(props: { searchParams: Promise<{ success?: st
     redirect('/login')
   }
 
-  const [{ data: profile }, { data: myContests }, plData, analytics] = await Promise.all([
+  const [{ data: profile }, { data: myContests }, plData] = await Promise.all([
     supabase.from('users').select('username, email, avatar_url, favorite_team, is_global_admin').eq('id', user.id).single(),
     supabase.from('contest_members').select(`
       contest_id,
@@ -139,7 +102,6 @@ export default async function Home(props: { searchParams: Promise<{ success?: st
       )
     `).eq('user_id', user.id),
     fetchPLData(),
-    fetchAnalytics(),
   ])
   const { recentScores, nextMatch } = plData
   const contestIds = (myContests || []).map(membership => membership.contest_id)
@@ -175,44 +137,43 @@ export default async function Home(props: { searchParams: Promise<{ success?: st
 
       {/* HeroBanner is fully driven by the real API */}
       <HeroBanner nextMatch={nextMatch} recentScores={recentScores} />
-      
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="col-span-1 rounded-2xl border border-zinc-800 bg-gradient-to-br from-orange-600 via-zinc-900 to-zinc-950 p-6 shadow-lg shadow-black/30 md:col-span-1">
-          <div className="mb-4 flex items-start justify-between">
+
+      <div className="w-full rounded-2xl border border-zinc-800 bg-gradient-to-br from-orange-600 via-zinc-900 to-zinc-950 p-5 shadow-lg shadow-black/30 sm:p-6">
+          <div className="mb-4 flex items-start justify-between gap-3">
             <h2 className="text-lg font-semibold text-zinc-100">{t('Your Profile')}</h2>
             <Link href="/profile" className="rounded-full border border-white/25 bg-white/10 px-3 py-1.5 text-xs font-bold text-orange-100 backdrop-blur-sm transition hover:border-white/40 hover:bg-white/20">{t('Edit')}</Link>
           </div>
           
-          <div className="mb-4 flex items-center space-x-4">
+          <div className="mb-4 flex items-center gap-4">
             {profile?.avatar_url ? (
               <img
                 src={profile.avatar_url}
                 alt="Profile"
-                className="h-12 w-12 rounded-full border border-zinc-700 bg-zinc-800 object-cover"
+                className="h-14 w-14 shrink-0 rounded-full border border-zinc-700 bg-zinc-800 object-cover"
               />
             ) : (
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-scorecaster-accent text-lg font-bold text-scorecaster-bg">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-scorecaster-accent text-lg font-bold text-scorecaster-bg">
                 {profile?.username ? profile.username.charAt(0).toUpperCase() : profile?.email?.charAt(0).toUpperCase()}
               </div>
             )}
-            <div>
+            <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
-                <p className="font-medium text-zinc-100">{profile?.username || t('No username set')}</p>
+                <p className="truncate font-medium text-zinc-100">{profile?.username || t('No username set')}</p>
                 {profile?.is_global_admin && (
-                  <span title="Global Admin" className="flex items-center">
+                  <span title="Global Admin" className="flex shrink-0 items-center">
                     <ShieldCheck className="h-4 w-4 text-scorecaster-accent" />
                   </span>
                 )}
               </div>
-              <p className="max-w-[150px] truncate text-sm text-zinc-500">{profile?.email}</p>
+              <p className="truncate text-sm text-zinc-500">{profile?.email}</p>
             </div>
           </div>
 
-          <div className="space-y-2 border-t border-zinc-800 pt-4">
-            <div className="flex items-center justify-between text-sm text-zinc-400">
-              <span className="font-medium text-zinc-500">{t('Favorite Team:')}</span>
+          <div className="space-y-3 border-t border-zinc-800 pt-4">
+            <div className="flex items-center justify-between gap-3 text-sm text-zinc-400">
+              <span className="shrink-0 font-medium text-zinc-500">{t('Favorite Team:')}</span>
               
-              <div className="flex items-center gap-2">
+              <div className="flex min-w-0 items-center gap-2">
                 {selectedTeamData && (
                   <Image
                     src={selectedTeamData.crest}
@@ -222,77 +183,19 @@ export default async function Home(props: { searchParams: Promise<{ success?: st
                     className="h-5 w-5 object-contain"
                   />
                 )}
-                <span className="font-semibold text-zinc-100">
+                <span className="truncate font-semibold text-zinc-100">
                   {profile?.favorite_team || t('Not selected')}
                 </span>
               </div>
             </div>
-            <div className="flex items-center justify-between text-sm">
-              <span className="font-medium text-zinc-500">{t('Best league ranking:')}</span>
-              <span className="font-semibold text-zinc-100">
+            <div className="flex items-center justify-between gap-3 text-sm">
+              <span className="shrink-0 font-medium text-zinc-500">{t('Best league ranking:')}</span>
+              <span className="truncate font-semibold text-zinc-100">
                 {bestRanking ? `#${bestRanking.rank} (${bestRanking.year})` : t('Not ranked yet')}
               </span>
             </div>
           </div>
-        </div>
-
-        <div className="col-span-1 rounded-2xl border border-zinc-800 bg-gradient-to-bl from-orange-600 via-zinc-900 to-zinc-950 p-6 shadow-lg shadow-black/30 md:col-span-2">
-          <div className="mb-4 flex items-start justify-between">
-            <h2 className="text-lg font-semibold text-zinc-100">{t('My Contests')}</h2>
-            <Link href="/contests" className="rounded-full border border-white/25 bg-white/10 px-3 py-1.5 text-xs font-bold text-orange-100 backdrop-blur-sm transition hover:border-white/40 hover:bg-white/20">{t('View Hub')}</Link>
-          </div>
-          
-          {!myContests || myContests.length === 0 ? (
-            <div className="flex h-32 flex-col items-center justify-center rounded-xl border-2 border-dashed border-zinc-700 bg-zinc-950 text-zinc-500">
-              <p>{t("You haven't joined any contests yet.")}</p>
-              <Link href="/contests" className="mt-1 text-sm font-medium text-scorecaster-accent hover:underline">{t('Join or Create one')}</Link>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              {myContests.map((membership: any) => (
-                <Link 
-                  key={membership.contest_id} 
-                  href={`/contests/${membership.contest_id}`}
-                  className="group flex items-center justify-between rounded-xl border border-zinc-800 bg-zinc-950 p-4 transition-all hover:border-scorecaster-accent/50 hover:shadow-sm"
-                >
-                  <div className="flex items-center gap-3 overflow-hidden">
-                    <ContestIcon contestId={membership.contest_id} size="sm" />
-                    <div className="truncate">
-                      <p className="truncate font-bold text-zinc-100">{membership.contests.name}</p>
-                      <p className="mt-0.5 text-xs text-zinc-500">{t('Role:')} {membership.role === 'admin' ? t('Admin') : t('Member')} · {t(getSeasonLengthLabelKey(membership.contests.season_length))}</p>
-                    </div>
-                  </div>
-                  <ChevronRight className="h-5 w-5 text-zinc-500 group-hover:text-scorecaster-accent" />
-                </Link>
-              ))}
-            </div>
-          )}
-        </div>
       </div>
-      <section className="flex items-center justify-between gap-4 rounded-2xl border border-zinc-800 bg-gradient-to-r from-zinc-900 to-zinc-950 p-5 shadow-lg shadow-black/20">
-        <div className="flex items-center gap-3">
-          <BarChart3 className="h-5 w-5 text-scorecaster-accent" aria-hidden="true" />
-          <div>
-            <h2 className="font-semibold text-zinc-100">{t('Analytics')}</h2>
-            {analytics ? (
-              <p className="text-sm text-zinc-400">
-                {analytics.visitors} {t('visitors')} · {analytics.pageviews} {t('page views')} {t('today')}
-              </p>
-            ) : (
-              <p className="text-sm text-zinc-400">{t('Live data is unavailable.')}</p>
-            )}
-          </div>
-        </div>
-        <a
-          href="https://vercel.com/dashboard"
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex shrink-0 items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3 py-1.5 text-xs font-bold text-orange-100 transition hover:border-white/40 hover:bg-white/20"
-        >
-          {t('Open Dashboard')}
-          <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
-        </a>
-      </section>
     </div>
   );
 }

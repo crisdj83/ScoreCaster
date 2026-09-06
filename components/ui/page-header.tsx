@@ -13,16 +13,16 @@ export function PageHeader({ title, description, actions, className }: PageHeade
   return (
     <div
       className={cn(
-        "mb-6 flex flex-col gap-3 sm:mb-8 sm:flex-row sm:items-end sm:justify-between",
+        "mb-4 flex flex-col gap-2 sm:mb-8 sm:flex-row sm:items-end sm:justify-between sm:gap-3",
         className
       )}
     >
       <div>
-        <h1 className="text-gradient-accent text-2xl font-black tracking-tight sm:text-3xl">
+        <h1 className="text-gradient-accent text-xl font-black tracking-tight sm:text-3xl">
           {title}
         </h1>
         {description ? (
-          <p className="mt-1 text-sm text-zinc-400">{description}</p>
+          <p className="mt-1 hidden text-sm text-zinc-400 sm:block">{description}</p>
         ) : null}
       </div>
       {actions ? <div className="flex flex-wrap gap-2">{actions}</div> : null}

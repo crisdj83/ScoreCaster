@@ -2,7 +2,7 @@
 import { createClient } from '../../../../lib/supabase/server'
 import { getPLMatches } from '../../../../lib/football'
 import { isMatchInContestSeason, normalizeSeasonLength } from '../../../../lib/contest-season'
-import { isPredictionRevealable } from '../../../../lib/scoring'
+import { isPredictionLocked, isPredictionRevealable } from '../../../../lib/scoring'
 import PredictionCard from './PredictionCard'
 import { getTranslations } from '../../../../lib/i18n'
 import { getServerLocale } from '../../../../lib/i18n-server'
@@ -44,9 +44,25 @@ export default async function PredictionsPage(props: { params: Promise<{ id: str
   const activeMatch = liveMatch || upcomingMatch;
   const currentMatchday = activeMatch ? Number(activeMatch.matchday) : null;
 
-  // Filter to show ONLY the matches for the current matchday
+  // Current matchday, with games you can still predict always first.
   const matchdayFixtures = currentMatchday
-    ? seasonMatches.filter((m: any) => Number(m.matchday) === currentMatchday)
+    ? seasonMatches
+        .filter((m: any) => Number(m.matchday) === currentMatchday)
+        .sort((a: any, b: any) => {
+          const rank = (match: any) => {
+            const status = String(match.status || '')
+            const kickoff = new Date(match.utcDate).getTime()
+            const finished =
+              ['FINISHED', 'AWARDED'].includes(status) ||
+              (Number.isFinite(kickoff) && kickoff <= now - 3 * 60 * 60 * 1000)
+            if (finished) return 2
+            if (isPredictionLocked(match.utcDate, now)) return 1
+            return 0
+          }
+          const rankDiff = rank(a) - rank(b)
+          if (rankDiff !== 0) return rankDiff
+          return new Date(a.utcDate).getTime() - new Date(b.utcDate).getTime()
+        })
     : []
   const allowedMatchIds = seasonMatches.map((match: any) => String(match.id))
 
@@ -81,17 +97,16 @@ export default async function PredictionsPage(props: { params: Promise<{ id: str
   }))
 
   return (
-    <div className="rounded-b-xl bg-zinc-950 p-6 md:p-8">
+    <div className="p-0 sm:p-2 md:p-4">
       <LiveRefresh refreshAfter={matchdayFixtures.map((match: any) => match.utcDate)} />
-      <div className="mb-8 flex items-center justify-between">
+      <div className="mb-2 flex items-center justify-between sm:mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-zinc-100">{t('Matchday')} {currentMatchday}</h2>
-          <p className="mt-1 text-sm text-zinc-500">{t('Predictions lock one hour before kickoff. Results are revealed 30 minutes before each game.')}</p>
+          <h2 className="text-base font-bold text-zinc-100 sm:text-2xl">{t('Matchday')} {currentMatchday}</h2>
+          <p className="mt-0.5 hidden text-sm text-zinc-500 sm:block">{t('Predictions lock one hour before kickoff. Results are revealed 30 minutes before each game.')}</p>
         </div>
       </div>
-      
-      {/* Grid of Fixtures */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+      <div className="grid grid-cols-1 gap-1.5 lg:grid-cols-2 lg:gap-2">
         {matchdayFixtures.map((match: any) => {
           // Find if the user already made a prediction for this specific match
         const existingPrediction = myPredictions?.find(p => String(p.match_id) === String(match.id))

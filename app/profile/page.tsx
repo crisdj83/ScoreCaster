@@ -156,7 +156,7 @@ function ProfilePageInner() {
     <div className="mx-auto max-w-3xl space-y-6 pb-12 pt-2">
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <Breadcrumb items={[{ label: t('Your Profile') }]} className="mb-2" />
+          <Breadcrumb items={[{ label: t('Your Profile') }]} className="mb-2 hidden md:flex" />
           <h1 className="flex items-center gap-3 text-3xl font-black uppercase tracking-tight text-zinc-100 md:text-4xl">
             <User className="h-8 w-8 text-scorecaster-accent" />
             {t('Your Profile')}

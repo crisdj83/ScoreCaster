@@ -1,17 +1,108 @@
-import Link from 'next/link'
 import Image from 'next/image'
-import { CalendarDays, Clock } from 'lucide-react'
 import { createClient } from '../../../../lib/supabase/server'
-import { getPLMatches } from '../../../../lib/football'
+import { getPLMatches, getPLScorers, getPLStandings } from '../../../../lib/football'
 import {
-  getSeasonLengthDescriptionKey,
   isMatchInContestSeason,
   normalizeSeasonLength,
 } from '../../../../lib/contest-season'
 import { getTranslations } from '../../../../lib/i18n'
 import { getServerLocale } from '../../../../lib/i18n-server'
-import { EmptyState, PageHeader } from '@/components/ui/page-header'
-import { ScoreBadge, StatPill } from '@/components/ui/badge'
+import { EmptyState } from '@/components/ui/page-header'
+import { ScoreBadge } from '@/components/ui/badge'
+import { RankTable, type RankColumn } from '@/components/ui/rank-table'
+import FixturesCalendar from './FixturesCalendar'
+
+type StandingRow = {
+  position: number
+  team: { id: number; name: string; shortName?: string; crest?: string }
+  playedGames: number
+  won: number
+  draw: number
+  lost: number
+  goalsFor: number
+  goalsAgainst: number
+  goalDifference: number
+  points: number
+  form?: string
+}
+
+function FormPills({ form }: { form?: string }) {
+  if (!form) return <span className="text-xs text-zinc-500">-</span>
+  return (
+    <div className="flex items-center justify-center gap-1">
+      {form.split(',').map((result: string, index: number) => {
+        let bgColor = 'bg-zinc-600'
+        if (result === 'W') bgColor = 'bg-emerald-600'
+        if (result === 'D') bgColor = 'bg-amber-500'
+        if (result === 'L') bgColor = 'bg-red-600'
+        return (
+          <div
+            key={index}
+            className={`flex h-6 w-6 items-center justify-center rounded-md text-[10px] font-black text-white ${bgColor}`}
+            title={result}
+          >
+            {result}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+function ScorerCard({
+  title,
+  players,
+  statKey,
+  statLabel,
+}: {
+  title: string
+  players: any[]
+  statKey: 'goals' | 'assists'
+  statLabel: string
+}) {
+  const sortedPlayers = [...players]
+    .filter((player) => typeof player[statKey] === 'number')
+    .sort((a, b) => b[statKey] - a[statKey])
+    .slice(0, 5)
+
+  return (
+    <section className="overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900">
+      <div className="bg-zinc-950 px-5 py-4 text-zinc-100">
+        <h3 className="font-black uppercase tracking-wider">{title}</h3>
+      </div>
+      {sortedPlayers.length ? (
+        sortedPlayers.map((player, index) => (
+          <div
+            key={`${player.player?.id || player.name}-${statKey}`}
+            className="flex items-center justify-between border-b border-zinc-800 px-5 py-3 last:border-0"
+          >
+            <div className="flex min-w-0 items-center gap-3">
+              <span className="w-5 text-sm font-black text-scorecaster-accent">{index + 1}</span>
+              {player.team?.crest ? (
+                <Image
+                  src={player.team.crest}
+                  alt=""
+                  width={28}
+                  height={28}
+                  className="h-7 w-7 object-contain"
+                />
+              ) : null}
+              <span className="truncate font-bold text-zinc-100">
+                {player.player?.name || player.name}
+              </span>
+            </div>
+            <span className="ml-3 shrink-0 font-black text-scorecaster-accent">
+              {player[statKey]}{' '}
+              <span className="text-xs font-bold text-zinc-500">{statLabel}</span>
+            </span>
+          </div>
+        ))
+      ) : (
+        <p className="px-5 py-6 text-sm text-zinc-500">Statistics unavailable.</p>
+      )}
+    </section>
+  )
+}
 
 export default async function FixturesPage(props: { params: Promise<{ id: string }> }) {
   const { id } = await props.params
@@ -24,8 +115,13 @@ export default async function FixturesPage(props: { params: Promise<{ id: string
     .single()
 
   const seasonLength = normalizeSeasonLength(contest?.season_length)
-  const data = await getPLMatches()
-  const matches = data.matches
+  const [data, standingsData, scorerData] = await Promise.all([
+    getPLMatches(),
+    getPLStandings().catch(() => null),
+    getPLScorers().catch(() => ({ scorers: [] })),
+  ])
+
+  const matches = (data.matches || [])
     .filter((match: any) => isMatchInContestSeason(match, seasonLength))
     .sort((a: any, b: any) => (
       Number(a.matchday) - Number(b.matchday) ||
@@ -34,111 +130,154 @@ export default async function FixturesPage(props: { params: Promise<{ id: string
 
   const matchdays: number[] = Array.from(new Set<number>(matches.map((match: any) => Number(match.matchday))))
 
+  const standingsTable: StandingRow[] =
+    standingsData?.standings?.find((standing: { type?: string }) => standing.type === 'TOTAL')?.table ||
+    standingsData?.standings?.[0]?.table ||
+    []
+
+  const standingsColumns: RankColumn<StandingRow>[] = [
+    {
+      key: 'pos',
+      header: '#',
+      headerClassName: 'text-center w-14',
+      className: 'text-center font-extrabold text-zinc-100',
+      cell: (row) => row.position,
+    },
+    {
+      key: 'club',
+      header: t('Club'),
+      mobilePrimary: true,
+      cell: (row) => (
+        <div className="flex items-center gap-3 font-bold text-zinc-100">
+          {row.team.crest ? (
+            <Image src={row.team.crest} alt="" width={24} height={24} className="h-6 w-6 object-contain" />
+          ) : null}
+          {row.team.shortName || row.team.name}
+        </div>
+      ),
+    },
+    {
+      key: 'mp',
+      header: 'MP',
+      headerClassName: 'text-center',
+      className: 'text-center text-zinc-400',
+      hideOnMobile: true,
+      cell: (row) => row.playedGames,
+    },
+    {
+      key: 'w',
+      header: 'W',
+      headerClassName: 'text-center',
+      className: 'text-center text-zinc-300',
+      mobileExpandable: true,
+      cell: (row) => row.won,
+    },
+    {
+      key: 'd',
+      header: 'D',
+      headerClassName: 'text-center',
+      className: 'text-center text-zinc-300',
+      mobileExpandable: true,
+      cell: (row) => row.draw,
+    },
+    {
+      key: 'l',
+      header: 'L',
+      headerClassName: 'text-center',
+      className: 'text-center text-zinc-300',
+      mobileExpandable: true,
+      cell: (row) => row.lost,
+    },
+    {
+      key: 'gf',
+      header: 'GF',
+      headerClassName: 'text-center',
+      className: 'text-center text-zinc-300',
+      mobileExpandable: true,
+      cell: (row) => row.goalsFor,
+    },
+    {
+      key: 'ga',
+      header: 'GA',
+      headerClassName: 'text-center',
+      className: 'text-center text-zinc-300',
+      mobileExpandable: true,
+      cell: (row) => row.goalsAgainst,
+    },
+    {
+      key: 'gd',
+      header: 'GD',
+      headerClassName: 'text-center',
+      className: 'text-center font-bold text-zinc-200',
+      mobileExpandable: true,
+      cell: (row) => row.goalDifference,
+    },
+    {
+      key: 'pts',
+      header: 'Pts',
+      headerClassName: 'text-center text-scorecaster-accent',
+      className: 'text-center',
+      cell: (row) => <ScoreBadge>{row.points}</ScoreBadge>,
+    },
+    {
+      key: 'form',
+      header: t('Form'),
+      headerClassName: 'text-center',
+      className: 'text-center',
+      mobileExpandable: true,
+      cell: (row) => <FormPills form={row.form} />,
+    },
+  ]
+
   return (
     <div className="space-y-6">
-      <PageHeader
-        title={t('Premier League Fixtures')}
-        description={t(getSeasonLengthDescriptionKey(seasonLength))}
-        actions={
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 text-scorecaster-accent">
-              <CalendarDays className="h-5 w-5" />
-              <span className="text-xs font-black uppercase tracking-widest">{t('Fixture Calendar')}</span>
-            </div>
-            <StatPill label={t('Fixtures')} value={matches.length} className="hidden sm:inline-flex" />
-          </div>
-        }
-      />
-
       {matchdays.length === 0 ? (
         <EmptyState title={t('No fixtures available for this season.')} />
       ) : (
-        <div className="space-y-6">
-          {matchdays.map((matchday) => (
-            <section
-              key={matchday}
-              className="overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900/60"
-            >
-              <div className="flex items-center justify-between bg-zinc-950 px-4 py-3 text-zinc-100 sm:px-5 sm:py-4">
-                <h3 className="font-black uppercase tracking-wider">
-                  {t('Matchday')} {matchday}
-                </h3>
-                <span className="text-xs font-bold text-zinc-500">
-                  {matches.filter((match: any) => Number(match.matchday) === matchday).length}{' '}
-                  {t('fixtures')}
-                </span>
-              </div>
-              <div className="divide-y divide-zinc-800">
-                {matches
-                  .filter((match: any) => Number(match.matchday) === matchday)
-                  .map((match: any) => {
-                    const score = match.score?.fullTime
-                    const hasScore =
-                      score?.home !== null &&
-                      score?.home !== undefined &&
-                      score?.away !== null &&
-                      score?.away !== undefined
-                    const homeName = match.homeTeam.shortName || match.homeTeam.name
-                    const awayName = match.awayTeam.shortName || match.awayTeam.name
-                    return (
-                      <Link
-                        key={match.id}
-                        href={`/contests/${id}/predictions/${match.id}`}
-                        className="fixture-calendar-game flex min-h-[72px] flex-col gap-3 px-4 py-4 transition-colors sm:grid sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:items-center sm:gap-4 sm:px-5"
-                      >
-                        <span className="flex items-center gap-2 font-bold text-zinc-100 sm:justify-end sm:text-right">
-                          {match.homeTeam.crest ? (
-                            <Image
-                              src={match.homeTeam.crest}
-                              alt=""
-                              width={28}
-                              height={28}
-                              className="h-7 w-7 object-contain sm:order-2"
-                            />
-                          ) : null}
-                          <span className="truncate sm:order-1">{homeName}</span>
-                        </span>
-
-                        <span className="flex min-w-24 flex-col items-center gap-1 self-center">
-                          {hasScore ? (
-                            <ScoreBadge className="font-mono text-base">
-                              {score.home} : {score.away}
-                            </ScoreBadge>
-                          ) : (
-                            <span className="text-sm font-black text-scorecaster-accent">vs</span>
-                          )}
-                          <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-zinc-500">
-                            <Clock className="h-3 w-3" />
-                            {new Date(match.utcDate).toLocaleString(getServerLocale(), {
-                              day: '2-digit',
-                              month: 'short',
-                              hour: '2-digit',
-                              minute: '2-digit',
-                            })}
-                          </span>
-                        </span>
-
-                        <span className="flex items-center gap-2 font-bold text-zinc-100">
-                          {match.awayTeam.crest ? (
-                            <Image
-                              src={match.awayTeam.crest}
-                              alt=""
-                              width={28}
-                              height={28}
-                              className="h-7 w-7 object-contain"
-                            />
-                          ) : null}
-                          <span className="truncate">{awayName}</span>
-                        </span>
-                      </Link>
-                    )
-                  })}
-              </div>
-            </section>
-          ))}
-        </div>
+        <FixturesCalendar matches={matches} contestId={id} locale={getServerLocale()} />
       )}
       <p className="text-xs text-zinc-500">{t('Click a fixture to view and manage predictions.')}</p>
+
+      <section className="space-y-6 pt-6 border-t border-zinc-800">
+        <h2 className="text-xl font-black uppercase tracking-wider text-zinc-100">
+          {t('Premier League Standings')}
+        </h2>
+
+        <RankTable
+          rows={standingsTable}
+          columns={standingsColumns}
+          getRowKey={(row) => String(row.team.id)}
+          emptyMessage={t('No fixtures available for this season.')}
+          mobileSingleLine
+          mobileRank={(row) => (
+            <span className="text-[13px] font-bold tabular-nums text-zinc-400">{row.position}</span>
+          )}
+          mobileTitle={(row) => (
+            <span className="inline-flex items-center gap-2">
+              {row.team.crest ? (
+                <Image src={row.team.crest} alt="" width={18} height={18} className="h-[18px] w-[18px] object-contain" />
+              ) : null}
+              {row.team.shortName || row.team.name}
+            </span>
+          )}
+          mobileEnd={(row) => row.points}
+        />
+
+        <div className="grid gap-6 md:grid-cols-2">
+          <ScorerCard
+            title={t('Top 5 scorers')}
+            players={scorerData.scorers || []}
+            statKey="goals"
+            statLabel={t('goals')}
+          />
+          <ScorerCard
+            title={t('Top 5 assists')}
+            players={scorerData.scorers || []}
+            statKey="assists"
+            statLabel={t('assists')}
+          />
+        </div>
+      </section>
     </div>
   )
 }

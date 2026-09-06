@@ -16,7 +16,7 @@ import {
   resolveContestScoring,
   type ContestScoring,
 } from '../../../../lib/scoring'
-import { Trophy, Medal, Target, Activity, CheckCircle2, Gauge } from 'lucide-react'
+import { Target, Activity, CheckCircle2, Gauge } from 'lucide-react'
 import RankingInsights from './RankingInsights'
 import CurrentGameweek from './CurrentGameweek'
 import LiveRefresh from '../../../components/LiveRefresh'
@@ -375,18 +375,7 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
       headerClassName: 'text-center w-16',
       className: 'text-center',
       cell: (player) => (
-        <div className="flex items-center justify-center gap-2 font-bold text-zinc-100">
-          {player.rank === 1 ? (
-            <Trophy className="h-5 w-5 text-yellow-500" />
-          ) : player.rank === 2 ? (
-            <Medal className="h-5 w-5 text-zinc-400" />
-          ) : player.rank === 3 ? (
-            <Medal className="h-5 w-5 text-amber-600" />
-          ) : (
-            <span className="h-5 w-5" />
-          )}
-          <span>{player.rank}</span>
-        </div>
+        <span className="font-mono text-sm font-bold text-zinc-100">{player.rank}</span>
       ),
     },
     {
@@ -423,6 +412,7 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
           {t('Exact Score')}
         </span>
       ),
+      mobileHeader: t('Exact Score'),
       headerClassName: 'text-center',
       className: 'text-center font-bold text-zinc-200',
       mobileExpandable: true,
@@ -436,6 +426,7 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
           {t('Close Prediction')}
         </span>
       ),
+      mobileHeader: t('Close Prediction'),
       headerClassName: 'text-center',
       className: 'text-center font-bold text-zinc-200',
       mobileExpandable: true,
@@ -449,6 +440,7 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
           {t('Correct Result')}
         </span>
       ),
+      mobileHeader: t('Correct Result'),
       headerClassName: 'text-center',
       className: 'text-center font-bold text-zinc-200',
       mobileExpandable: true,
@@ -457,6 +449,7 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
     {
       key: 'avg',
       header: t('Average points'),
+      mobileHeader: t('Average points'),
       headerClassName: 'text-center',
       className: 'text-center font-bold text-zinc-200',
       mobileExpandable: true,
@@ -468,7 +461,7 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
     <div className="p-0">
       <LiveRefresh refreshAfter={matches.map((match) => match.utcDate)} always />
       <PageHeader
-        title="PL RANKING"
+        title={t('League Ranking')}
         description={`${t('Tiered Scoring')}: ${t('Exact Score')} (${ptsExact}pts) • ${t('Close Prediction')} (${ptsClose}pts) • ${t('Correct Result')} (${ptsResult}pts)`}
         actions={
           <div className="flex items-center gap-2 text-scorecaster-accent">
@@ -485,28 +478,25 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
         selectedMatchId={searchParams.matchId}
       />
 
+      <div className="mb-3 mt-6 flex items-center justify-between sm:mb-4 sm:mt-8">
+        <h2 className="text-base font-black uppercase tracking-wider text-zinc-100 sm:text-xl">
+          {t('Contest Leaderboard')}
+        </h2>
+      </div>
+
       <RankTable
         rows={rankedPlayers}
         columns={columns}
         getRowKey={(player) => player.id}
         emptyMessage={t('No players found in this contest.')}
+        mobileSingleLine
         mobileRank={(player) => (
-          <div className="flex h-8 w-8 items-center justify-center">
-            {player.rank === 1 ? (
-              <Trophy className="h-[18px] w-[18px] text-yellow-500" />
-            ) : player.rank === 2 ? (
-              <Medal className="h-[18px] w-[18px] text-zinc-400" />
-            ) : player.rank === 3 ? (
-              <Medal className="h-[18px] w-[18px] text-amber-600" />
-            ) : (
-              <span className="font-mono text-sm font-bold text-zinc-500">{player.rank}</span>
-            )}
-          </div>
+          <span className="text-[13px] font-bold tabular-nums text-zinc-400">{player.rank}</span>
         )}
         mobileTitle={(player) => player.username}
         mobileSubtitle={(player) => (player.motto ? `"${player.motto}"` : undefined)}
         mobileEnd={(player) => (
-          <span className="text-base">{player.totalPoints.toFixed(1).replace('.0', '')}</span>
+          <span className="text-sm">{player.totalPoints.toFixed(1).replace('.0', '')}</span>
         )}
       />
       <RankingInsights players={players} evolution={evolution} trends={trends} labels={labels} />

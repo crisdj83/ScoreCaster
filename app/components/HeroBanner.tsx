@@ -88,7 +88,7 @@ export default function HeroBanner({
   }
 
   return (
-    <div className="relative flex w-full flex-col overflow-hidden rounded-2xl border border-zinc-800 bg-gradient-to-bl from-orange-600 via-zinc-900 to-zinc-950 shadow-2xl lg:flex-row">
+    <div className="relative flex w-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-bl from-orange-600 via-zinc-900 to-zinc-950 shadow-2xl lg:flex-row">
       
       <style dangerouslySetInnerHTML={{__html: `
         @keyframes scroll-y {
@@ -96,15 +96,90 @@ export default function HeroBanner({
           100% { transform: translateY(-50%); }
         }
         .animate-marquee-y {
-          animation: scroll-y 25s linear infinite;
+          animation: scroll-y 36s linear infinite;
         }
         .animate-marquee-y:hover {
           animation-play-state: paused;
         }
+        .hero-glass-veil {
+          -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 48%, rgba(0,0,0,0.45) 72%, transparent 100%);
+          mask-image: linear-gradient(to bottom, #000 0%, #000 48%, rgba(0,0,0,0.45) 72%, transparent 100%);
+        }
+        .scores-crossfade {
+          -webkit-mask-image: linear-gradient(
+            to bottom,
+            transparent 0%,
+            rgba(0,0,0,0.18) 10%,
+            rgba(0,0,0,0.55) 20%,
+            #000 34%,
+            #000 58%,
+            rgba(0,0,0,0.7) 70%,
+            rgba(0,0,0,0.35) 82%,
+            rgba(0,0,0,0.1) 92%,
+            transparent 100%
+          );
+          mask-image: linear-gradient(
+            to bottom,
+            transparent 0%,
+            rgba(0,0,0,0.18) 10%,
+            rgba(0,0,0,0.55) 20%,
+            #000 34%,
+            #000 58%,
+            rgba(0,0,0,0.7) 70%,
+            rgba(0,0,0,0.35) 82%,
+            rgba(0,0,0,0.1) 92%,
+            transparent 100%
+          );
+        }
+        @media (min-width: 1024px) {
+          .hero-glass-veil {
+            -webkit-mask-image: linear-gradient(to right, #000 0%, #000 46%, rgba(0,0,0,0.4) 72%, transparent 100%);
+            mask-image: linear-gradient(to right, #000 0%, #000 46%, rgba(0,0,0,0.4) 72%, transparent 100%);
+          }
+          .scores-crossfade {
+            -webkit-mask-image: linear-gradient(
+              to right,
+              transparent 0%,
+              rgba(0,0,0,0.25) 8%,
+              rgba(0,0,0,0.7) 18%,
+              #000 32%,
+              #000 100%
+            ),
+            linear-gradient(
+              to bottom,
+              #000 0%,
+              #000 62%,
+              rgba(0,0,0,0.45) 82%,
+              transparent 100%
+            );
+            mask-image: linear-gradient(
+              to right,
+              transparent 0%,
+              rgba(0,0,0,0.25) 8%,
+              rgba(0,0,0,0.7) 18%,
+              #000 32%,
+              #000 100%
+            ),
+            linear-gradient(
+              to bottom,
+              #000 0%,
+              #000 62%,
+              rgba(0,0,0,0.45) 82%,
+              transparent 100%
+            );
+            -webkit-mask-composite: source-in;
+            mask-composite: intersect;
+          }
+        }
       `}} />
 
-      {/* LEFT SIDE: Countdown & Next Match */}
-      <div className="w-full lg:w-1/2 bg-transparent p-6 sm:p-10 flex flex-col justify-between text-white relative">
+      {/* UPPER / LEFT: glass hero that melts into the scores */}
+      <div className="relative z-10 w-full pb-8 text-white lg:w-1/2 lg:pb-0 lg:pr-6">
+        <div
+          aria-hidden
+          className="hero-glass-veil pointer-events-none absolute inset-0 bg-white/[0.08] backdrop-blur-xl"
+        />
+        <div className="relative z-10 flex h-full flex-col justify-between p-6 sm:p-10">
         <div>
           <p className="mb-3 max-w-md text-3xl font-black uppercase leading-none tracking-tight text-white sm:text-5xl">
             {t('Call the scores.')}<br /><span className="text-scorecaster-accent">{t('Own the table.')}</span>
@@ -124,7 +199,6 @@ export default function HeroBanner({
           </p>
         </div>
 
-        {/* Timers Container - Fully responsive wrapping */}
         <div className="mt-8">
           <div className="flex flex-wrap gap-2 sm:gap-3 items-center mb-6">
             <div className="flex flex-col items-center">
@@ -165,17 +239,18 @@ export default function HeroBanner({
             </Link>
           </div>
         </div>
+        </div>
       </div>
 
-      {/* RIGHT SIDE: Scrolling Latest Scores Feed */}
-      <div className="relative flex h-[350px] w-full flex-col overflow-hidden bg-transparent lg:h-auto lg:min-h-[420px] lg:w-1/2">
+      {/* LOWER / RIGHT: scores that rise out of the glass */}
+      <div className="relative z-0 -mt-14 h-[340px] w-full overflow-hidden bg-transparent lg:mt-0 lg:-ml-10 lg:h-auto lg:min-h-[420px] lg:w-1/2">
         {recentScores.length > 0 ? (
-          <div className="absolute inset-0 overflow-hidden">
-            <div className="animate-marquee-y flex min-h-full w-full flex-col gap-3 p-4 sm:p-6">
+          <div className="scores-crossfade absolute inset-0 overflow-hidden">
+            <div className="animate-marquee-y flex min-h-full w-full flex-col gap-3 p-4 pt-16 sm:p-6 sm:pt-16 lg:pt-6">
             {[...recentScores, ...recentScores].map((match, idx) => (
               <div
                 key={`${match.id}-${idx}`}
-                className="rounded-xl border border-zinc-600/35 bg-zinc-800/65 p-3 shadow-lg shadow-black/20 backdrop-blur-md transition-colors hover:border-orange-400/40 hover:bg-zinc-800/75 sm:p-4"
+                className="rounded-xl border border-white/10 bg-white/[0.06] p-3 shadow-lg shadow-black/20 backdrop-blur-md transition-colors hover:border-orange-400/40 hover:bg-white/[0.1] sm:p-4"
               >
                 <div className="mb-2 flex items-center justify-between">
                   <span className="rounded-full border border-orange-500/30 bg-orange-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-orange-300 backdrop-blur-sm">

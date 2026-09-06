@@ -33,6 +33,19 @@
     @apply rounded-xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-md;
   }
 
+  /* Dense, readable mobile lists — light frost, inset highlight, no milky haze */
+  .glass-row {
+    @apply rounded-2xl border border-white/[0.08] bg-white/[0.045] backdrop-blur-md;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.07),
+      0 10px 28px rgb(0 0 0 / 0.18);
+  }
+
+  .glass-list {
+    @apply rounded-2xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-md;
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.06);
+  }
+
   .text-gradient-accent {
     @apply bg-gradient-to-r from-amber-300 via-orange-400 to-orange-600 bg-clip-text text-transparent;
   }
@@ -163,18 +176,71 @@
 @layer components {
   .prediction-fixture-content {
     position: relative;
-    background-color: rgb(255 255 255 / 0.05);
-    background-image:
-      linear-gradient(rgba(6, 6, 8, 0.72), rgba(6, 6, 8, 0.85)),
-      url("https://images.unsplash.com/photo-1556056504-5c7696c4c28d?auto=format&fit=crop&w=1200&q=70");
-    background-position: center;
-    background-size: cover;
-    background-repeat: no-repeat;
-    backdrop-filter: blur(20px);
+    isolation: isolate;
+    overflow: hidden;
+    border-radius: 1.25rem;
+    clip-path: inset(0 round 1.25rem);
+    transform: translateZ(0);
+    -webkit-mask-image: -webkit-radial-gradient(white, black);
+    background-color: rgb(255 255 255 / 0.04);
+    border-color: rgb(255 255 255 / 0.08);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.07);
   }
 
-  .prediction-fixture-content:hover {
-    background-color: rgb(255 255 255 / 0.08);
+  .prediction-fixture-content::before,
+  .prediction-fixture-content::after {
+    border-radius: inherit;
+  }
+
+  .prediction-fixture-content::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background-color: #101410;
+    background-image: url("https://images.unsplash.com/photo-1550254478-ead259d59536?auto=format&fit=crop&w=1400&q=60");
+    background-size: cover;
+    background-position: center;
+    opacity: 0.2;
+    filter: saturate(0.22) brightness(0.62) contrast(0.95);
+  }
+
+  .prediction-fixture-content::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: linear-gradient(
+      180deg,
+      rgb(12 12 14 / 0.58),
+      rgb(8 8 10 / 0.74)
+    );
+    backdrop-filter: blur(10px) saturate(100%);
+    -webkit-backdrop-filter: blur(10px) saturate(100%);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.07);
+  }
+
+  .prediction-fixture-content > * {
+    position: relative;
+    z-index: 2;
+  }
+
+  .prediction-fixture-content:hover::after {
+    background: linear-gradient(
+      180deg,
+      rgb(14 14 16 / 0.52),
+      rgb(8 8 10 / 0.68)
+    );
+  }
+
+  .prediction-fixture-content.prediction-hurry::after {
+    background: linear-gradient(
+      180deg,
+      rgb(42 14 14 / 0.55),
+      rgb(16 8 8 / 0.72)
+    );
   }
 
   .fixture-calendar-game:hover {
