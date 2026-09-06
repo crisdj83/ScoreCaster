@@ -72,11 +72,11 @@ export default async function MatchPredictionsPage({ params }: PageProps) {
         <ArrowLeft className="h-4 w-4" /> {t('Back to fixtures')}
       </Link>
       <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-6 text-zinc-100 shadow-xl md:p-8">
-        <div className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-scorecaster-accent">
+        <div className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-xactscore-accent">
           <Trophy className="h-4 w-4" /> {t('Match predictions')}
         </div>
         <h1 className="mt-3 text-3xl font-black uppercase tracking-tight">
-          {match.homeTeam.name} <span className="text-scorecaster-accent">vs</span> {match.awayTeam.name}
+          {match.homeTeam.name} <span className="text-xactscore-accent">vs</span> {match.awayTeam.name}
         </h1>
         <p className="mt-2 flex items-center gap-2 text-sm text-zinc-400">
           <Clock className="h-4 w-4" /> {new Date(match.utcDate).toLocaleString(getServerLocale())}

@@ -4,7 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { ShieldCheck } from 'lucide-react'
 import HeroBanner from './components/HeroBanner'
-import ScoreCasterLogo from './components/ScoreCasterLogo'
+import XactScoreLogo from './components/XactScoreLogo'
 import { getPLMatches } from '../lib/football'
 import { getTranslations } from '../lib/i18n'
 import { getServerLocale } from '../lib/i18n-server'
@@ -132,7 +132,7 @@ export default async function Home(props: { searchParams: Promise<{ success?: st
     )}
       
       <div className="flex flex-col items-center gap-5 pt-2 pb-2">
-        <ScoreCasterLogo />
+        <XactScoreLogo />
       </div>
 
       {/* HeroBanner is fully driven by the real API */}
@@ -152,7 +152,7 @@ export default async function Home(props: { searchParams: Promise<{ success?: st
                 className="h-14 w-14 shrink-0 rounded-full border border-zinc-700 bg-zinc-800 object-cover"
               />
             ) : (
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-scorecaster-accent text-lg font-bold text-scorecaster-bg">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-xactscore-accent text-lg font-bold text-xactscore-bg">
                 {profile?.username ? profile.username.charAt(0).toUpperCase() : profile?.email?.charAt(0).toUpperCase()}
               </div>
             )}
@@ -161,7 +161,7 @@ export default async function Home(props: { searchParams: Promise<{ success?: st
                 <p className="truncate font-medium text-zinc-100">{profile?.username || t('No username set')}</p>
                 {profile?.is_global_admin && (
                   <span title="Global Admin" className="flex shrink-0 items-center">
-                    <ShieldCheck className="h-4 w-4 text-scorecaster-accent" />
+                    <ShieldCheck className="h-4 w-4 text-xactscore-accent" />
                   </span>
                 )}
               </div>

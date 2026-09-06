@@ -112,7 +112,7 @@ export default function ProfileForm({ user, profile, messages }: any) {
                 >
                   <img src={team.logo} alt={team.name} className="w-6 h-6 object-contain" />
                   <span className="flex-1">{team.name}</span>
-                  {selectedTeam?.name === team.name && <Check className="h-4 w-4 text-scorecaster-green" />}
+                  {selectedTeam?.name === team.name && <Check className="h-4 w-4 text-xactscore-green" />}
                 </div>
               ))}
             </div>

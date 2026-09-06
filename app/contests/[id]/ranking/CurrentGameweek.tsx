@@ -131,7 +131,7 @@ export default function CurrentGameweek({
                 <span className="truncate">{fixture.home}</span>
               </div>
               <div className="px-3 text-center">
-                <div className="font-mono text-lg font-black text-scorecaster-accent">
+                <div className="font-mono text-lg font-black text-xactscore-accent">
                   {showSelectedScore ? fixture.score || '0 : 0' : '— : —'}
                 </div>
                 <div
@@ -180,7 +180,7 @@ export default function CurrentGameweek({
                   key={player.id}
                   className="flex min-h-11 items-center gap-2 rounded-lg bg-zinc-950 px-3 py-2 text-sm sm:grid sm:grid-cols-[4rem_minmax(0,1fr)_7rem_5rem] sm:gap-2"
                 >
-                  <span className="w-6 shrink-0 font-mono text-xs font-black text-scorecaster-accent sm:w-auto sm:text-sm">
+                  <span className="w-6 shrink-0 font-mono text-xs font-black text-xactscore-accent sm:w-auto sm:text-sm">
                     {index + 1}
                     {index === 0 ? 'st' : index === 1 ? 'nd' : index === 2 ? 'rd' : 'th'}
                   </span>

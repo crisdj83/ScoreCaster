@@ -72,7 +72,7 @@ export function RankTable<T>({
               expandableColumns.length > 0 ? (
                 <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4">
                   {subtitle ? (
-                    <div className="col-span-full truncate text-[11px] italic text-scorecaster-accent">
+                    <div className="col-span-full truncate text-[11px] italic text-xactscore-accent">
                       {subtitle}
                     </div>
                   ) : null}
@@ -112,7 +112,7 @@ export function RankTable<T>({
                 </div>
 
                 {mobileEnd ? (
-                  <div className="shrink-0 text-right font-black tabular-nums text-scorecaster-accent">
+                  <div className="shrink-0 text-right font-black tabular-nums text-xactscore-accent">
                     {mobileEnd(row, index)}
                   </div>
                 ) : null}

@@ -17,16 +17,16 @@ const config = {
     },
     extend: {
       colors: {
-        scorecaster: {
-          bg: "var(--scorecaster-bg)",
-          card: "var(--scorecaster-card)",
-          surface: "var(--scorecaster-surface)",
-          border: "var(--scorecaster-border)",
-          text: "var(--scorecaster-text)",
-          muted: "var(--scorecaster-muted)",
-          accent: "var(--scorecaster-accent)",
-          orange: "var(--scorecaster-orange)",
-          green: "var(--scorecaster-green)",
+        xactscore: {
+          bg: "var(--xactscore-bg)",
+          card: "var(--xactscore-card)",
+          surface: "var(--xactscore-surface)",
+          border: "var(--xactscore-border)",
+          text: "var(--xactscore-text)",
+          muted: "var(--xactscore-muted)",
+          accent: "var(--xactscore-accent)",
+          orange: "var(--xactscore-orange)",
+          green: "var(--xactscore-green)",
         },
         border: "var(--border)",
         input: "var(--input)",

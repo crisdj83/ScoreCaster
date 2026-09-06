@@ -13,7 +13,7 @@ const outfit = Outfit({ subsets: ["latin"], display: "swap" });
 export async function generateMetadata(): Promise<Metadata> {
   const t = getTranslations(getServerLocale());
   return {
-    title: t("ScoreCaster | Premier League Predictions"),
+    title: t("XactScore | Premier League Predictions"),
     description: t("Predict match scores and compete with friends."),
   };
 }
@@ -26,7 +26,7 @@ export default function RootLayout({
   const locale = getServerLocale();
   return (
     <html lang={locale} className="dark">
-      <body className={`${outfit.className} bg-scorecaster-bg text-scorecaster-text min-h-screen flex flex-col`}>
+      <body className={`${outfit.className} bg-xactscore-bg text-xactscore-text min-h-screen flex flex-col`}>
         <LocaleProvider initialLocale={locale}>
           <Navbar />
           <main className="mx-auto w-full flex-grow px-3 py-5 pb-24 sm:px-5 sm:py-6 lg:px-8 lg:py-8 lg:pb-8 xl:px-10">

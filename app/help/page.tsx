@@ -36,13 +36,13 @@ export default function HelpPage() {
   return (
     <div className="mx-auto max-w-3xl space-y-6 pb-12 pt-2">
       <div className="flex items-center gap-3">
-        <div className="rounded-xl bg-zinc-950 p-2.5 text-scorecaster-accent">
+        <div className="rounded-xl bg-zinc-950 p-2.5 text-xactscore-accent">
           <CircleHelp className="h-6 w-6" />
         </div>
         <PageHeader
           className="mb-0"
           title={t('Help')}
-          description={t('Everything you need to get the most from ScoreCaster.')}
+          description={t('Everything you need to get the most from XactScore.')}
         />
       </div>
 
@@ -54,7 +54,7 @@ export default function HelpPage() {
           >
             <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 font-black text-zinc-100 marker:hidden">
               <span>{t(section.title)}</span>
-              <ChevronDown className="h-5 w-5 shrink-0 text-scorecaster-accent transition-transform group-open:rotate-180" />
+              <ChevronDown className="h-5 w-5 shrink-0 text-xactscore-accent transition-transform group-open:rotate-180" />
             </summary>
             <p className="border-t border-zinc-800 px-5 pb-5 pt-4 text-sm leading-6 text-zinc-400">
               {t(section.body)}

@@ -57,21 +57,21 @@
   .focus-frost:focus,
   .focus-frost:focus-visible {
     border-color: rgb(255 149 61 / 0.55);
-    box-shadow: var(--scorecaster-focus-shadow);
+    box-shadow: var(--xactscore-focus-shadow);
   }
 }
 
 @layer base {
   :root {
-    --scorecaster-bg: #050506;
-    --scorecaster-card: #ffffff0d;
-    --scorecaster-surface: #ffffff0d;
-    --scorecaster-border: #ffffff1a;
-    --scorecaster-text: #f7f7f8;
-    --scorecaster-muted: #9a9aa3;
-    --scorecaster-accent: #ff8a2b;
-    --scorecaster-orange: #ff7a18;
-    --scorecaster-green: #34d399;
+    --xactscore-bg: #050506;
+    --xactscore-card: #ffffff0d;
+    --xactscore-surface: #ffffff0d;
+    --xactscore-border: #ffffff1a;
+    --xactscore-text: #f7f7f8;
+    --xactscore-muted: #9a9aa3;
+    --xactscore-accent: #ff8a2b;
+    --xactscore-orange: #ff7a18;
+    --xactscore-green: #34d399;
 
     --background: #050506;
     --foreground: #f7f7f8;
@@ -92,7 +92,7 @@
     --input: #ffffff1a;
     --ring: #ff8a2b;
     --radius: 1.1rem;
-    --scorecaster-focus-shadow:
+    --xactscore-focus-shadow:
       0 0 0 1px rgb(255 149 61 / 0.45),
       0 10px 32px rgb(0 0 0 / 0.5),
       inset 0 1px 0 rgb(255 255 255 / 0.08),
@@ -114,13 +114,13 @@
   }
 
   body {
-    @apply min-h-screen bg-scorecaster-bg text-scorecaster-text;
+    @apply min-h-screen bg-xactscore-bg text-xactscore-text;
     background-image:
       radial-gradient(ellipse 120% 80% at 15% -10%, rgb(255 138 43 / 0.16), transparent 60%),
       radial-gradient(ellipse 100% 60% at 100% 0%, rgb(255 90 60 / 0.10), transparent 55%),
       radial-gradient(ellipse 90% 70% at 50% 120%, rgb(255 138 43 / 0.08), transparent 60%);
     background-attachment: fixed;
-    background-color: var(--scorecaster-bg);
+    background-color: var(--xactscore-bg);
   }
 
   input:focus,
@@ -132,10 +132,10 @@
   summary:focus-visible {
     outline: none;
     border-color: rgb(255 149 61 / 0.55);
-    box-shadow: var(--scorecaster-focus-shadow);
+    box-shadow: var(--xactscore-focus-shadow);
   }
 
-  @keyframes scorecaster-ball-down {
+  @keyframes xactscore-ball-down {
     0% {
       transform: translateY(0);
       opacity: 1;
@@ -146,11 +146,11 @@
     }
   }
 
-  .scorecaster-ball-down {
-    animation: scorecaster-ball-down 450ms ease-out;
+  .xactscore-ball-down {
+    animation: xactscore-ball-down 450ms ease-out;
   }
 
-  @keyframes scorecaster-glass-shimmer {
+  @keyframes xactscore-glass-shimmer {
     0% {
       background-position: -200% 0;
     }
@@ -159,7 +159,7 @@
     }
   }
 
-  @keyframes scorecaster-glow-pulse {
+  @keyframes xactscore-glow-pulse {
     0%, 100% {
       opacity: 0.55;
     }
@@ -169,7 +169,7 @@
   }
 
   .animate-glow-pulse {
-    animation: scorecaster-glow-pulse 2.4s ease-in-out infinite;
+    animation: xactscore-glow-pulse 2.4s ease-in-out infinite;
   }
 }
 

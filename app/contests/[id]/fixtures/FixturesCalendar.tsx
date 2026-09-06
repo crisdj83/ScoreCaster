@@ -98,13 +98,13 @@ export default function FixturesCalendar({
 
           <div className="flex min-w-0 flex-1 flex-col items-center gap-0.5 sm:flex-row sm:justify-center sm:gap-2">
             <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-scorecaster-accent" />
+              <Calendar className="h-4 w-4 text-xactscore-accent" />
               <h3 className="font-black uppercase tracking-wider text-zinc-100">
                 {t('GW')} {selectedMatchday}
               </h3>
             </div>
             {isCurrentGameweekSelected ? (
-              <span className="rounded-full border border-scorecaster-accent/40 bg-scorecaster-accent/20 px-2 py-0.5 text-[10px] font-black uppercase tracking-widest text-orange-300">
+              <span className="rounded-full border border-xactscore-accent/40 bg-xactscore-accent/20 px-2 py-0.5 text-[10px] font-black uppercase tracking-widest text-orange-300">
                 {t('Current Gameweek')}
               </span>
             ) : (
@@ -181,7 +181,7 @@ export default function FixturesCalendar({
                       {score.home} : {score.away}
                     </ScoreBadge>
                   ) : (
-                    <span className="text-sm font-black text-scorecaster-accent">vs</span>
+                    <span className="text-sm font-black text-xactscore-accent">vs</span>
                   )}
                   <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-zinc-500">
                     <Clock className="h-3 w-3" />

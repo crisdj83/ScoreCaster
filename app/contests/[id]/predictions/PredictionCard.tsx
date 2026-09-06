@@ -155,9 +155,9 @@ export default function PredictionCard({ match, contestId, existingPrediction, r
           href={`/contests/${contestId}/ranking?matchId=${match.id}`}
           className="mt-0.5 flex min-h-7 items-center justify-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.05] px-2 text-[11px] font-bold text-zinc-100 transition-colors hover:bg-white/10"
         >
-          <Eye className="h-3.5 w-3.5 shrink-0 text-scorecaster-accent" />
+          <Eye className="h-3.5 w-3.5 shrink-0 text-xactscore-accent" />
           <span className="truncate">{t("View everyone's predictions")}</span>
-          <span className="tabular-nums text-scorecaster-accent">{revealedPredictions.length}</span>
+          <span className="tabular-nums text-xactscore-accent">{revealedPredictions.length}</span>
         </Link>
       ) : null}
 
@@ -189,7 +189,7 @@ export default function PredictionCard({ match, contestId, existingPrediction, r
           <span
             className={cn(
               'max-w-[7rem] truncate text-[10px]',
-              saveError ? 'text-red-400' : isPending ? 'animate-pulse italic text-zinc-500' : 'text-scorecaster-accent'
+              saveError ? 'text-red-400' : isPending ? 'animate-pulse italic text-zinc-500' : 'text-xactscore-accent'
             )}
           >
             {saveLabel}

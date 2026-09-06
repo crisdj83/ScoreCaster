@@ -158,7 +158,7 @@ function ProfilePageInner() {
         <div>
           <Breadcrumb items={[{ label: t('Your Profile') }]} className="mb-2 hidden md:flex" />
           <h1 className="flex items-center gap-3 text-3xl font-black uppercase tracking-tight text-zinc-100 md:text-4xl">
-            <User className="h-8 w-8 text-scorecaster-accent" />
+            <User className="h-8 w-8 text-xactscore-accent" />
             {t('Your Profile')}
           </h1>
         </div>
@@ -173,7 +173,7 @@ function ProfilePageInner() {
           <form action={updateProfile} className="space-y-8">
             <div>
               <h3 className="mb-4 flex items-center gap-2 text-lg font-bold text-zinc-100">
-                <ImageIcon className="h-5 w-5 text-scorecaster-accent" /> {t('Profile Picture / Logo')}
+                <ImageIcon className="h-5 w-5 text-xactscore-accent" /> {t('Profile Picture / Logo')}
               </h3>
 
               <div className="flex flex-col items-start gap-6 md:flex-row">
@@ -267,7 +267,7 @@ function ProfilePageInner() {
 
               <div className="relative">
                 <Label className="flex items-center gap-2">
-                  <Shield className="h-4 w-4 text-scorecaster-accent" /> {t('Favorite Team')}
+                  <Shield className="h-4 w-4 text-xactscore-accent" /> {t('Favorite Team')}
                 </Label>
 
                 <input type="hidden" name="favorite_team" value={favoriteTeam} />

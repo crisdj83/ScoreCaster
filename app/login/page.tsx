@@ -19,10 +19,10 @@ export default async function LoginPage(props: { searchParams: Promise<{ message
         <CardContent className="p-6 md:p-8">
           <div className="mb-8 flex flex-col items-center">
             <div className="mb-3 rounded-xl bg-zinc-950 p-3">
-              <Trophy className="h-8 w-8 text-scorecaster-accent" />
+              <Trophy className="h-8 w-8 text-xactscore-accent" />
             </div>
             <h1 className="text-2xl font-black uppercase tracking-tight text-zinc-100">
-              {t('Welcome to ScoreCaster')}
+              {t('Welcome to XactScore')}
             </h1>
             <p className="mt-1 text-sm text-zinc-400">{t('Sign in to predict and compete')}</p>
           </div>
@@ -70,7 +70,7 @@ export default async function LoginPage(props: { searchParams: Promise<{ message
                 formAction={signup}
                 className={cn(
                   buttonVariants({ variant: 'outline' }),
-                  'w-full border-scorecaster-accent text-scorecaster-accent uppercase tracking-wider hover:bg-scorecaster-accent/10'
+                  'w-full border-xactscore-accent text-xactscore-accent uppercase tracking-wider hover:bg-xactscore-accent/10'
                 )}
               >
                 {t('Sign Up')}
@@ -81,7 +81,7 @@ export default async function LoginPage(props: { searchParams: Promise<{ message
               <button
                 formAction={resetPassword}
                 formNoValidate
-                className="min-h-11 text-sm text-zinc-500 underline transition-colors hover:text-scorecaster-accent"
+                className="min-h-11 text-sm text-zinc-500 underline transition-colors hover:text-xactscore-accent"
               >
                 {t('Forgot Password?')}
               </button>

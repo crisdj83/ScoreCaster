@@ -60,8 +60,8 @@ export default async function EditContestPage(props: {
   return (
     <div className="max-w-3xl space-y-6">
       <div className="mb-2 flex items-center gap-3">
-        <div className="rounded-xl bg-scorecaster-accent/10 p-2.5">
-          <Settings className="h-6 w-6 text-scorecaster-accent" />
+        <div className="rounded-xl bg-xactscore-accent/10 p-2.5">
+          <Settings className="h-6 w-6 text-xactscore-accent" />
         </div>
         <PageHeader
           className="mb-0"
@@ -112,7 +112,7 @@ export default async function EditContestPage(props: {
         <Card>
           <CardContent className="p-6 md:p-8">
             <div className="mb-3 flex items-center gap-2">
-              <Shield className="h-5 w-5 text-scorecaster-accent" />
+              <Shield className="h-5 w-5 text-xactscore-accent" />
               <h3 className="text-lg font-extrabold uppercase tracking-tight text-zinc-100">
                 {t('Season Length')}
               </h3>
@@ -129,7 +129,7 @@ export default async function EditContestPage(props: {
                     name="season_length"
                     value="full"
                     defaultChecked={seasonLength === 'full'}
-                    className="mt-1 accent-scorecaster-accent"
+                    className="mt-1 accent-xactscore-accent"
                   />
                   <span>
                     <span className="block font-bold text-zinc-100">{t('Full season')}</span>
@@ -144,7 +144,7 @@ export default async function EditContestPage(props: {
                     name="season_length"
                     value="first_half"
                     defaultChecked={seasonLength === 'first_half'}
-                    className="mt-1 accent-scorecaster-accent"
+                    className="mt-1 accent-xactscore-accent"
                   />
                   <span>
                     <span className="block font-bold text-zinc-100">{t('First half')}</span>
@@ -159,7 +159,7 @@ export default async function EditContestPage(props: {
                     name="season_length"
                     value="second_half"
                     defaultChecked={seasonLength === 'second_half'}
-                    className="mt-1 accent-scorecaster-accent"
+                    className="mt-1 accent-xactscore-accent"
                   />
                   <span>
                     <span className="block font-bold text-zinc-100">{t('Second half')}</span>
@@ -181,7 +181,7 @@ export default async function EditContestPage(props: {
         <Card>
           <CardContent className="p-6 md:p-8">
             <div className="mb-3 flex items-center gap-2">
-              <Target className="h-5 w-5 text-scorecaster-accent" />
+              <Target className="h-5 w-5 text-xactscore-accent" />
               <h3 className="text-lg font-extrabold uppercase tracking-tight text-zinc-100">
                 {t('Scoring System')}
               </h3>
@@ -250,10 +250,10 @@ export default async function EditContestPage(props: {
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-scorecaster-accent">
+        <Card className="border-l-4 border-l-xactscore-accent">
           <CardContent className="p-6 md:p-8">
             <div className="mb-2 flex items-center gap-2">
-              <Key className="h-5 w-5 text-scorecaster-accent" />
+              <Key className="h-5 w-5 text-xactscore-accent" />
               <h3 className="text-lg font-extrabold uppercase tracking-tight text-zinc-100">
                 {t('Secret Invite Key')}
               </h3>
@@ -265,7 +265,7 @@ export default async function EditContestPage(props: {
               <span className="mb-2 block text-[10px] font-black uppercase tracking-widest text-zinc-500">
                 {t('Current Active Key')}
               </span>
-              <span className="font-mono text-3xl font-black tracking-widest text-scorecaster-accent md:text-4xl">
+              <span className="font-mono text-3xl font-black tracking-widest text-xactscore-accent md:text-4xl">
                 {contest.contest_key}
               </span>
             </div>

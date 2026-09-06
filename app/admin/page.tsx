@@ -52,7 +52,7 @@ export default async function AdminDashboard(props: { searchParams: Promise<{ su
       <div>
         <Breadcrumb items={[{ label: t('Admin') }]} className="mb-3 hidden md:flex" />
         <div className="flex items-center gap-3">
-          <ShieldCheck className="h-8 w-8 shrink-0 text-scorecaster-accent" />
+          <ShieldCheck className="h-8 w-8 shrink-0 text-xactscore-accent" />
           <PageHeader
             className="mb-0"
             title={t('Global Admin Portal')}
@@ -69,7 +69,7 @@ export default async function AdminDashboard(props: { searchParams: Promise<{ su
 
       <Card className="overflow-hidden">
         <div className="flex items-center gap-2 bg-zinc-950 px-5 py-4 text-xs font-black uppercase tracking-wider text-zinc-100">
-          <Clock className="h-4 w-4 text-scorecaster-accent" />
+          <Clock className="h-4 w-4 text-xactscore-accent" />
           {t('Pending Image Approvals')} ({pendingUsers?.length || 0})
         </div>
 
@@ -98,7 +98,7 @@ export default async function AdminDashboard(props: { searchParams: Promise<{ su
                     <img
                       src={u.pending_avatar_url}
                       alt="Pending Avatar"
-                      className="h-28 w-28 rounded-full border-4 border-scorecaster-accent object-cover shadow-md"
+                      className="h-28 w-28 rounded-full border-4 border-xactscore-accent object-cover shadow-md"
                     />
                   </div>
 

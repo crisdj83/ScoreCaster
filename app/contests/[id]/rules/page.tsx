@@ -30,12 +30,12 @@ export default async function RulesPage(props: { params: Promise<{ id: string }>
         <Card>
           <CardContent className="p-6 md:p-8">
             <h3 className="mb-4 flex items-center gap-2.5 text-lg font-extrabold uppercase tracking-tight text-zinc-100">
-              <div className="rounded-xl bg-scorecaster-accent/10 p-2">
-                <AlertCircle className="h-5 w-5 text-scorecaster-accent" />
+              <div className="rounded-xl bg-xactscore-accent/10 p-2">
+                <AlertCircle className="h-5 w-5 text-xactscore-accent" />
               </div>
               {t('How to Play')}
             </h3>
-            <ul className="ml-7 list-disc space-y-3 text-sm font-medium text-zinc-400 marker:text-scorecaster-accent">
+            <ul className="ml-7 list-disc space-y-3 text-sm font-medium text-zinc-400 marker:text-xactscore-accent">
               <li>{t('Navigate to the Predictions tab to see the upcoming Premier League fixtures.')}</li>
               <li>{t('Use the + and - buttons to set your predicted score for the Home and Away teams.')}</li>
               <li>{t('Your predictions are saved automatically as you change them.')}</li>
@@ -52,8 +52,8 @@ export default async function RulesPage(props: { params: Promise<{ id: string }>
         <Card>
           <CardContent className="p-6 md:p-8">
             <h3 className="mb-3 flex items-center gap-2.5 text-lg font-extrabold uppercase tracking-tight text-zinc-100">
-              <div className="rounded-xl bg-scorecaster-accent/10 p-2">
-                <Target className="h-5 w-5 text-scorecaster-accent" />
+              <div className="rounded-xl bg-xactscore-accent/10 p-2">
+                <Target className="h-5 w-5 text-xactscore-accent" />
               </div>
               {t('Tiered Scoring System')}
             </h3>
@@ -64,11 +64,11 @@ export default async function RulesPage(props: { params: Promise<{ id: string }>
             </p>
 
             <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
-              <div className="group relative flex flex-col overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950/60 p-5 transition-all hover:border-scorecaster-accent">
+              <div className="group relative flex flex-col overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950/60 p-5 transition-all hover:border-xactscore-accent">
                 <Badge variant="accent" className="absolute right-0 top-0 rounded-none rounded-bl-xl">
                   +{pointsExact} PTS
                 </Badge>
-                <Target className="mb-3 h-7 w-7 text-scorecaster-accent" />
+                <Target className="mb-3 h-7 w-7 text-xactscore-accent" />
                 <h4 className="mb-1.5 font-extrabold uppercase tracking-tight text-zinc-100">
                   {t('Exact Score')}
                 </h4>
@@ -84,7 +84,7 @@ export default async function RulesPage(props: { params: Promise<{ id: string }>
                 </div>
               </div>
 
-              <div className="group relative flex flex-col overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950/60 p-5 transition-all hover:border-scorecaster-accent">
+              <div className="group relative flex flex-col overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950/60 p-5 transition-all hover:border-xactscore-accent">
                 <Badge variant="accent" className="absolute right-0 top-0 rounded-none rounded-bl-xl">
                   +{pointsClose} PTS
                 </Badge>
@@ -133,8 +133,8 @@ export default async function RulesPage(props: { params: Promise<{ id: string }>
         <Card>
           <CardContent className="p-6 md:p-8">
             <h3 className="mb-3 flex items-center gap-2.5 text-lg font-extrabold uppercase tracking-tight text-zinc-100">
-              <div className="rounded-xl bg-scorecaster-accent/10 p-2">
-                <Clock className="h-5 w-5 text-scorecaster-accent" />
+              <div className="rounded-xl bg-xactscore-accent/10 p-2">
+                <Clock className="h-5 w-5 text-xactscore-accent" />
               </div>
               {t('Leaderboard Tiebreakers')}
             </h3>
@@ -143,7 +143,7 @@ export default async function RulesPage(props: { params: Promise<{ id: string }>
                 'If two or more players have the exact same Total Points, the leaderboard will rank them based on:'
               )}
             </p>
-            <ol className="ml-7 list-decimal space-y-2 text-sm font-bold text-zinc-300 marker:text-scorecaster-accent">
+            <ol className="ml-7 list-decimal space-y-2 text-sm font-bold text-zinc-300 marker:text-xactscore-accent">
               <li>
                 {t('Highest number of Exact Scores')} (+{pointsExact} pts)
               </li>

@@ -28,7 +28,7 @@ export default function ContestHub({ myContests, messages }: any) {
       <PageHeader
         title={t('Contest Hub')}
         actions={
-          <div className="rounded-xl bg-scorecaster-accent p-2.5 text-scorecaster-bg shadow">
+          <div className="rounded-xl bg-xactscore-accent p-2.5 text-xactscore-bg shadow">
             <Trophy className="h-6 w-6" />
           </div>
         }
@@ -84,13 +84,13 @@ export default function ContestHub({ myContests, messages }: any) {
                     <Link
                       key={membership.contest_id}
                       href={`/contests/${membership.contest_id}`}
-                      className="group flex min-h-[120px] cursor-pointer flex-col rounded-xl border border-zinc-800 bg-zinc-950/50 p-5 transition-all hover:border-scorecaster-accent hover:shadow-lg"
+                      className="group flex min-h-[120px] cursor-pointer flex-col rounded-xl border border-zinc-800 bg-zinc-950/50 p-5 transition-all hover:border-xactscore-accent hover:shadow-lg"
                     >
                       <div className="mb-2 flex items-start justify-between gap-2">
                         <div className="flex min-w-0 items-start gap-3">
                           <ContestIcon contestId={membership.contest_id} size="sm" />
                           <div className="min-w-0">
-                            <h3 className="truncate text-lg font-extrabold text-zinc-100 transition-colors group-hover:text-scorecaster-accent">
+                            <h3 className="truncate text-lg font-extrabold text-zinc-100 transition-colors group-hover:text-xactscore-accent">
                               {membership.contests.name}
                             </h3>
                             <p className="mt-1 text-xs font-bold uppercase tracking-wider text-zinc-500">
@@ -124,7 +124,7 @@ export default function ContestHub({ myContests, messages }: any) {
           {activeTab === 'join' && (
             <div className="mx-auto max-w-md py-4">
               <div className="mb-6 text-center">
-                <Search className="mx-auto mb-3 h-10 w-10 text-scorecaster-accent" />
+                <Search className="mx-auto mb-3 h-10 w-10 text-xactscore-accent" />
                 <h2 className="text-xl font-extrabold uppercase tracking-tight text-zinc-100">
                   {t('Join a Private Contest')}
                 </h2>
@@ -154,7 +154,7 @@ export default function ContestHub({ myContests, messages }: any) {
           {activeTab === 'create' && (
             <div className="mx-auto max-w-md py-4">
               <div className="mb-6 text-center">
-                <Plus className="mx-auto mb-3 h-10 w-10 text-scorecaster-accent" />
+                <Plus className="mx-auto mb-3 h-10 w-10 text-xactscore-accent" />
                 <h2 className="text-xl font-extrabold uppercase tracking-tight text-zinc-100">
                   {t('Create a New Contest')}
                 </h2>

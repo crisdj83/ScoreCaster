@@ -14,9 +14,12 @@ export function LocaleProvider({ initialLocale, children }: { initialLocale: Loc
   const router = useRouter()
 
   useEffect(() => {
-    const saved = window.localStorage.getItem('scorecaster_locale')
+    const saved =
+      window.localStorage.getItem('xactscore_locale') ||
+      window.localStorage.getItem('scorecaster_locale')
     if (isLocale(saved) && saved !== initialLocale) {
-      document.cookie = `scorecaster_locale=${saved};path=/;max-age=31536000;samesite=lax`
+      window.localStorage.setItem('xactscore_locale', saved)
+      document.cookie = `xactscore_locale=${saved};path=/;max-age=31536000;samesite=lax`
       setLocaleState(saved)
       router.refresh()
     }
@@ -24,8 +27,8 @@ export function LocaleProvider({ initialLocale, children }: { initialLocale: Loc
 
   const setLocale = (next: Locale) => {
     setLocaleState(next)
-    window.localStorage.setItem('scorecaster_locale', next)
-    document.cookie = `scorecaster_locale=${next};path=/;max-age=31536000;samesite=lax`
+    window.localStorage.setItem('xactscore_locale', next)
+    document.cookie = `xactscore_locale=${next};path=/;max-age=31536000;samesite=lax`
     router.refresh()
   }
 

@@ -89,7 +89,7 @@ export default async function MessagesPage(props: { searchParams: Promise<{ erro
     <div className="mx-auto max-w-4xl space-y-6 pb-12 pt-2">
       <MessagesReadMarker />
       <div className="flex items-center gap-3">
-        <div className="rounded-xl bg-zinc-950 p-2.5 text-scorecaster-accent">
+        <div className="rounded-xl bg-zinc-950 p-2.5 text-xactscore-accent">
           <MessageSquare className="h-6 w-6" />
         </div>
         <PageHeader

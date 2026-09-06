@@ -1,5 +1,5 @@
 -- =============================================================================
--- ScoreCaster — optimized schema for the current Next.js app
+-- XactScore — optimized schema for the current Next.js app
 -- Safe to paste into the Supabase SQL Editor (idempotent).
 -- Does NOT drop data. Aligns columns/indexes/RLS with what the app queries.
 -- =============================================================================

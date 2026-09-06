@@ -34,15 +34,15 @@ export default function NavLinks({ isAdmin, isLoggedIn, unreadMessageCount }: Na
     <>
       <Link
         href="/"
-        aria-label="ScoreCaster home"
+        aria-label="XactScore home"
         className="inline-flex h-10 items-center gap-2 outline-none sm:h-11"
       >
-        <span className="relative flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-scorecaster-accent shadow-lg shadow-orange-500/10 backdrop-blur-md">
+        <span className="relative flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-xactscore-accent shadow-lg shadow-orange-500/10 backdrop-blur-md">
           <Activity className="h-5 w-5" strokeWidth={3} />
           <CircleDot className="absolute right-1 top-1 h-2.5 w-2.5" fill="currentColor" strokeWidth={2.5} />
         </span>
         <span className="text-gradient-accent hidden font-black uppercase tracking-tight lg:inline">
-          ScoreCaster
+          XactScore
         </span>
       </Link>
       <Link href="/" className={linkClass('/')}>

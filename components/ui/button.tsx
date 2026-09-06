@@ -18,7 +18,7 @@ const buttonVariants = cva(
         ghost: "text-zinc-300 hover:bg-white/10 hover:text-zinc-100",
         destructive:
           "bg-red-500/15 text-red-300 border border-red-500/30 backdrop-blur-md hover:bg-red-500/25",
-        link: "text-scorecaster-accent underline-offset-4 hover:underline",
+        link: "text-xactscore-accent underline-offset-4 hover:underline",
         glass:
           "border border-orange-500/30 bg-orange-500/10 text-orange-200 backdrop-blur-md hover:bg-orange-500/20",
       },

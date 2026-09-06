@@ -36,7 +36,7 @@ export default async function UpdatePasswordPage(props: { searchParams: Promise<
         <CardContent className="p-6 md:p-8">
           <div className="mb-8 flex flex-col items-center">
             <div className="mb-3 rounded-xl bg-zinc-950 p-3">
-              <Trophy className="h-8 w-8 text-scorecaster-accent" />
+              <Trophy className="h-8 w-8 text-xactscore-accent" />
             </div>
             <h1 className="text-2xl font-black uppercase tracking-tight text-zinc-100">
               {t('Reset Password')}

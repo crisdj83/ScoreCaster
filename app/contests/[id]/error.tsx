@@ -16,22 +16,22 @@ export default function ContestError({
   }, [error])
 
   return (
-    <div className="mx-auto flex max-w-lg flex-col items-center gap-4 rounded-xl border border-scorecaster-border bg-scorecaster-card p-8 text-center">
+    <div className="mx-auto flex max-w-lg flex-col items-center gap-4 rounded-xl border border-xactscore-border bg-xactscore-card p-8 text-center">
       <AlertTriangle className="h-10 w-10 text-red-400" />
-      <h1 className="text-lg font-semibold text-scorecaster-text">Couldn&apos;t load this contest</h1>
-      <p className="text-sm text-scorecaster-muted">
+      <h1 className="text-lg font-semibold text-xactscore-text">Couldn&apos;t load this contest</h1>
+      <p className="text-sm text-xactscore-muted">
         Something went wrong fetching the contest data. Please try again.
       </p>
       <div className="flex gap-3">
         <button
           onClick={reset}
-          className="rounded-lg border border-scorecaster-border bg-scorecaster-surface px-4 py-2 text-sm font-medium text-scorecaster-text hover:bg-scorecaster-card"
+          className="rounded-lg border border-xactscore-border bg-xactscore-surface px-4 py-2 text-sm font-medium text-xactscore-text hover:bg-xactscore-card"
         >
           Try again
         </button>
         <Link
           href="/contests"
-          className="rounded-lg bg-scorecaster-accent px-4 py-2 text-sm font-medium text-scorecaster-bg hover:opacity-90"
+          className="rounded-lg bg-xactscore-accent px-4 py-2 text-sm font-medium text-xactscore-bg hover:opacity-90"
         >
           Back to contests
         </Link>

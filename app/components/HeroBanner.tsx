@@ -182,7 +182,7 @@ export default function HeroBanner({
         <div className="relative z-10 flex h-full flex-col justify-between p-6 sm:p-10">
         <div>
           <p className="mb-3 max-w-md text-3xl font-black uppercase leading-none tracking-tight text-white sm:text-5xl">
-            {t('Call the scores.')}<br /><span className="text-scorecaster-accent">{t('Own the table.')}</span>
+            {t('Call the scores.')}<br /><span className="text-xactscore-accent">{t('Own the table.')}</span>
           </p>
           <p className="mb-6 max-w-md text-sm leading-6 text-orange-100 sm:text-base">
             {t('Predict match outcomes, compete with your league, and climb the leaderboard every matchweek.')}
@@ -233,7 +233,7 @@ export default function HeroBanner({
           <div>
             <Link 
               href="/contests" 
-              className="inline-block rounded bg-scorecaster-accent px-6 py-3 text-xs font-black uppercase tracking-wider text-scorecaster-bg shadow-md transition-colors hover:bg-[#ff922f] sm:text-sm"
+              className="inline-block rounded bg-xactscore-accent px-6 py-3 text-xs font-black uppercase tracking-wider text-xactscore-bg shadow-md transition-colors hover:bg-[#ff922f] sm:text-sm"
             >
               {t('Make Predictions')}
             </Link>

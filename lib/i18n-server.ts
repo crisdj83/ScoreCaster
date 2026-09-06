@@ -23,7 +23,7 @@ function localeFromAcceptLanguage(value: string | null): Locale {
 }
 
 export function getServerLocale(): Locale {
-  const value = cookies().get('scorecaster_locale')?.value
+  const value = cookies().get('xactscore_locale')?.value || cookies().get('scorecaster_locale')?.value
   if (isLocale(value)) return value
 
   const requestHeaders = headers()

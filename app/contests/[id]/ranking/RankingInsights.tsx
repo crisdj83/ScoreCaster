@@ -257,7 +257,7 @@ export default function RankingInsights({
                               <span className="truncate font-semibold text-gray-700">{prediction.username}</span>
                               <span className="ml-3 flex items-center gap-2 font-mono font-black text-gray-900">
                                 {prediction.homeScore} : {prediction.awayScore}
-                                {prediction.points !== null && <span className="rounded-full bg-scorecaster-accent px-1.5 py-0.5 font-sans text-[10px] text-scorecaster-bg">+{prediction.points}</span>}
+                                {prediction.points !== null && <span className="rounded-full bg-xactscore-accent px-1.5 py-0.5 font-sans text-[10px] text-xactscore-bg">+{prediction.points}</span>}
                               </span>
                             </div>
                           ))}

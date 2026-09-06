@@ -77,7 +77,7 @@ function ScorerCard({
             className="flex items-center justify-between border-b border-zinc-800 px-5 py-3 last:border-0"
           >
             <div className="flex min-w-0 items-center gap-3">
-              <span className="w-5 text-sm font-black text-scorecaster-accent">{index + 1}</span>
+              <span className="w-5 text-sm font-black text-xactscore-accent">{index + 1}</span>
               {player.team?.crest ? (
                 <Image
                   src={player.team.crest}
@@ -91,7 +91,7 @@ function ScorerCard({
                 {player.player?.name || player.name}
               </span>
             </div>
-            <span className="ml-3 shrink-0 font-black text-scorecaster-accent">
+            <span className="ml-3 shrink-0 font-black text-xactscore-accent">
               {player[statKey]}{' '}
               <span className="text-xs font-bold text-zinc-500">{statLabel}</span>
             </span>
@@ -215,7 +215,7 @@ export default async function FixturesPage(props: { params: Promise<{ id: string
     {
       key: 'pts',
       header: 'Pts',
-      headerClassName: 'text-center text-scorecaster-accent',
+      headerClassName: 'text-center text-xactscore-accent',
       className: 'text-center',
       cell: (row) => <ScoreBadge>{row.points}</ScoreBadge>,
     },

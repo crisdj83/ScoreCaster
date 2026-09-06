@@ -386,7 +386,7 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
         <div>
           <div className="font-bold text-zinc-100">{player.username}</div>
           {player.motto ? (
-            <div className="mt-0.5 max-w-[18ch] truncate text-xs italic text-scorecaster-accent">
+            <div className="mt-0.5 max-w-[18ch] truncate text-xs italic text-xactscore-accent">
               &ldquo;{player.motto}&rdquo;
             </div>
           ) : null}
@@ -408,7 +408,7 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
       key: 'exact',
       header: (
         <span className="inline-flex items-center gap-1">
-          <Target className="h-4 w-4 text-scorecaster-accent" />
+          <Target className="h-4 w-4 text-xactscore-accent" />
           {t('Exact Score')}
         </span>
       ),
@@ -464,7 +464,7 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
         title={t('League Ranking')}
         description={`${t('Tiered Scoring')}: ${t('Exact Score')} (${ptsExact}pts) • ${t('Close Prediction')} (${ptsClose}pts) • ${t('Correct Result')} (${ptsResult}pts)`}
         actions={
-          <div className="flex items-center gap-2 text-scorecaster-accent">
+          <div className="flex items-center gap-2 text-xactscore-accent">
             <Gauge className="h-5 w-5" />
             <span className="text-xs font-black uppercase tracking-widest">
               {t('Season')}: {t(getSeasonLengthLabelKey(seasonLength))}
