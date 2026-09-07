@@ -4,6 +4,7 @@ import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import Navbar from "./components/Navbar";
 import SiteFooter from "./components/SiteFooter";
+import ServiceWorkerRegister from "./components/ServiceWorkerRegister";
 import { LocaleProvider } from "./components/LocaleProvider";
 import { getServerLocale } from "../lib/i18n-server";
 import { getTranslations } from "../lib/i18n";
@@ -49,6 +50,7 @@ export default function RootLayout({
             <SiteFooter />
           </div>
         </LocaleProvider>
+        <ServiceWorkerRegister />
         <Analytics />
       </body>
     </html>

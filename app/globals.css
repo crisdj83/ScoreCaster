@@ -61,6 +61,12 @@
   }
 }
 
+@media (display-mode: standalone), (display-mode: fullscreen) {
+  .install-pwa-bar {
+    display: none !important;
+  }
+}
+
 @layer base {
   :root {
     --xactscore-bg: #050506;

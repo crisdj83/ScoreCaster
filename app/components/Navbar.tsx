@@ -4,6 +4,7 @@ import { signOut } from '../actions'
 import NavLinks from './NavLinks'
 import BottomNav from './BottomNav'
 import LanguageSwitcher from './LanguageSwitcher'
+import InstallPwaBar from './InstallPwaBar'
 import { getTranslations } from '../../lib/i18n'
 import { getServerLocale } from '../../lib/i18n-server'
 
@@ -44,7 +45,7 @@ export default async function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 w-full border-b border-white/10 bg-xactscore-bg/70 backdrop-blur-xl">
+      <header className="sticky top-0 z-40 w-full border-b border-white/10 bg-xactscore-bg/70 pt-[env(safe-area-inset-top)] backdrop-blur-xl">
         <div className="flex w-full flex-wrap items-center gap-2 px-3 py-3 sm:gap-2.5 sm:px-5 lg:px-8 xl:px-10">
           <NavLinks isAdmin={isAdmin} isLoggedIn={Boolean(user)} unreadMessageCount={unreadMessageCount} />
 
@@ -64,6 +65,7 @@ export default async function Navbar() {
             ) : null}
           </div>
         </div>
+        <InstallPwaBar />
       </header>
       <BottomNav isAdmin={isAdmin} isLoggedIn={Boolean(user)} unreadMessageCount={unreadMessageCount} />
     </>

@@ -1,4 +1,5 @@
 import { CircleHelp, ChevronDown } from 'lucide-react'
+import Link from 'next/link'
 import { getTranslations } from '../../lib/i18n'
 import { getServerLocale } from '../../lib/i18n-server'
 import { PageHeader } from '@/components/ui/page-header'
@@ -28,6 +29,10 @@ const sections = [
     title: 'Messages',
     body: 'Messages are discussions between members of your contests. Use them to talk about fixtures, banter, and league news.',
   },
+  {
+    title: 'Install the app',
+    body: 'On iPhone, open this site in Safari, tap Share, then Add to Home Screen. On Android, open Chrome and choose Install app or Add to Home screen. XactScore then opens like an app, without the browser bar.',
+  },
 ] as const
 
 export default function HelpPage() {
@@ -56,9 +61,17 @@ export default function HelpPage() {
               <span>{t(section.title)}</span>
               <ChevronDown className="h-5 w-5 shrink-0 text-xactscore-accent transition-transform group-open:rotate-180" />
             </summary>
-            <p className="border-t border-zinc-800 px-5 pb-5 pt-4 text-sm leading-6 text-zinc-400">
-              {t(section.body)}
-            </p>
+            <div className="space-y-3 border-t border-zinc-800 px-5 pb-5 pt-4">
+              <p className="text-sm leading-6 text-zinc-400">{t(section.body)}</p>
+              {section.title === 'Install the app' ? (
+                <Link
+                  href="/help/install"
+                  className="inline-flex text-sm font-bold text-orange-300 hover:text-orange-200"
+                >
+                  {t('Open the full install guide')}
+                </Link>
+              ) : null}
+            </div>
           </details>
         ))}
       </div>
