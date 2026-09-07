@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Outfit } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
@@ -10,11 +10,24 @@ import { getTranslations } from "../lib/i18n";
 
 const outfit = Outfit({ subsets: ["latin"], display: "swap" });
 
+export const viewport: Viewport = {
+  themeColor: "#050506",
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
+
 export async function generateMetadata(): Promise<Metadata> {
   const t = getTranslations(getServerLocale());
   return {
     title: t("XactScore | Premier League Predictions"),
     description: t("Predict match scores and compete with friends."),
+    applicationName: "XactScore",
+    appleWebApp: {
+      capable: true,
+      title: "XactScore",
+      statusBarStyle: "black-translucent",
+    },
   };
 }
 

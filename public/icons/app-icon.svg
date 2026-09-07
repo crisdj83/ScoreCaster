@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-label="XactScore">
+  <defs>
+    <linearGradient id="xs-accent" x1="160" y1="220" x2="860" y2="800" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#fcd34d"/>
+      <stop offset="45%" stop-color="#ff8a2b"/>
+      <stop offset="100%" stop-color="#ea580c"/>
+    </linearGradient>
+    <radialGradient id="xs-glow" cx="50%" cy="48%" r="48%">
+      <stop offset="0%" stop-color="#ff8a2b" stop-opacity="0.28"/>
+      <stop offset="70%" stop-color="#ff8a2b" stop-opacity="0.06"/>
+      <stop offset="100%" stop-color="#ff8a2b" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1024" height="1024" fill="#0c0c0e"/>
+  <rect width="1024" height="1024" fill="url(#xs-glow)"/>
+  <path
+    d="M150 530 H330 L430 820 L555 230 L680 530 H874"
+    fill="none"
+    stroke="url(#xs-accent)"
+    stroke-width="88"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  <circle cx="790" cy="268" r="118" fill="#0c0c0e" stroke="url(#xs-accent)" stroke-width="52"/>
+  <circle cx="790" cy="268" r="42" fill="#ff8a2b"/>
+</svg>
