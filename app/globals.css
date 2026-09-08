@@ -249,6 +249,39 @@
     );
   }
 
+  .prediction-fixture-content.prediction-lucky-pill {
+    overflow: hidden;
+    border-radius: calc(0.75rem - 1.5px);
+    clip-path: none;
+    -webkit-mask-image: none;
+    mask-image: none;
+    transform: none;
+    border: 0;
+    box-shadow: none;
+  }
+
+  .prediction-fixture-content.prediction-lucky-pill::before,
+  .prediction-fixture-content.prediction-lucky-pill::after {
+    inset: 0;
+    border-radius: inherit;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .prediction-fixture-content.prediction-lucky-pill::before {
+    opacity: 0.55;
+    filter: saturate(0.7) brightness(0.85) contrast(1.05);
+  }
+
+  .prediction-fixture-content.prediction-lucky-pill::after {
+    background: linear-gradient(
+      180deg,
+      rgb(12 12 14 / 0.28),
+      rgb(8 8 10 / 0.45)
+    );
+  }
+
   .fixture-calendar-game:hover {
     background-color: rgb(255 138 43 / 0.1);
     border-color: rgb(255 138 43 / 0.35);

@@ -1,12 +1,18 @@
 'use client'
 
-import { useEffect, useState, useTransition } from 'react'
+import { useEffect, useRef, useState, useTransition } from 'react'
 import Image from 'next/image'
 import { Plus, Minus, Clock, Eye } from 'lucide-react'
 import { savePrediction } from './actions'
 import Link from 'next/link'
 import { useLocale, useTranslations } from '../../../components/LocaleProvider'
 import { cn } from '@/lib/utils'
+
+const SCORE_MAX = 5
+
+function clampScore(value: number) {
+  return Math.min(SCORE_MAX, Math.max(0, value))
+}
 
 function TeamCrest({
   src,
@@ -36,14 +42,20 @@ function TeamCrest({
 }
 
 export default function PredictionCard({ match, contestId, existingPrediction, revealedPredictions = [] }: any) {
-  const [homeScore, setHomeScore] = useState(existingPrediction?.predicted_home_score ?? 0)
-  const [awayScore, setAwayScore] = useState(existingPrediction?.predicted_away_score ?? 0)
+  const initialHome = existingPrediction?.predicted_home_score ?? 0
+  const initialAway = existingPrediction?.predicted_away_score ?? 0
+  const [homeScore, setHomeScore] = useState(initialHome)
+  const [awayScore, setAwayScore] = useState(initialAway)
   const [isPending, startTransition] = useTransition()
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saved'>('idle')
   const [saveError, setSaveError] = useState('')
   const [now, setNow] = useState<number | null>(null)
   const t = useTranslations()
   const { locale } = useLocale()
+  const homeScoreRef = useRef(initialHome)
+  const awayScoreRef = useRef(initialAway)
+  const lastSavedRef = useRef({ home: initialHome, away: initialAway })
+  const saveTimerRef = useRef<number | null>(null)
 
   const kickoffTime = new Date(match.utcDate)
   useEffect(() => {
@@ -51,6 +63,50 @@ export default function PredictionCard({ match, contestId, existingPrediction, r
     const timer = window.setInterval(() => setNow(Date.now()), 1000)
     return () => window.clearInterval(timer)
   }, [])
+
+  useEffect(() => {
+    if (saveTimerRef.current) return
+    const home = existingPrediction?.predicted_home_score ?? 0
+    const away = existingPrediction?.predicted_away_score ?? 0
+    homeScoreRef.current = home
+    awayScoreRef.current = away
+    lastSavedRef.current = { home, away }
+    setHomeScore(home)
+    setAwayScore(away)
+  }, [existingPrediction?.predicted_home_score, existingPrediction?.predicted_away_score])
+
+  const saveLatest = async () => {
+    const home = homeScoreRef.current
+    const away = awayScoreRef.current
+    if (home === lastSavedRef.current.home && away === lastSavedRef.current.away) return
+    try {
+      await savePrediction(contestId, match.id, home, away)
+      lastSavedRef.current = { home, away }
+      if (homeScoreRef.current !== home || awayScoreRef.current !== away) {
+        await saveLatest()
+        return
+      }
+      setSaveStatus('saved')
+      setSaveError('')
+      window.setTimeout(() => setSaveStatus('idle'), 2000)
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : 'Unable to save prediction.')
+    }
+  }
+
+  useEffect(() => {
+    return () => {
+      if (saveTimerRef.current) {
+        window.clearTimeout(saveTimerRef.current)
+        saveTimerRef.current = null
+      }
+      const home = homeScoreRef.current
+      const away = awayScoreRef.current
+      if (home !== lastSavedRef.current.home || away !== lastSavedRef.current.away) {
+        void savePrediction(contestId, match.id, home, away)
+      }
+    }
+  }, [contestId, match.id])
 
   const clock = now ?? Date.now()
   const millisecondsUntilKickoff = kickoffTime.getTime() - clock
@@ -81,31 +137,32 @@ export default function PredictionCard({ match, contestId, existingPrediction, r
     minute: '2-digit',
   }).format(kickoffTime)
 
-  const handleScoreChange = (team: 'home' | 'away', change: number) => {
-    if (isLocked) return
-
-    let newHome = homeScore
-    let newAway = awayScore
-
-    if (team === 'home') {
-      newHome = Math.max(0, homeScore + change)
-      setHomeScore(newHome)
-    } else {
-      newAway = Math.max(0, awayScore + change)
-      setAwayScore(newAway)
-    }
-
+  const persistScores = (newHome: number, newAway: number) => {
+    const home = clampScore(newHome)
+    const away = clampScore(newAway)
+    homeScoreRef.current = home
+    awayScoreRef.current = away
+    setHomeScore(home)
+    setAwayScore(away)
     setSaveStatus('idle')
     setSaveError('')
-    startTransition(async () => {
-      try {
-        await savePrediction(contestId, match.id, newHome, newAway)
-        setSaveStatus('saved')
-        setTimeout(() => setSaveStatus('idle'), 2000)
-      } catch (error) {
-        setSaveError(error instanceof Error ? error.message : 'Unable to save prediction.')
-      }
-    })
+    if (saveTimerRef.current) window.clearTimeout(saveTimerRef.current)
+    saveTimerRef.current = window.setTimeout(() => {
+      saveTimerRef.current = null
+      startTransition(() => {
+        void saveLatest()
+      })
+    }, 1000)
+  }
+
+  const handleScoreChange = (team: 'home' | 'away', change: number) => {
+    if (isLocked) return
+    const currentHome = homeScoreRef.current
+    const currentAway = awayScoreRef.current
+    const newHome = team === 'home' ? clampScore(currentHome + change) : currentHome
+    const newAway = team === 'away' ? clampScore(currentAway + change) : currentAway
+    if (newHome === currentHome && newAway === currentAway) return
+    persistScores(newHome, newAway)
   }
 
   const stepperBtn =
@@ -127,25 +184,27 @@ export default function PredictionCard({ match, contestId, existingPrediction, r
         isHurryUp && 'prediction-hurry border-red-400/35'
       )}
     >
-      <div className="space-y-0">
-        <TeamScoreRow
-          crest={match.homeTeam.crest}
+      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-1">
+        <TeamName crest={match.homeTeam.crest} name={homeName} dimmed={isLocked} />
+        <TeamSteppers
           name={homeName}
           score={homeScore}
-          dimmed={isLocked}
-          disabled={isLocked || isPending}
+          disabled={isLocked}
           onDec={() => handleScoreChange('home', -1)}
           onInc={() => handleScoreChange('home', 1)}
+          canDec={homeScore > 0}
+          canInc={homeScore < SCORE_MAX}
           stepperClass={stepperBtn}
         />
-        <TeamScoreRow
-          crest={match.awayTeam.crest}
+        <TeamName crest={match.awayTeam.crest} name={awayName} dimmed={isLocked} />
+        <TeamSteppers
           name={awayName}
           score={awayScore}
-          dimmed={isLocked}
-          disabled={isLocked || isPending}
+          disabled={isLocked}
           onDec={() => handleScoreChange('away', -1)}
           onInc={() => handleScoreChange('away', 1)}
+          canDec={awayScore > 0}
+          canInc={awayScore < SCORE_MAX}
           stepperClass={stepperBtn}
         />
       </div>
@@ -200,40 +259,53 @@ export default function PredictionCard({ match, contestId, existingPrediction, r
   )
 }
 
-function TeamScoreRow({
+function TeamName({
   crest,
   name,
-  score,
   dimmed,
-  disabled,
-  onDec,
-  onInc,
-  stepperClass,
 }: {
   crest?: string
   name: string
-  score: number
   dimmed?: boolean
-  disabled?: boolean
-  onDec: () => void
-  onInc: () => void
-  stepperClass: string
 }) {
   return (
-    <div className="flex h-8 items-center gap-1.5 px-0.5">
+    <div className="flex h-8 min-w-0 items-center gap-1.5 px-0.5">
       <TeamCrest src={crest} name={name} dimmed={dimmed} />
       <span className="min-w-0 flex-1 truncate text-xs font-semibold tracking-tight text-zinc-100">
         {name}
       </span>
-      <div className="flex shrink-0 items-center">
-        <button type="button" disabled={disabled} onClick={onDec} className={stepperClass} aria-label={`Decrease ${name} score`}>
-          <Minus className="h-3 w-3" />
-        </button>
-        <span className="w-6 text-center text-base font-black tabular-nums text-white">{score}</span>
-        <button type="button" disabled={disabled} onClick={onInc} className={stepperClass} aria-label={`Increase ${name} score`}>
-          <Plus className="h-3 w-3" />
-        </button>
-      </div>
+    </div>
+  )
+}
+
+function TeamSteppers({
+  name,
+  score,
+  disabled,
+  onDec,
+  onInc,
+  canDec,
+  canInc,
+  stepperClass,
+}: {
+  name: string
+  score: number
+  disabled?: boolean
+  onDec: () => void
+  onInc: () => void
+  canDec: boolean
+  canInc: boolean
+  stepperClass: string
+}) {
+  return (
+    <div className="flex h-8 shrink-0 items-center">
+      <button type="button" disabled={disabled || !canDec} onClick={onDec} className={stepperClass} aria-label={`Decrease ${name} score`}>
+        <Minus className="h-3 w-3" />
+      </button>
+      <span className="w-6 text-center text-base font-black tabular-nums text-white">{score}</span>
+      <button type="button" disabled={disabled || !canInc} onClick={onInc} className={stepperClass} aria-label={`Increase ${name} score`}>
+        <Plus className="h-3 w-3" />
+      </button>
     </div>
   )
 }

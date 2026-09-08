@@ -4,33 +4,10 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { ShieldCheck } from 'lucide-react'
 import HeroBanner from './components/HeroBanner'
-import XactScoreLogo from './components/XactScoreLogo'
 import { getPLMatches } from '../lib/football'
 import { getTranslations } from '../lib/i18n'
 import { getServerLocale } from '../lib/i18n-server'
-
-const TEAMS = [
-  { name: 'Arsenal', crest: 'https://a.espncdn.com/i/teamlogos/soccer/500/359.png' },
-  { name: 'Aston Villa', crest: 'https://a.espncdn.com/i/teamlogos/soccer/500/362.png' },
-  { name: 'Bournemouth', crest: 'https://a.espncdn.com/i/teamlogos/soccer/500/349.png' },
-  { name: 'Brentford', crest: 'https://a.espncdn.com/i/teamlogos/soccer/500/337.png' },
-  { name: 'Brighton', crest: 'https://a.espncdn.com/i/teamlogos/soccer/500/331.png' },
-  { name: 'Chelsea', crest: 'https://a.espncdn.com/i/teamlogos/soccer/500/363.png' },
-  { name: 'Crystal Palace', crest: 'https://a.espncdn.com/i/teamlogos/soccer/500/384.png' },
-  { name: 'Everton', crest: 'https://a.espncdn.com/i/teamlogos/soccer/500/368.png' },
-  { name: 'Fulham', crest: 'https://a.espncdn.com/i/teamlogos/soccer/500/370.png' },
-  { name: 'Ipswich Town', crest: 'https://a.espncdn.com/i/teamlogos/soccer/500/379.png' },
-  { name: 'Leicester City', crest: 'https://a.espncdn.com/i/teamlogos/soccer/500/375.png' },
-  { name: 'Liverpool', crest: 'https://a.espncdn.com/i/teamlogos/soccer/500/364.png' },
-  { name: 'Manchester City', crest: 'https://a.espncdn.com/i/teamlogos/soccer/500/382.png' },
-  { name: 'Manchester United', crest: 'https://a.espncdn.com/i/teamlogos/soccer/500/360.png' },
-  { name: 'Newcastle United', crest: 'https://a.espncdn.com/i/teamlogos/soccer/500/361.png' },
-  { name: 'Nottingham Forest', crest: 'https://a.espncdn.com/i/teamlogos/soccer/500/393.png' },
-  { name: 'Southampton', crest: 'https://a.espncdn.com/i/teamlogos/soccer/500/376.png' },
-  { name: 'Tottenham Hotspur', crest: 'https://a.espncdn.com/i/teamlogos/soccer/500/367.png' },
-  { name: 'West Ham United', crest: 'https://a.espncdn.com/i/teamlogos/soccer/500/371.png' },
-  { name: 'Wolverhampton Wanderers', crest: 'https://a.espncdn.com/i/teamlogos/soccer/500/380.png' }
-]
+import { findFavoriteTeam } from '../lib/favorite-teams'
 
 // Fetch both the recent scores AND the next scheduled match
 async function fetchPLData() {
@@ -41,7 +18,7 @@ async function fetchPLData() {
     const recentMatchesRaw = data.matches
       .filter((m: any) => ['FINISHED', 'IN_PLAY', 'PAUSED'].includes(m.status))
       .sort((a: any, b: any) => new Date(b.utcDate).getTime() - new Date(a.utcDate).getTime())
-      .slice(0, 8);
+      .slice(0, 5);
 
     const recentScores = recentMatchesRaw.map((m: any) => ({
       id: m.id,
@@ -68,6 +45,9 @@ async function fetchPLData() {
         date: nextMatchRaw.utcDate,
         homeTeam: nextMatchRaw.homeTeam.shortName || nextMatchRaw.homeTeam.name,
         awayTeam: nextMatchRaw.awayTeam.shortName || nextMatchRaw.awayTeam.name,
+        homeCrest: nextMatchRaw.homeTeam.crest,
+        awayCrest: nextMatchRaw.awayTeam.crest,
+        venue: nextMatchRaw.venue || nextMatchRaw.stadium || null,
       }
     }
 
@@ -121,80 +101,72 @@ export default async function Home(props: { searchParams: Promise<{ success?: st
     return !best || current.rank < best.rank ? current : best
   }, null)
 
-  const selectedTeamData = TEAMS.find(team => team.name === profile?.favorite_team)
+  const selectedTeamData = findFavoriteTeam(profile?.favorite_team)
 
   return (
-    <div className="space-y-8 pb-12">
+    <div className="space-y-3 pb-4 sm:space-y-6 sm:pb-8">
     {searchParams?.success && (
       <div className="rounded-xl border border-orange-500/50 bg-orange-500/15 px-4 py-3 text-sm font-bold text-orange-200">
         {t(searchParams.success)}
       </div>
     )}
       
-      <div className="flex flex-col items-center gap-5 pt-2 pb-2">
-        <XactScoreLogo />
-      </div>
-
-      {/* HeroBanner is fully driven by the real API */}
       <HeroBanner nextMatch={nextMatch} recentScores={recentScores} />
 
-      <div className="w-full rounded-2xl border border-zinc-800 bg-gradient-to-br from-orange-600 via-zinc-900 to-zinc-950 p-5 shadow-lg shadow-black/30 sm:p-6">
-          <div className="mb-4 flex items-start justify-between gap-3">
-            <h2 className="text-lg font-semibold text-zinc-100">{t('Your Profile')}</h2>
-            <Link href="/profile" className="rounded-full border border-white/25 bg-white/10 px-3 py-1.5 text-xs font-bold text-orange-100 backdrop-blur-sm transition hover:border-white/40 hover:bg-white/20">{t('Edit')}</Link>
+      <div className="flex items-center gap-2.5 rounded-2xl border border-zinc-800 bg-gradient-to-br from-orange-600 via-zinc-900 to-zinc-950 px-3 py-2.5 shadow-lg shadow-black/30 sm:gap-4 sm:px-5 sm:py-4">
+        {profile?.avatar_url ? (
+          <img
+            src={profile.avatar_url}
+            alt=""
+            className="h-10 w-10 shrink-0 rounded-full border border-zinc-700 bg-zinc-800 object-cover sm:h-12 sm:w-12"
+          />
+        ) : (
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-xactscore-accent text-sm font-bold text-xactscore-bg sm:h-12 sm:w-12 sm:text-lg">
+            {profile?.username ? profile.username.charAt(0).toUpperCase() : profile?.email?.charAt(0).toUpperCase()}
           </div>
-          
-          <div className="mb-4 flex items-center gap-4">
-            {profile?.avatar_url ? (
-              <img
-                src={profile.avatar_url}
-                alt="Profile"
-                className="h-14 w-14 shrink-0 rounded-full border border-zinc-700 bg-zinc-800 object-cover"
+        )}
+        <div className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden sm:gap-3">
+          <p className="min-w-0 max-w-[7.5rem] truncate text-sm font-semibold text-zinc-100 sm:max-w-none sm:text-base">
+            {profile?.username || t('No username set')}
+          </p>
+          {profile?.is_global_admin && (
+            <span title="Global Admin" className="flex shrink-0 items-center">
+              <ShieldCheck className="h-3.5 w-3.5 text-xactscore-accent" />
+            </span>
+          )}
+          <span className="hidden h-3 w-px shrink-0 bg-white/20 sm:block" aria-hidden />
+          <span
+            className="inline-flex min-w-0 items-center gap-1 text-sm text-zinc-200"
+            title={t('Favorite Team:')}
+          >
+            {selectedTeamData ? (
+              <Image
+                src={selectedTeamData.crest}
+                alt=""
+                width={16}
+                height={16}
+                className="h-4 w-4 shrink-0 object-contain"
               />
-            ) : (
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-xactscore-accent text-lg font-bold text-xactscore-bg">
-                {profile?.username ? profile.username.charAt(0).toUpperCase() : profile?.email?.charAt(0).toUpperCase()}
-              </div>
-            )}
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2">
-                <p className="truncate font-medium text-zinc-100">{profile?.username || t('No username set')}</p>
-                {profile?.is_global_admin && (
-                  <span title="Global Admin" className="flex shrink-0 items-center">
-                    <ShieldCheck className="h-4 w-4 text-xactscore-accent" />
-                  </span>
-                )}
-              </div>
-              <p className="truncate text-sm text-zinc-500">{profile?.email}</p>
-            </div>
-          </div>
-
-          <div className="space-y-3 border-t border-zinc-800 pt-4">
-            <div className="flex items-center justify-between gap-3 text-sm text-zinc-400">
-              <span className="shrink-0 font-medium text-zinc-500">{t('Favorite Team:')}</span>
-              
-              <div className="flex min-w-0 items-center gap-2">
-                {selectedTeamData && (
-                  <Image
-                    src={selectedTeamData.crest}
-                    alt={`${selectedTeamData.name} Logo`}
-                    width={20}
-                    height={20}
-                    className="h-5 w-5 object-contain"
-                  />
-                )}
-                <span className="truncate font-semibold text-zinc-100">
-                  {profile?.favorite_team || t('Not selected')}
-                </span>
-              </div>
-            </div>
-            <div className="flex items-center justify-between gap-3 text-sm">
-              <span className="shrink-0 font-medium text-zinc-500">{t('Best league ranking:')}</span>
-              <span className="truncate font-semibold text-zinc-100">
-                {bestRanking ? `#${bestRanking.rank} (${bestRanking.year})` : t('Not ranked yet')}
-              </span>
-            </div>
-          </div>
+            ) : null}
+            <span className="truncate font-semibold">
+              {profile?.favorite_team || t('Not selected')}
+            </span>
+          </span>
+          <span className="h-3 w-px shrink-0 bg-white/20" aria-hidden />
+          <span className="shrink-0 text-sm text-zinc-300" title={t('Best league ranking:')}>
+            <span className="font-medium text-zinc-400">{t('Best rank')}</span>
+            {' '}
+            <span className="font-semibold tabular-nums text-zinc-100">
+              {bestRanking ? `#${bestRanking.rank}` : '—'}
+            </span>
+          </span>
+        </div>
+        <Link
+          href="/profile"
+          className="shrink-0 rounded-full border border-white/25 bg-white/10 px-2.5 py-1 text-xs font-bold text-orange-100 backdrop-blur-sm transition hover:border-white/40 hover:bg-white/20 sm:px-3 sm:py-1.5"
+        >
+          {t('Edit')}
+        </Link>
       </div>
     </div>
   );

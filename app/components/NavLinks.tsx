@@ -10,10 +10,9 @@ import {
   MessageSquare,
   ShieldCheck,
   CircleHelp,
-  Activity,
-  CircleDot,
 } from 'lucide-react'
 import { useTranslations } from './LocaleProvider'
+import XactScoreLogo from './XactScoreLogo'
 import { cn } from '@/lib/utils'
 import { tabActive, tabBase, tabInactive } from '@/lib/tab-styles'
 
@@ -35,15 +34,9 @@ export default function NavLinks({ isAdmin, isLoggedIn, unreadMessageCount }: Na
       <Link
         href="/"
         aria-label="XactScore home"
-        className="inline-flex h-10 items-center gap-2 outline-none sm:h-11"
+        className="inline-flex items-center outline-none"
       >
-        <span className="relative flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-xactscore-accent shadow-lg shadow-orange-500/10 backdrop-blur-md">
-          <Activity className="h-5 w-5" strokeWidth={3} />
-          <CircleDot className="absolute right-1 top-1 h-2.5 w-2.5" fill="currentColor" strokeWidth={2.5} />
-        </span>
-        <span className="text-gradient-accent hidden font-black uppercase tracking-tight lg:inline">
-          XactScore
-        </span>
+        <XactScoreLogo compact />
       </Link>
       <Link href="/" className={linkClass('/')}>
         <HomeIcon className="h-4 w-4" />

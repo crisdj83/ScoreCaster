@@ -19,7 +19,6 @@ type RankingPlayer = {
   totalPlayed: number
   scoredMatches: number
   accuracy: number
-  averagePoints: number
 }
 
 type EvolutionRow = {

@@ -16,6 +16,7 @@ type DialogProps = {
   onConfirm?: () => void | Promise<void>
   destructive?: boolean
   className?: string
+  titleClassName?: string
 }
 
 export function Dialog({
@@ -29,6 +30,7 @@ export function Dialog({
   onConfirm,
   destructive = false,
   className,
+  titleClassName,
 }: DialogProps) {
   const [pending, setPending] = React.useState(false)
 
@@ -65,7 +67,7 @@ export function Dialog({
           className
         )}
       >
-        <h2 id="dialog-title" className="text-lg font-bold tracking-tight text-white">
+        <h2 id="dialog-title" className={cn("text-lg font-bold tracking-tight text-white", titleClassName)}>
           {title}
         </h2>
         {description ? (

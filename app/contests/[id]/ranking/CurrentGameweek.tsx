@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
-import { BadgeDollarSign, Gauge, SlidersHorizontal, UserRound, Check, Crosshair, X } from 'lucide-react'
+import { BadgeDollarSign, ChevronLeft, ChevronRight, Gauge, SlidersHorizontal, UserRound, Check, Crosshair, X } from 'lucide-react'
+import { useTranslations } from '../../../components/LocaleProvider'
 import { Button } from '@/components/ui/button'
+import { isUnoptimizedAvatar } from '../../../../lib/soccer-avatar'
 
 type Fixture = {
   id: string
@@ -16,6 +18,8 @@ type Fixture = {
   status: string
   score: string | null
   isLive: boolean
+  homeScorers?: string[]
+  awayScorers?: string[]
 }
 
 type Player = {
@@ -25,6 +29,19 @@ type Player = {
   points: number | null
   avatar?: string | null
   outcome: 'zero' | 'close' | 'exact' | 'result'
+}
+
+function Crest({ src, name }: { src?: string; name: string }) {
+  if (!src) {
+    return (
+      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-[8px] font-bold text-zinc-400">
+        {name.slice(0, 2).toUpperCase()}
+      </span>
+    )
+  }
+  return (
+    <Image src={src} alt="" width={20} height={20} className="h-5 w-5 shrink-0 object-contain" />
+  )
 }
 
 export default function CurrentGameweek({
@@ -48,6 +65,7 @@ export default function CurrentGameweek({
   const [selectedMatchday] = useState(defaultFixture?.matchday ?? 1)
   const [focusedMatchId, setFocusedMatchId] = useState(defaultFixture?.id)
   const [now, setNow] = useState<number | null>(null)
+  const t = useTranslations()
 
   useEffect(() => {
     setNow(Date.now())
@@ -76,88 +94,111 @@ export default function CurrentGameweek({
   }
 
   return (
-    <section className="mb-8 rounded-xl border border-orange-500/40 bg-zinc-900 p-4 shadow-lg sm:p-5 md:p-6">
-      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-        <div>
-          <p className="text-xs font-black uppercase tracking-widest text-orange-300">Live gameweek</p>
-          <h3 className="mt-1 text-xl font-black text-zinc-100">Scores and current points</h3>
-          <p className="mt-1 text-sm text-zinc-400">Live scores and points refresh every five minutes.</p>
-        </div>
-      </div>
-
-      {focusedIndex >= 0 && (
-        <div className="mt-4 flex items-center justify-between gap-3">
-          <Button
-            type="button"
-            variant="secondary"
-            size="sm"
-            onClick={() => moveMatch(-1)}
-            disabled={focusedIndex === 0}
-          >
-            Previous match
-          </Button>
-          <span className="text-xs font-bold text-zinc-500">
+    <section className="mb-5 rounded-xl border border-orange-500/40 bg-zinc-900 p-3 shadow-lg sm:p-5 md:p-6">
+      <div className="flex items-center justify-between gap-2">
+        <h3 className="truncate text-sm font-black uppercase tracking-wider text-zinc-100 sm:text-base">
+          GW {selectedMatchday} · Scores
+        </h3>
+        {focusedIndex >= 0 ? (
+          <span className="shrink-0 text-[10px] font-bold tabular-nums text-zinc-500">
             {focusedIndex + 1} / {gameweekFixtures.length}
           </span>
-          <Button
-            type="button"
-            variant="secondary"
-            size="sm"
-            onClick={() => moveMatch(1)}
-            disabled={focusedIndex === gameweekFixtures.length - 1}
-          >
-            Next match
-          </Button>
-        </div>
-      )}
+        ) : null}
+      </div>
 
-      <div className="mt-5 grid gap-3">
+      <div className="mt-3">
         {selectedFixtures.length ? (
-          selectedFixtures.map((fixture) => (
-            <div
-              key={fixture.id}
-              className="flex flex-col gap-3 rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
-            >
-              <div className="flex min-w-0 items-center gap-2 font-semibold text-zinc-100">
-                {fixture.isLive && (
-                  <span
-                    className="h-2.5 w-2.5 animate-pulse rounded-full bg-emerald-400"
-                    title="Live"
-                  />
-                )}
-                {fixture.homeCrest ? (
-                  <Image src={fixture.homeCrest} alt="" width={24} height={24} className="h-6 w-6 object-contain" />
-                ) : null}
-                <span className="truncate">{fixture.home}</span>
-              </div>
-              <div className="px-3 text-center">
-                <div className="font-mono text-lg font-black text-xactscore-accent">
-                  {showSelectedScore ? fixture.score || '0 : 0' : '— : —'}
-                </div>
-                <div
-                  className={`text-[10px] uppercase tracking-wider ${
-                    fixture.isLive ? 'font-black text-emerald-400' : 'text-zinc-500'
-                  }`}
+          selectedFixtures.map((fixture) => {
+            const homeScorers = showSelectedScore ? fixture.homeScorers || [] : []
+            const awayScorers = showSelectedScore ? fixture.awayScorers || [] : []
+            const showScorers = homeScorers.length > 0 || awayScorers.length > 0
+
+            return (
+              <div
+                key={fixture.id}
+                className="grid grid-cols-[auto_minmax(0,1fr)_auto_minmax(0,1fr)_auto] items-center gap-x-1 rounded-xl border border-zinc-800 bg-zinc-950 px-1 py-2 sm:gap-x-2 sm:px-3"
+              >
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className={`h-8 w-auto shrink-0 gap-0.5 px-1.5 text-[8px] font-black uppercase tracking-wider ${showScorers ? 'row-span-2 self-center' : ''}`}
+                  onClick={() => moveMatch(-1)}
+                  disabled={focusedIndex <= 0}
+                  aria-label={t('Previous')}
                 >
-                  {fixture.isLive ? 'Live' : fixture.status === 'FINISHED' ? 'Final' : 'Score hidden'}
+                  <ChevronLeft className="h-4 w-4" />
+                  {t('Previous')}
+                </Button>
+
+                <div className="flex min-w-0 items-center justify-end gap-1.5">
+                  <span className="truncate text-right text-xs font-semibold text-zinc-100 sm:text-sm">
+                    {fixture.home}
+                  </span>
+                  <Crest src={fixture.homeCrest} name={fixture.home} />
                 </div>
-              </div>
-              <div className="flex min-w-0 items-center gap-2 font-semibold text-zinc-100 sm:justify-end sm:text-right">
-                <span className="truncate">{fixture.away}</span>
-                {fixture.awayCrest ? (
-                  <Image src={fixture.awayCrest} alt="" width={24} height={24} className="h-6 w-6 object-contain" />
+
+                <div className="flex min-w-[4.5rem] shrink-0 items-center justify-center gap-0.5 whitespace-nowrap sm:min-w-[5.5rem]">
+                  {fixture.isLive ? (
+                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" title="Live" />
+                  ) : null}
+                  <span className="font-mono text-sm font-black tabular-nums text-xactscore-accent sm:text-lg">
+                    {showSelectedScore ? fixture.score || '0 : 0' : '— : —'}
+                  </span>
+                  {!fixture.isLive && fixture.status === 'FINISHED' && showSelectedScore ? (
+                    <span className="text-[8px] font-black uppercase tracking-wider text-zinc-500">FT</span>
+                  ) : null}
+                </div>
+
+                <div className="flex min-w-0 items-center gap-1.5">
+                  <Crest src={fixture.awayCrest} name={fixture.away} />
+                  <span className="truncate text-xs font-semibold text-zinc-100 sm:text-sm">
+                    {fixture.away}
+                  </span>
+                </div>
+
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className={`h-8 w-auto shrink-0 gap-0.5 px-1.5 text-[8px] font-black uppercase tracking-wider ${showScorers ? 'row-span-2 self-center' : ''}`}
+                  onClick={() => moveMatch(1)}
+                  disabled={focusedIndex < 0 || focusedIndex === gameweekFixtures.length - 1}
+                  aria-label={t('Next')}
+                >
+                  {t('Next')}
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+
+                {showScorers ? (
+                  <>
+                    <div className="col-start-2 min-w-0 space-y-0.5 pt-1 text-right text-[10px] leading-tight text-zinc-500">
+                      {homeScorers.map((scorer) => (
+                        <div key={scorer} className="truncate">
+                          {scorer}
+                        </div>
+                      ))}
+                    </div>
+                    <div />
+                    <div className="min-w-0 space-y-0.5 pt-1 text-[10px] leading-tight text-zinc-500">
+                      {awayScorers.map((scorer) => (
+                        <div key={scorer} className="truncate">
+                          {scorer}
+                        </div>
+                      ))}
+                    </div>
+                  </>
                 ) : null}
               </div>
-            </div>
-          ))
+            )
+          })
         ) : (
           <p className="text-sm text-zinc-400">No fixtures available for this gameweek.</p>
         )}
       </div>
 
       {focusedIndex >= 0 && (
-        <div className="mt-6 border-t border-zinc-800 pt-5">
-          {/* Desktop header */}
+        <div className="mt-4 border-t border-zinc-800 pt-3">
           <div className="mb-2 hidden items-center gap-2 px-3 text-[10px] font-black uppercase tracking-wider text-zinc-500 sm:grid sm:grid-cols-[4rem_minmax(0,1fr)_7rem_5rem]">
             <span className="flex items-center gap-1">
               <Gauge className="h-3.5 w-3.5" /> Rank
@@ -178,7 +219,7 @@ export default function CurrentGameweek({
               selectedPlayers.map((player, index) => (
                 <div
                   key={player.id}
-                  className="flex min-h-11 items-center gap-2 rounded-lg bg-zinc-950 px-3 py-2 text-sm sm:grid sm:grid-cols-[4rem_minmax(0,1fr)_7rem_5rem] sm:gap-2"
+                  className="flex min-h-10 items-center gap-2 rounded-lg bg-zinc-950 px-3 py-1.5 text-sm sm:grid sm:grid-cols-[4rem_minmax(0,1fr)_7rem_5rem] sm:gap-2"
                 >
                   <span className="w-6 shrink-0 font-mono text-xs font-black text-xactscore-accent sm:w-auto sm:text-sm">
                     {index + 1}
@@ -192,9 +233,7 @@ export default function CurrentGameweek({
                         width={24}
                         height={24}
                         className="h-6 w-6 shrink-0 rounded-full object-cover sm:h-7 sm:w-7"
-                        unoptimized={
-                          player.avatar.includes('dicebear') || player.avatar.includes('supabase')
-                        }
+                        unoptimized={isUnoptimizedAvatar(player.avatar)}
                       />
                     ) : (
                       <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-orange-500/20 text-xs font-black text-orange-300 sm:h-7 sm:w-7">

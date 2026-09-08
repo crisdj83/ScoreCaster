@@ -13,30 +13,41 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
+import {
+  PREMIER_LEAGUE_TEAMS,
+  WORLD_TEAMS,
+  findFavoriteTeam,
+  type FavoriteTeam,
+} from '../../lib/favorite-teams'
+import { soccerAvatarPath } from '../../lib/soccer-avatar'
 
-// All 20 Premier League Teams (Using enterprise-grade ESPN CDN for 100% uptime)
-const TEAMS = [
-  { name: 'Arsenal', crest: 'https://a.espncdn.com/i/teamlogos/soccer/500/359.png' },
-  { name: 'Aston Villa', crest: 'https://a.espncdn.com/i/teamlogos/soccer/500/362.png' },
-  { name: 'Bournemouth', crest: 'https://a.espncdn.com/i/teamlogos/soccer/500/349.png' },
-  { name: 'Brentford', crest: 'https://a.espncdn.com/i/teamlogos/soccer/500/337.png' },
-  { name: 'Brighton', crest: 'https://a.espncdn.com/i/teamlogos/soccer/500/331.png' },
-  { name: 'Chelsea', crest: 'https://a.espncdn.com/i/teamlogos/soccer/500/363.png' },
-  { name: 'Crystal Palace', crest: 'https://a.espncdn.com/i/teamlogos/soccer/500/384.png' },
-  { name: 'Everton', crest: 'https://a.espncdn.com/i/teamlogos/soccer/500/368.png' },
-  { name: 'Fulham', crest: 'https://a.espncdn.com/i/teamlogos/soccer/500/370.png' },
-  { name: 'Ipswich Town', crest: 'https://a.espncdn.com/i/teamlogos/soccer/500/379.png' },
-  { name: 'Leicester City', crest: 'https://a.espncdn.com/i/teamlogos/soccer/500/375.png' },
-  { name: 'Liverpool', crest: 'https://a.espncdn.com/i/teamlogos/soccer/500/364.png' },
-  { name: 'Manchester City', crest: 'https://a.espncdn.com/i/teamlogos/soccer/500/382.png' },
-  { name: 'Manchester United', crest: 'https://a.espncdn.com/i/teamlogos/soccer/500/360.png' },
-  { name: 'Newcastle United', crest: 'https://a.espncdn.com/i/teamlogos/soccer/500/361.png' },
-  { name: 'Nottingham Forest', crest: 'https://a.espncdn.com/i/teamlogos/soccer/500/393.png' },
-  { name: 'Southampton', crest: 'https://a.espncdn.com/i/teamlogos/soccer/500/376.png' },
-  { name: 'Tottenham Hotspur', crest: 'https://a.espncdn.com/i/teamlogos/soccer/500/367.png' },
-  { name: 'West Ham United', crest: 'https://a.espncdn.com/i/teamlogos/soccer/500/371.png' },
-  { name: 'Wolverhampton Wanderers', crest: 'https://a.espncdn.com/i/teamlogos/soccer/500/380.png' }
-]
+function FavoriteTeamGroup({
+  label,
+  teams,
+  onSelect,
+}: {
+  label: string
+  teams: FavoriteTeam[]
+  onSelect: (name: string) => void
+}) {
+  return (
+    <>
+      <div className="sticky top-0 z-[1] border-y border-zinc-800 bg-zinc-900 px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider text-zinc-500">
+        {label}
+      </div>
+      {teams.map((team) => (
+        <div
+          key={team.name}
+          className="flex cursor-pointer items-center gap-3 px-4 py-2 transition-colors hover:bg-zinc-800"
+          onClick={() => onSelect(team.name)}
+        >
+          <img src={team.crest} alt="" className="h-6 w-6 object-contain" />
+          <span className="text-zinc-200">{team.name}</span>
+        </div>
+      ))}
+    </>
+  )
+}
 
 function ProfileSuccessBanner() {
   const searchParams = useSearchParams()
@@ -131,13 +142,12 @@ function ProfilePageInner() {
   }, [router])
 
   const generateRandomAvatar = () => {
-    const randomSeed = Math.random().toString(36).substring(7)
-    const newUrl = `https://api.dicebear.com/9.x/avataaars/svg?seed=${randomSeed}&backgroundColor=e5e7eb`
-    setAvatarUrl(newUrl)
+    const randomSeed = Math.random().toString(36).slice(2, 10)
+    setAvatarUrl(soccerAvatarPath(randomSeed, favoriteTeam || undefined))
     setIsPending(false)
   }
 
-  const selectedTeamData = TEAMS.find(team => team.name === favoriteTeam)
+  const selectedTeamData = findFavoriteTeam(favoriteTeam)
 
   if (loading) return <ProfileLoadingSkeleton />
   if (loadError) {
@@ -202,7 +212,7 @@ function ProfilePageInner() {
                     <Label htmlFor="avatar_url">{t('Image URL')}</Label>
                     <Input
                       id="avatar_url"
-                      type="url"
+                      type="text"
                       name="avatar_url"
                       value={avatarUrl}
                       onChange={(e) => {
@@ -210,6 +220,8 @@ function ProfilePageInner() {
                         setIsPending(false)
                       }}
                       placeholder="Paste a link to an image..."
+                      inputMode="url"
+                      autoComplete="off"
                     />
                   </div>
 
@@ -300,7 +312,7 @@ function ProfilePageInner() {
                   <>
                     <div className="fixed inset-0 z-10" onClick={() => setShowDropdown(false)} />
 
-                    <div className="absolute z-20 mt-1 max-h-60 w-full overflow-y-auto rounded-xl border border-zinc-700 bg-zinc-900 shadow-lg shadow-black/40">
+                    <div className="absolute z-20 mt-1 max-h-80 w-full overflow-y-auto rounded-xl border border-zinc-700 bg-zinc-900 shadow-lg shadow-black/40">
                       <div
                         className="flex cursor-pointer items-center gap-3 border-b border-zinc-800 px-4 py-3 text-zinc-500 hover:bg-zinc-800"
                         onClick={() => {
@@ -314,19 +326,22 @@ function ProfilePageInner() {
                         {t('None')}
                       </div>
 
-                      {TEAMS.map((team) => (
-                        <div
-                          key={team.name}
-                          className="flex cursor-pointer items-center gap-3 px-4 py-2 transition-colors hover:bg-zinc-800"
-                          onClick={() => {
-                            setFavoriteTeam(team.name)
-                            setShowDropdown(false)
-                          }}
-                        >
-                          <img src={team.crest} alt={team.name} className="h-6 w-6 object-contain" />
-                          <span className="text-zinc-200">{team.name}</span>
-                        </div>
-                      ))}
+                      <FavoriteTeamGroup
+                        label={t('Premier League')}
+                        teams={PREMIER_LEAGUE_TEAMS}
+                        onSelect={(name) => {
+                          setFavoriteTeam(name)
+                          setShowDropdown(false)
+                        }}
+                      />
+                      <FavoriteTeamGroup
+                        label={t('World clubs')}
+                        teams={WORLD_TEAMS}
+                        onSelect={(name) => {
+                          setFavoriteTeam(name)
+                          setShowDropdown(false)
+                        }}
+                      />
                     </div>
                   </>
                 )}

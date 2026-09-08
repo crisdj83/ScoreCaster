@@ -31,6 +31,8 @@ type RankTableProps<T> = {
   mobileRank?: (row: T, index: number) => React.ReactNode
   /** Compact trailing bold stat for the mobile row, e.g. total points */
   mobileEnd?: (row: T, index: number) => React.ReactNode
+  /** Inline icon stats shown on the compact mobile row (no dropdown) */
+  mobileStats?: (row: T, index: number) => React.ReactNode
   /** One-line mobile rows; extra stats open in a dropdown when present */
   mobileSingleLine?: boolean
 }
@@ -45,6 +47,7 @@ export function RankTable<T>({
   mobileSubtitle,
   mobileRank,
   mobileEnd,
+  mobileStats,
   mobileSingleLine = false,
 }: RankTableProps<T>) {
   if (rows.length === 0) {
@@ -57,7 +60,7 @@ export function RankTable<T>({
 
   const mobileColumns = columns.filter((c) => !c.hideOnMobile)
   const expandableColumns = mobileColumns.filter((c) => c.mobileExpandable)
-  const compactMode = Boolean(mobileRank || mobileEnd)
+  const compactMode = Boolean(mobileRank || mobileEnd || mobileStats)
   const showInlineSubtitle = !mobileSingleLine && Boolean(mobileSubtitle)
 
   return (
@@ -95,13 +98,13 @@ export function RankTable<T>({
             const trigger = (
               <>
                 {mobileRank ? (
-                  <div className="flex w-6 shrink-0 items-center justify-center tabular-nums">
+                  <div className="flex min-w-6 shrink-0 items-center justify-center tabular-nums">
                     {mobileRank(row, index)}
                   </div>
                 ) : null}
 
-                <div className="min-w-0 flex-1">
-                  <div className="truncate text-[13px] font-semibold leading-none tracking-tight text-zinc-100">
+                <div className="flex min-w-0 flex-1 items-center">
+                  <div className="min-w-0 flex-1 text-[13px] font-semibold leading-none tracking-tight text-zinc-100">
                     {mobileTitle ? mobileTitle(row, index) : null}
                   </div>
                   {showInlineSubtitle ? (
@@ -111,13 +114,33 @@ export function RankTable<T>({
                   ) : null}
                 </div>
 
+                {mobileStats ? (
+                  <div className="flex shrink-0 items-center gap-2.5 whitespace-nowrap leading-none">
+                    {mobileStats(row, index)}
+                  </div>
+                ) : null}
+
                 {mobileEnd ? (
-                  <div className="shrink-0 text-right font-black tabular-nums text-xactscore-accent">
+                  <div className="min-w-[1.75rem] shrink-0 text-right font-black tabular-nums text-xactscore-accent">
                     {mobileEnd(row, index)}
                   </div>
                 ) : null}
               </>
             )
+
+            if (!details) {
+              return (
+                <li
+                  key={rowKey}
+                  className={cn(
+                    "flex min-h-10 items-center gap-2 px-3 py-2",
+                    index % 2 === 1 && "bg-white/[0.02]"
+                  )}
+                >
+                  {trigger}
+                </li>
+              )
+            }
 
             return (
               <ExpandableRow

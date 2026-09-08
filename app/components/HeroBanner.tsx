@@ -2,7 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { MapPin } from 'lucide-react'
 import { useTranslations } from './LocaleProvider'
+import { buttonVariants } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 
 const TEAMS = [
   { name: 'Arsenal', crest: 'https://a.espncdn.com/i/teamlogos/soccer/500/359.png' },
@@ -42,6 +45,9 @@ export type NextMatchData = {
   date: string;
   homeTeam: string;
   awayTeam: string;
+  homeCrest?: string;
+  awayCrest?: string;
+  venue?: string | null;
 }
 
 export default function HeroBanner({ 
@@ -87,6 +93,19 @@ export default function HeroBanner({
     return team ? team.crest : ''
   }
 
+  const unit = (label: string, value: string, accent = false) => (
+    <div className="flex flex-col items-center">
+      <span className="mb-0.5 text-xs uppercase tracking-wider text-orange-200">{label}</span>
+      <div
+        className={`flex w-8 items-center justify-center rounded border-2 bg-black/20 p-1 font-mono text-sm font-black sm:w-12 sm:p-2 sm:text-base ${
+          accent ? 'border-orange-400 text-orange-400' : 'border-white/80'
+        }`}
+      >
+        {value}
+      </div>
+    </div>
+  )
+
   return (
     <div className="relative flex w-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-bl from-orange-600 via-zinc-900 to-zinc-950 shadow-2xl lg:flex-row">
       
@@ -96,7 +115,7 @@ export default function HeroBanner({
           100% { transform: translateY(-50%); }
         }
         .animate-marquee-y {
-          animation: scroll-y 36s linear infinite;
+          animation: scroll-y 28s linear infinite;
         }
         .animate-marquee-y:hover {
           animation-play-state: paused;
@@ -112,10 +131,8 @@ export default function HeroBanner({
             rgba(0,0,0,0.18) 10%,
             rgba(0,0,0,0.55) 20%,
             #000 34%,
-            #000 58%,
-            rgba(0,0,0,0.7) 70%,
-            rgba(0,0,0,0.35) 82%,
-            rgba(0,0,0,0.1) 92%,
+            #000 70%,
+            rgba(0,0,0,0.35) 88%,
             transparent 100%
           );
           mask-image: linear-gradient(
@@ -124,10 +141,8 @@ export default function HeroBanner({
             rgba(0,0,0,0.18) 10%,
             rgba(0,0,0,0.55) 20%,
             #000 34%,
-            #000 58%,
-            rgba(0,0,0,0.7) 70%,
-            rgba(0,0,0,0.35) 82%,
-            rgba(0,0,0,0.1) 92%,
+            #000 70%,
+            rgba(0,0,0,0.35) 88%,
             transparent 100%
           );
         }
@@ -173,112 +188,109 @@ export default function HeroBanner({
         }
       `}} />
 
-      {/* UPPER / LEFT: glass hero that melts into the scores */}
-      <div className="relative z-10 w-full pb-8 text-white lg:w-1/2 lg:pb-0 lg:pr-6">
+      <div className="relative z-10 w-full pb-6 text-white lg:w-1/2 lg:pb-0 lg:pr-6">
         <div
           aria-hidden
           className="hero-glass-veil pointer-events-none absolute inset-0 bg-white/[0.08] backdrop-blur-xl"
         />
-        <div className="relative z-10 flex h-full flex-col justify-between p-6 sm:p-10">
+        <div className="relative z-10 flex h-full flex-col justify-between p-3 sm:p-8 lg:p-10">
         <div>
-          <p className="mb-3 max-w-md text-3xl font-black uppercase leading-none tracking-tight text-white sm:text-5xl">
-            {t('Call the scores.')}<br /><span className="text-xactscore-accent">{t('Own the table.')}</span>
+          <p className="mb-1 max-w-md text-xl font-black uppercase leading-none tracking-tight text-white sm:mb-3 sm:text-4xl lg:text-5xl">
+            {t('Call the scores.')}{' '}
+            <span className="text-xactscore-accent">{t('Own the table.')}</span>
           </p>
-          <p className="mb-6 max-w-md text-sm leading-6 text-orange-100 sm:text-base">
-            {t('Predict match outcomes, compete with your league, and climb the leaderboard every matchweek.')}
+          <p className="mb-2 max-w-md text-sm leading-snug text-orange-100 sm:mb-4 sm:leading-6">
+            {t('Call every Premier League score. Compete in your league. Climb the table.')}
           </p>
-          <div className="flex items-center gap-2 mb-3">
-            <span className="text-lg">⚽</span>
-            <span className="font-extrabold tracking-widest text-xs uppercase text-orange-200">{t('Upcoming Match')}</span>
-          </div>
-          <h2 className="text-2xl sm:text-4xl font-black uppercase tracking-tight leading-tight mb-2">
-            Premier League
-          </h2>
-          <p className="text-orange-100 font-medium text-base sm:text-lg">
-            {nextMatch ? `${nextMatch.homeTeam} vs ${nextMatch.awayTeam}` : t('Season Ended / No Fixtures')}
+          <p className="text-xs font-extrabold uppercase tracking-widest text-orange-200">
+            {t('Upcoming Match')}
           </p>
+          {nextMatch ? (
+            <>
+              <div className="mt-2 flex min-w-0 items-center gap-2">
+                {(nextMatch.homeCrest || getTeamLogo(nextMatch.homeTeam)) ? (
+                  <img
+                    src={nextMatch.homeCrest || getTeamLogo(nextMatch.homeTeam)}
+                    alt=""
+                    className="h-6 w-6 shrink-0 object-contain sm:h-7 sm:w-7"
+                  />
+                ) : null}
+                <span className="min-w-0 truncate text-base font-black uppercase leading-tight tracking-tight sm:text-xl">
+                  {nextMatch.homeTeam}
+                </span>
+                <span className="shrink-0 text-xs font-black uppercase text-xactscore-accent">vs</span>
+                <span className="min-w-0 truncate text-right text-base font-black uppercase leading-tight tracking-tight sm:text-xl">
+                  {nextMatch.awayTeam}
+                </span>
+                {(nextMatch.awayCrest || getTeamLogo(nextMatch.awayTeam)) ? (
+                  <img
+                    src={nextMatch.awayCrest || getTeamLogo(nextMatch.awayTeam)}
+                    alt=""
+                    className="h-6 w-6 shrink-0 object-contain sm:h-7 sm:w-7"
+                  />
+                ) : null}
+              </div>
+              {nextMatch.venue ? (
+                <p className="mt-1 flex min-w-0 items-center gap-1 text-xs font-semibold text-orange-200/90">
+                  <MapPin className="h-3 w-3 shrink-0" aria-hidden />
+                  <span className="truncate">{nextMatch.venue}</span>
+                </p>
+              ) : null}
+            </>
+          ) : (
+            <h2 className="mt-2 text-base font-black uppercase leading-tight tracking-tight sm:text-xl">
+              {t('Season Ended / No Fixtures')}
+            </h2>
+          )}
         </div>
 
-        <div className="mt-8">
-          <div className="flex flex-wrap gap-2 sm:gap-3 items-center mb-6">
-            <div className="flex flex-col items-center">
-              <span className="text-[10px] uppercase tracking-wider text-orange-200 mb-1">{t('Days')}</span>
-              <div className="border-2 border-white/80 p-2 w-12 sm:w-14 flex items-center justify-center text-xl sm:text-2xl font-black font-mono rounded bg-black/20">
-                {timeLeft.days}
-              </div>
-            </div>
-            <span className="text-xl font-black">:</span>
-            <div className="flex flex-col items-center">
-              <span className="text-[10px] uppercase tracking-wider text-orange-200 mb-1">{t('Hours')}</span>
-              <div className="border-2 border-white/80 p-2 w-12 sm:w-14 flex items-center justify-center text-xl sm:text-2xl font-black font-mono rounded bg-black/20">
-                {timeLeft.hours}
-              </div>
-            </div>
-            <span className="text-xl font-black">:</span>
-            <div className="flex flex-col items-center">
-              <span className="text-[10px] uppercase tracking-wider text-orange-200 mb-1">{t('Mins')}</span>
-              <div className="border-2 border-white/80 p-2 w-12 sm:w-14 flex items-center justify-center text-xl sm:text-2xl font-black font-mono rounded bg-black/20">
-                {timeLeft.minutes}
-              </div>
-            </div>
-            <span className="text-xl font-black">:</span>
-            <div className="flex flex-col items-center">
-              <span className="text-[10px] uppercase tracking-wider text-orange-200 mb-1">{t('Secs')}</span>
-              <div className="border-2 border-orange-400 p-2 w-12 sm:w-14 flex items-center justify-center text-xl sm:text-2xl font-black font-mono text-orange-400 rounded bg-black/20">
-                {timeLeft.seconds}
-              </div>
-            </div>
+        <div className="mt-3 sm:mt-8">
+          <div className="mb-3 flex flex-wrap items-center gap-1.5 sm:mb-6 sm:gap-3">
+            {unit(t('Days'), timeLeft.days)}
+            <span className="text-sm font-black">:</span>
+            {unit(t('Hours'), timeLeft.hours)}
+            <span className="text-sm font-black">:</span>
+            {unit(t('Mins'), timeLeft.minutes)}
+            <span className="text-sm font-black">:</span>
+            {unit(t('Secs'), timeLeft.seconds, true)}
           </div>
 
-          <div>
-            <Link 
-              href="/contests" 
-              className="inline-block rounded bg-xactscore-accent px-6 py-3 text-xs font-black uppercase tracking-wider text-xactscore-bg shadow-md transition-colors hover:bg-[#ff922f] sm:text-sm"
-            >
-              {t('Make Predictions')}
-            </Link>
-          </div>
+          <Link 
+            href="/contests" 
+            className={cn(
+              buttonVariants({ variant: 'glass', size: 'sm' }),
+              'uppercase tracking-wider sm:h-11 sm:min-h-11 sm:px-5 sm:text-xs'
+            )}
+          >
+            {t('Make Predictions')}
+          </Link>
         </div>
         </div>
       </div>
 
-      {/* LOWER / RIGHT: scores that rise out of the glass */}
-      <div className="relative z-0 -mt-14 h-[340px] w-full overflow-hidden bg-transparent lg:mt-0 lg:-ml-10 lg:h-auto lg:min-h-[420px] lg:w-1/2">
+      <div className="relative z-0 -mt-8 h-[196px] w-full overflow-hidden bg-transparent sm:-mt-10 sm:h-[240px] lg:mt-0 lg:-ml-10 lg:h-auto lg:min-h-[360px] lg:w-1/2">
         {recentScores.length > 0 ? (
           <div className="scores-crossfade absolute inset-0 overflow-hidden">
-            <div className="animate-marquee-y flex min-h-full w-full flex-col gap-3 p-4 pt-16 sm:p-6 sm:pt-16 lg:pt-6">
+            <div className="animate-marquee-y flex min-h-full w-full flex-col gap-2 p-3 pt-6 sm:gap-2.5 sm:p-5 sm:pt-8 lg:pt-6">
             {[...recentScores, ...recentScores].map((match, idx) => (
               <div
                 key={`${match.id}-${idx}`}
-                className="rounded-xl border border-white/10 bg-white/[0.06] p-3 shadow-lg shadow-black/20 backdrop-blur-md transition-colors hover:border-orange-400/40 hover:bg-white/[0.1] sm:p-4"
+                className="flex min-h-[52px] items-center gap-2 rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2.5 shadow-lg shadow-black/20 backdrop-blur-md sm:px-3.5 sm:py-3"
               >
-                <div className="mb-2 flex items-center justify-between">
-                  <span className="rounded-full border border-orange-500/30 bg-orange-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-orange-300 backdrop-blur-sm">
-                    {match.status}
-                  </span>
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 overflow-hidden sm:gap-3">
-                      {(match.homeCrest || getTeamLogo(match.homeTeam)) && (
-                        <img src={match.homeCrest || getTeamLogo(match.homeTeam)} alt={match.homeTeam} className="h-5 w-5 flex-shrink-0 object-contain" />
-                      )}
-                      <span className="truncate text-sm font-semibold text-zinc-100">{match.homeTeam}</span>
-                    </div>
-                    <span className="flex-shrink-0 text-lg font-bold text-white">{match.homeScore !== null ? match.homeScore : '-'}</span>
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 overflow-hidden sm:gap-3">
-                      {(match.awayCrest || getTeamLogo(match.awayTeam)) && (
-                        <img src={match.awayCrest || getTeamLogo(match.awayTeam)} alt={match.awayTeam} className="h-5 w-5 flex-shrink-0 object-contain" />
-                      )}
-                      <span className="truncate text-sm font-semibold text-zinc-100">{match.awayTeam}</span>
-                    </div>
-                    <span className="flex-shrink-0 text-lg font-bold text-white">{match.awayScore !== null ? match.awayScore : '-'}</span>
-                  </div>
-                </div>
+                <span className="w-8 shrink-0 text-xs font-bold uppercase tracking-wider text-orange-300">
+                  {match.status}
+                </span>
+                {(match.homeCrest || getTeamLogo(match.homeTeam)) ? (
+                  <img src={match.homeCrest || getTeamLogo(match.homeTeam)} alt="" className="h-5 w-5 shrink-0 object-contain" />
+                ) : null}
+                <span className="min-w-0 flex-1 truncate text-sm font-semibold text-zinc-100">{match.homeTeam}</span>
+                <span className="shrink-0 font-mono text-sm font-black text-white">
+                  {match.homeScore ?? '-'}–{match.awayScore ?? '-'}
+                </span>
+                <span className="min-w-0 flex-1 truncate text-right text-sm font-semibold text-zinc-100">{match.awayTeam}</span>
+                {(match.awayCrest || getTeamLogo(match.awayTeam)) ? (
+                  <img src={match.awayCrest || getTeamLogo(match.awayTeam)} alt="" className="h-5 w-5 shrink-0 object-contain" />
+                ) : null}
               </div>
             ))}
              </div>

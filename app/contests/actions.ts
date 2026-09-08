@@ -15,7 +15,12 @@ export async function createContest(formData: FormData) {
   
   if (authError || !user) redirect('/login')
 
-  const name = formData.get('name') as string
+  const name = String(formData.get('name') || '').trim()
+  if (!name) {
+    redirect('/contests?error=Please enter a contest name.')
+  }
+
+  const isPublic = formData.get('visibility') === 'public'
   const contestKey = generateContestKey()
   const serviceSupabase = createAdminClient()
 
@@ -24,15 +29,23 @@ export async function createContest(formData: FormData) {
     .from('contests')
     .insert({
       admin_id: user.id,
-      name: name,
+      name,
       contest_key: contestKey,
       season_length: 'full',
+      is_public: isPublic,
     })
     .select('id')
     .single()
 
   if (contestError) {
-    redirect(`/contests?error=Failed to create contest: ${contestError.message}`)
+    const missingPublicColumn = /is_public/.test(contestError.message || '')
+    redirect(
+      `/contests?error=${encodeURIComponent(
+        missingPublicColumn
+          ? 'Public contests need a one-time database update. Paste supabase/public-contests.sql into the Supabase SQL editor, then try again.'
+          : `Failed to create contest: ${contestError.message}`
+      )}`
+    )
   }
 
   // 2. Automatically add the creator as the 'admin' in the members table
@@ -58,14 +71,17 @@ export async function joinContest(formData: FormData) {
   
   if (authError || !user) redirect('/login')
 
-  const contestKey = formData.get('contest_key') as string
+  const contestKey = String(formData.get('contest_key') || '').trim().toLowerCase()
+  if (!contestKey) {
+    redirect('/contests?error=Please enter an invitation key.')
+  }
 
-  // 1. Find the contest by its unique key
+  // 1. Find the private contest by its unique key
   const { data: contest, error: searchError } = await supabase
     .from('contests')
     .select('id')
-    .eq('contest_key', contestKey.toLowerCase())
-    .single()
+    .eq('contest_key', contestKey)
+    .maybeSingle()
 
   if (searchError || !contest) {
     redirect(`/contests?error=Contest not found. Please check the code and try again.`)
@@ -85,6 +101,44 @@ export async function joinContest(formData: FormData) {
     redirect(`/contests/${contest.id}`) // Just send them to it
   } else if (joinError) {
     redirect(`/contests?error=Failed to join contest: ${joinError.message}`)
+  }
+
+  redirect(`/contests/${contest.id}`)
+}
+
+export async function joinPublicContest(formData: FormData) {
+  const supabase = await createClient()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+  if (authError || !user) redirect('/login')
+
+  const contestId = String(formData.get('contest_id') || '')
+  if (!contestId) {
+    redirect('/contests/public?error=Contest not found.')
+  }
+
+  const { data: contest, error: searchError } = await supabase
+    .from('contests')
+    .select('id, is_public')
+    .eq('id', contestId)
+    .maybeSingle()
+
+  if (searchError || !contest || !contest.is_public) {
+    redirect('/contests/public?error=This public contest could not be found.')
+  }
+
+  const { error: joinError } = await supabase
+    .from('contest_members')
+    .insert({
+      contest_id: contest.id,
+      user_id: user.id,
+      role: 'member',
+    })
+
+  if (joinError && joinError.code === '23505') {
+    redirect(`/contests/${contest.id}`)
+  } else if (joinError) {
+    redirect(`/contests/public?error=Failed to join contest: ${joinError.message}`)
   }
 
   redirect(`/contests/${contest.id}`)

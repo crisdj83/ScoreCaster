@@ -50,6 +50,9 @@ export async function savePrediction(
   if (isNaN(homeScore) || isNaN(awayScore)) {
     throw new Error('Scores must be valid numbers.')
   }
+  if (homeScore < 0 || homeScore > 5 || awayScore < 0 || awayScore > 5) {
+    throw new Error('Scores must be between 0 and 5.')
+  }
 
   const admin = createAdminClient()
   const payload = {
@@ -96,4 +99,68 @@ export async function savePrediction(
   revalidatePath(`/contests/${contestId}`)
 
   return { success: true }
+}
+
+export async function saveGameweekPredictions(
+  contestId: string,
+  predictions: { matchId: string; homeScore: number; awayScore: number }[]
+) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('You must be logged in to save a prediction.')
+
+  const { data: membership, error: membershipError } = await supabase
+    .from('contest_members')
+    .select('user_id, contests(season_length)')
+    .eq('contest_id', contestId)
+    .eq('user_id', user.id)
+    .single()
+  if (membershipError || !membership) throw new Error('You are not a member of this contest.')
+
+  const contest = Array.isArray(membership.contests) ? membership.contests[0] : membership.contests
+  const matchData = await getPLMatches()
+  const now = Date.now()
+  const updatedAt = new Date().toISOString()
+  const payloads = []
+
+  for (const prediction of predictions) {
+    const match = matchData.matches.find(
+      (item: { id: number | string; utcDate: string }) => String(item.id) === String(prediction.matchId)
+    )
+    if (!match) continue
+    if (!isMatchInContestSeason(match, contest?.season_length)) continue
+    if (!match.utcDate || isPredictionLocked(match.utcDate, now)) continue
+
+    const homeScore = Number(prediction.homeScore)
+    const awayScore = Number(prediction.awayScore)
+    if (!Number.isInteger(homeScore) || !Number.isInteger(awayScore)) continue
+    if (homeScore < 0 || homeScore > 5 || awayScore < 0 || awayScore > 5) continue
+
+    payloads.push({
+      user_id: user.id,
+      contest_id: contestId,
+      match_id: String(prediction.matchId),
+      predicted_home_score: homeScore,
+      predicted_away_score: awayScore,
+      updated_at: updatedAt,
+    })
+  }
+
+  if (payloads.length === 0) {
+    throw new Error('No unlocked matches left to fill this gameweek.')
+  }
+
+  const admin = createAdminClient()
+  const { error: upsertError } = await admin
+    .from('predictions')
+    .upsert(payloads, { onConflict: 'user_id,contest_id,match_id' })
+
+  if (upsertError) {
+    throw new Error(`Supabase Save Error: ${upsertError.message}`)
+  }
+
+  revalidatePath(`/contests/${contestId}/predictions`)
+  revalidatePath(`/contests/${contestId}`)
+
+  return { success: true, saved: payloads.length }
 }

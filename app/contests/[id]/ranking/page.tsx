@@ -17,12 +17,22 @@ import {
   type ContestScoring,
 } from '../../../../lib/scoring'
 import { Target, Activity, CheckCircle2, Gauge } from 'lucide-react'
+import Image from 'next/image'
 import RankingInsights from './RankingInsights'
 import CurrentGameweek from './CurrentGameweek'
 import LiveRefresh from '../../../components/LiveRefresh'
 import { RankTable, type RankColumn } from '@/components/ui/rank-table'
 import { ScoreBadge } from '@/components/ui/badge'
 import { PageHeader } from '@/components/ui/page-header'
+import { isUnoptimizedAvatar } from '../../../../lib/soccer-avatar'
+
+type MatchGoal = {
+  minute?: number
+  injuryTime?: number | null
+  type?: string
+  team?: { id?: number | string; name?: string }
+  scorer?: { id?: number | string; name?: string }
+}
 
 type Match = {
   id: number | string
@@ -35,6 +45,7 @@ type Match = {
     fullTime?: { home?: number | null; away?: number | null }
     halfTime?: { home?: number | null; away?: number | null }
   }
+  goals?: MatchGoal[]
 }
 
 type Prediction = {
@@ -71,6 +82,85 @@ function outcomeFromPoints(points: number | null, scoring: ContestScoring) {
 function displayName(member: any) {
   const user = Array.isArray(member.users) ? member.users[0] : member.users
   return user?.username || user?.email?.split('@')[0] || 'Unknown Player'
+}
+
+function lastName(name: string) {
+  const parts = name.trim().split(/\s+/)
+  return parts[parts.length - 1] || name
+}
+
+function formatGoalMinute(goal: MatchGoal) {
+  const minute = Number(goal.minute) || 0
+  const injury = Number(goal.injuryTime) || 0
+  return injury > 0 ? `${minute}+${injury}'` : `${minute}'`
+}
+
+function scorersForTeam(goals: MatchGoal[] | undefined, team: Match['homeTeam']) {
+  const teamGoals = (goals || []).filter((goal) => {
+    if (team.id != null && goal.team?.id != null) return String(goal.team.id) === String(team.id)
+    return Boolean(team.name && goal.team?.name === team.name)
+  })
+  const order: string[] = []
+  const byPlayer = new Map<string, { name: string; bits: string[] }>()
+  for (const goal of teamGoals) {
+    const key = String(goal.scorer?.id ?? goal.scorer?.name ?? `${goal.minute}`)
+    const suffix = goal.type === 'OWN' ? ' og' : goal.type === 'PENALTY' ? ' pen' : ''
+    const name = lastName(goal.scorer?.name || 'Goal')
+    let entry = byPlayer.get(key)
+    if (!entry) {
+      entry = { name, bits: [] }
+      byPlayer.set(key, entry)
+      order.push(key)
+    }
+    entry.bits.push(`${formatGoalMinute(goal)}${suffix}`)
+  }
+  return order.map((key) => {
+    const entry = byPlayer.get(key)!
+    return `${entry.name} ${entry.bits.join(', ')}`
+  })
+}
+
+function PlayerAvatar({ src, name }: { src?: string | null; name: string }) {
+  if (src) {
+    return (
+      <Image
+        src={src}
+        alt=""
+        width={20}
+        height={20}
+        className="h-5 w-5 shrink-0 rounded-full object-cover"
+        unoptimized={isUnoptimizedAvatar(src)}
+      />
+    )
+  }
+  return (
+    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-[9px] font-bold text-zinc-400">
+      {name.slice(0, 1).toUpperCase()}
+    </span>
+  )
+}
+
+function ScoringChip({
+  icon: Icon,
+  value,
+  label,
+  iconClassName,
+}: {
+  icon: typeof Target
+  value: number
+  label: string
+  iconClassName: string
+}) {
+  return (
+    <span
+      className="inline-flex w-10 shrink-0 items-center justify-center gap-0.5 py-0.5"
+      title={`${label}: ${value}`}
+      aria-label={`${label}: ${value}`}
+    >
+      <Icon className={`h-3.5 w-3.5 shrink-0 ${iconClassName}`} aria-hidden />
+      <span className="w-4 text-center text-[11px] font-bold tabular-nums text-zinc-200">{value}</span>
+    </span>
+  )
 }
 
 export default async function RankingPage(props: { params: Promise<{ id: string }>; searchParams: Promise<{ matchId?: string }> }) {
@@ -160,10 +250,12 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
     const closeResults = playedPredictions.filter(item => item.points === ptsClose).length
     const rightOutcome = playedPredictions.filter(item => item.points === ptsResult).length
     const totalPoints = playedPredictions.reduce((sum, item) => sum + (item.points || 0), 0)
+    const profile = Array.isArray(member.users) ? member.users[0] : member.users
     return {
       id: member.user_id,
       username: displayName(member),
-      motto: (Array.isArray(member.users) ? member.users[0]?.quote : member.users?.quote) || '',
+      motto: profile?.quote || '',
+      avatar: profile?.avatar_url || null,
       totalPoints,
       exactResults,
       closeResults,
@@ -171,7 +263,6 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
       totalPlayed: lockedPredictions.length,
       scoredMatches: playedPredictions.length,
       accuracy: lockedPredictions.length ? ((exactResults + closeResults + rightOutcome) / lockedPredictions.length) * 100 : 0,
-      averagePoints: playedPredictions.length ? playedPredictions.reduce((sum, item) => sum + (item.points || 0), 0) / playedPredictions.length : 0,
     }
   }).sort((a, b) => b.totalPoints - a.totalPoints || b.exactResults - a.exactResults || b.closeResults - a.closeResults || b.accuracy - a.accuracy || a.username.localeCompare(b.username))
 
@@ -276,6 +367,8 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
     score: match.score?.fullTime?.home !== null && match.score?.fullTime?.home !== undefined && match.score?.fullTime?.away !== null && match.score?.fullTime?.away !== undefined
       ? `${match.score.fullTime.home} : ${match.score.fullTime.away}`
       : null,
+    homeScorers: scorersForTeam(match.goals, match.homeTeam),
+    awayScorers: scorersForTeam(match.goals, match.awayTeam),
   }))
   const trends = matches.map(match => {
     const revealable = isPredictionRevealable(match.utcDate, now)
@@ -375,7 +468,7 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
       headerClassName: 'text-center w-16',
       className: 'text-center',
       cell: (player) => (
-        <span className="font-mono text-sm font-bold text-zinc-100">{player.rank}</span>
+        <span className="font-mono text-sm font-bold text-zinc-100">{player.rank}.</span>
       ),
     },
     {
@@ -383,13 +476,16 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
       header: t('Player'),
       mobilePrimary: true,
       cell: (player) => (
-        <div>
-          <div className="font-bold text-zinc-100">{player.username}</div>
-          {player.motto ? (
-            <div className="mt-0.5 max-w-[18ch] truncate text-xs italic text-xactscore-accent">
-              &ldquo;{player.motto}&rdquo;
-            </div>
-          ) : null}
+        <div className="flex min-w-0 items-center gap-2.5">
+          <PlayerAvatar src={player.avatar} name={player.username} />
+          <div className="min-w-0">
+            <div className="font-bold text-zinc-100">{player.username}</div>
+            {player.motto ? (
+              <div className="mt-0.5 max-w-[18ch] truncate text-xs italic text-xactscore-accent">
+                &ldquo;{player.motto}&rdquo;
+              </div>
+            ) : null}
+          </div>
         </div>
       ),
     },
@@ -412,10 +508,8 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
           {t('Exact Score')}
         </span>
       ),
-      mobileHeader: t('Exact Score'),
       headerClassName: 'text-center',
       className: 'text-center font-bold text-zinc-200',
-      mobileExpandable: true,
       cell: (player) => player.exactResults,
     },
     {
@@ -426,10 +520,8 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
           {t('Close Prediction')}
         </span>
       ),
-      mobileHeader: t('Close Prediction'),
       headerClassName: 'text-center',
       className: 'text-center font-bold text-zinc-200',
-      mobileExpandable: true,
       cell: (player) => player.closeResults,
     },
     {
@@ -440,20 +532,9 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
           {t('Correct Result')}
         </span>
       ),
-      mobileHeader: t('Correct Result'),
       headerClassName: 'text-center',
       className: 'text-center font-bold text-zinc-200',
-      mobileExpandable: true,
       cell: (player) => player.rightOutcome,
-    },
-    {
-      key: 'avg',
-      header: t('Average points'),
-      mobileHeader: t('Average points'),
-      headerClassName: 'text-center',
-      className: 'text-center font-bold text-zinc-200',
-      mobileExpandable: true,
-      cell: (player) => player.averagePoints.toFixed(1),
     },
   ]
 
@@ -464,10 +545,15 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
         title={t('League Ranking')}
         description={`${t('Tiered Scoring')}: ${t('Exact Score')} (${ptsExact}pts) • ${t('Close Prediction')} (${ptsClose}pts) • ${t('Correct Result')} (${ptsResult}pts)`}
         actions={
-          <div className="flex items-center gap-2 text-xactscore-accent">
-            <Gauge className="h-5 w-5" />
-            <span className="text-xs font-black uppercase tracking-widest">
-              {t('Season')}: {t(getSeasonLengthLabelKey(seasonLength))}
+          <div className="flex items-center gap-1.5 text-xactscore-accent">
+            <Gauge className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
+            <span className="flex flex-col items-end leading-none">
+              <span className="text-[9px] font-black uppercase tracking-wide text-xactscore-accent/70">
+                {t('Season')}
+              </span>
+              <span className="whitespace-nowrap text-[10px] font-black uppercase tracking-wide sm:text-xs">
+                {t(getSeasonLengthLabelKey(seasonLength))}
+              </span>
             </span>
           </div>
         }
@@ -478,10 +564,24 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
         selectedMatchId={searchParams.matchId}
       />
 
-      <div className="mb-3 mt-6 flex items-center justify-between sm:mb-4 sm:mt-8">
+      <div className="mb-2 mt-6 sm:mb-4 sm:mt-8">
         <h2 className="text-base font-black uppercase tracking-wider text-zinc-100 sm:text-xl">
           {t('Contest Leaderboard')}
         </h2>
+        <p className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] font-semibold leading-none text-zinc-500 md:hidden">
+          <span className="inline-flex items-center gap-1">
+            <Target className="h-3 w-3 text-xactscore-accent" aria-hidden />
+            {t('Exact Score')}
+          </span>
+          <span className="inline-flex items-center gap-1">
+            <Activity className="h-3 w-3 text-sky-400" aria-hidden />
+            {t('Close Prediction')}
+          </span>
+          <span className="inline-flex items-center gap-1">
+            <CheckCircle2 className="h-3 w-3 text-emerald-400" aria-hidden />
+            {t('Correct Result')}
+          </span>
+        </p>
       </div>
 
       <RankTable
@@ -491,12 +591,45 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
         emptyMessage={t('No players found in this contest.')}
         mobileSingleLine
         mobileRank={(player) => (
-          <span className="text-[13px] font-bold tabular-nums text-zinc-400">{player.rank}</span>
+          <span className="text-[13px] font-bold tabular-nums text-zinc-400">{player.rank}.</span>
         )}
-        mobileTitle={(player) => player.username}
-        mobileSubtitle={(player) => (player.motto ? `"${player.motto}"` : undefined)}
-        mobileEnd={(player) => (
-          <span className="text-sm">{player.totalPoints.toFixed(1).replace('.0', '')}</span>
+        mobileTitle={(player) => (
+          <span className="flex min-w-0 items-center gap-1.5" title={player.motto ? `"${player.motto}"` : undefined}>
+            <PlayerAvatar src={player.avatar} name={player.username} />
+            <span className="min-w-0 truncate">{player.username}</span>
+          </span>
+        )}
+        mobileStats={(player) => (
+          <span className="inline-flex items-center overflow-hidden rounded-full border border-white/[0.08] bg-white/[0.05] shadow-[inset_0_1px_0_rgb(255_255_255/0.07)] backdrop-blur-md">
+            <span className="inline-flex items-center divide-x divide-white/10">
+              <ScoringChip
+                icon={Target}
+                value={player.exactResults}
+                label={t('Exact Score')}
+                iconClassName="text-xactscore-accent"
+              />
+              <ScoringChip
+                icon={Activity}
+                value={player.closeResults}
+                label={t('Close Prediction')}
+                iconClassName="text-sky-400"
+              />
+              <ScoringChip
+                icon={CheckCircle2}
+                value={player.rightOutcome}
+                label={t('Correct Result')}
+                iconClassName="text-emerald-400"
+              />
+            </span>
+            <span className="ml-1 h-4 w-px shrink-0 bg-white/25" aria-hidden />
+            <span
+              className="inline-flex w-[4.75rem] shrink-0 items-center justify-center py-0.5 text-sm font-black tabular-nums leading-none text-xactscore-accent"
+              title={t('Total Points')}
+            >
+              {player.totalPoints.toFixed(1).replace('.0', '')}
+              <span className="ml-0.5 text-[10px] font-bold tracking-wide text-xactscore-accent/80">pts.</span>
+            </span>
+          </span>
         )}
       />
       <RankingInsights players={players} evolution={evolution} trends={trends} labels={labels} />

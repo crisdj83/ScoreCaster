@@ -30,6 +30,7 @@ create table if not exists public.contests (
   name text not null,
   contest_key text unique not null,
   is_open boolean not null default true,
+  is_public boolean not null default false,
   -- App uses season_length: 'full' | 'first_half' | 'second_half'
   season_length text not null default 'full'
     check (season_length in ('full', 'first_half', 'second_half')),
@@ -113,6 +114,7 @@ alter table public.contests add column if not exists points_exact numeric;
 alter table public.contests add column if not exists points_close numeric;
 alter table public.contests add column if not exists points_result numeric;
 alter table public.contests add column if not exists is_open boolean default true;
+alter table public.contests add column if not exists is_public boolean not null default false;
 
 -- Drop old check before migrating values (half → first_half, add second_half)
 alter table public.contests drop constraint if exists contests_season_length_check;
@@ -265,6 +267,7 @@ create index if not exists contest_members_user_idx on public.contest_members (u
 create index if not exists contest_members_contest_idx on public.contest_members (contest_id);
 create index if not exists contests_contest_key_idx on public.contests (contest_key);
 create index if not exists contests_admin_id_idx on public.contests (admin_id);
+create index if not exists contests_is_public_idx on public.contests (is_public) where is_public = true;
 
 create index if not exists predictions_contest_match_idx on public.predictions (contest_id, match_id);
 create index if not exists predictions_contest_user_idx on public.predictions (contest_id, user_id);

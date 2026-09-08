@@ -11,9 +11,28 @@ export default async function ContestsPage(props: { searchParams: Promise<{ erro
   if (authError || !user) redirect('/login')
 
   // 2. Fetch all contests this user is a member of, along with the contest details
-  const { data: myContests } = await supabase
+  const memberSelect = `
+      contest_id,
+      role,
+      joined_at,
+      contests (
+        name,
+        contest_key,
+        season_length,
+        is_open,
+        is_public
+      )
+    `
+  let { data: myContests, error: contestsError } = await supabase
     .from('contest_members')
-    .select(`
+    .select(memberSelect)
+    .eq('user_id', user.id)
+    .order('joined_at', { ascending: false })
+
+  if (contestsError) {
+    const fallback = await supabase
+      .from('contest_members')
+      .select(`
       contest_id,
       role,
       joined_at,
@@ -24,8 +43,10 @@ export default async function ContestsPage(props: { searchParams: Promise<{ erro
         is_open
       )
     `)
-    .eq('user_id', user.id)
-    .order('joined_at', { ascending: false })
+      .eq('user_id', user.id)
+      .order('joined_at', { ascending: false })
+    myContests = fallback.data
+  }
 
   return (
     <ContestHub myContests={myContests || []} messages={searchParams} />

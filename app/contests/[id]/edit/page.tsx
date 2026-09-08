@@ -2,7 +2,7 @@ import { createClient } from '../../../../lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { updateContestSettings, updateSeasonSettings, generateNewInviteKey, updateScoringSettings, deleteContest } from './actions'
 import DeleteLeagueButton from '../DeleteLeagueButton'
-import { Settings, Shield, Key, RefreshCw, Target, Trash2 } from 'lucide-react'
+import { Settings, Shield, Key, RefreshCw, Target, Trash2, Globe } from 'lucide-react'
 import { getTranslations } from '../../../../lib/i18n'
 import { getServerLocale } from '../../../../lib/i18n-server'
 import { Card, CardContent } from '@/components/ui/card'
@@ -35,7 +35,8 @@ export default async function EditContestPage(props: {
         season_length,
         points_exact,
         points_close,
-        points_result
+        points_result,
+        is_public
       )
     `)
     .eq('contest_id', params.id)
@@ -54,6 +55,7 @@ export default async function EditContestPage(props: {
     points_exact: number;
     points_close: number;
     points_result: number;
+    is_public?: boolean;
   }
   const seasonLength = normalizeSeasonLength(contest.season_length)
 
@@ -250,36 +252,52 @@ export default async function EditContestPage(props: {
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-xactscore-accent">
-          <CardContent className="p-6 md:p-8">
-            <div className="mb-2 flex items-center gap-2">
-              <Key className="h-5 w-5 text-xactscore-accent" />
-              <h3 className="text-lg font-extrabold uppercase tracking-tight text-zinc-100">
-                {t('Secret Invite Key')}
-              </h3>
-            </div>
-            <p className="mb-6 text-xs text-zinc-500">
-              {t('Share this key with friends. If the key leaks, you can generate a new secure code below.')}
-            </p>
-            <div className="mb-6 rounded-xl border border-zinc-800 bg-zinc-950 p-6 text-center shadow-inner">
-              <span className="mb-2 block text-[10px] font-black uppercase tracking-widest text-zinc-500">
-                {t('Current Active Key')}
-              </span>
-              <span className="font-mono text-3xl font-black tracking-widest text-xactscore-accent md:text-4xl">
-                {contest.contest_key}
-              </span>
-            </div>
-            <form action={generateNewInviteKey}>
-              <input type="hidden" name="contest_id" value={contest.id} />
-              <div className="flex justify-end border-t border-zinc-800 pt-4">
-                <Button type="submit" variant="glass" className="uppercase tracking-wider">
-                  <RefreshCw className="h-4 w-4" />
-                  {t('Generate New Key')}
-                </Button>
+        {contest.is_public ? (
+          <Card className="border-l-4 border-l-xactscore-accent">
+            <CardContent className="p-6 md:p-8">
+              <div className="mb-2 flex items-center gap-2">
+                <Globe className="h-5 w-5 text-xactscore-accent" />
+                <h3 className="text-lg font-extrabold uppercase tracking-tight text-zinc-100">
+                  {t('Public')}
+                </h3>
               </div>
-            </form>
-          </CardContent>
-        </Card>
+              <p className="text-sm text-zinc-400">
+                {t('This league is public. Anyone can join from Join Public — no invite key.')}
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="border-l-4 border-l-xactscore-accent">
+            <CardContent className="p-6 md:p-8">
+              <div className="mb-2 flex items-center gap-2">
+                <Key className="h-5 w-5 text-xactscore-accent" />
+                <h3 className="text-lg font-extrabold uppercase tracking-tight text-zinc-100">
+                  {t('Secret Invite Key')}
+                </h3>
+              </div>
+              <p className="mb-6 text-xs text-zinc-500">
+                {t('Share this key with friends. If the key leaks, you can generate a new secure code below.')}
+              </p>
+              <div className="mb-6 rounded-xl border border-zinc-800 bg-zinc-950 p-6 text-center shadow-inner">
+                <span className="mb-2 block text-[10px] font-black uppercase tracking-widest text-zinc-500">
+                  {t('Current Active Key')}
+                </span>
+                <span className="font-mono text-3xl font-black tracking-widest text-xactscore-accent md:text-4xl">
+                  {contest.contest_key}
+                </span>
+              </div>
+              <form action={generateNewInviteKey}>
+                <input type="hidden" name="contest_id" value={contest.id} />
+                <div className="flex justify-end border-t border-zinc-800 pt-4">
+                  <Button type="submit" variant="glass" className="uppercase tracking-wider">
+                    <RefreshCw className="h-4 w-4" />
+                    {t('Generate New Key')}
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        )}
 
         <Card className="border-red-500/30 bg-red-500/5">
           <CardContent className="p-6 md:p-8">

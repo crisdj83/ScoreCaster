@@ -1,6 +1,10 @@
 const BASE_URL = 'https://api.football-data.org/v4';
 
-async function fetchFootballData(path: string, revalidateSeconds = 300) {
+async function fetchFootballData(
+  path: string,
+  revalidateSeconds = 300,
+  extraHeaders: Record<string, string> = {}
+) {
   const apiKey = process.env.FOOTBALL_DATA_API_KEY;
   if (!apiKey) {
     throw new Error('FOOTBALL_DATA_API_KEY is not configured');
@@ -9,6 +13,7 @@ async function fetchFootballData(path: string, revalidateSeconds = 300) {
   const res = await fetch(`${BASE_URL}${path}`, {
     headers: {
       'X-Auth-Token': apiKey,
+      ...extraHeaders,
     },
     next: { revalidate: revalidateSeconds, tags: ['football-data'] },
   });
@@ -25,7 +30,7 @@ async function fetchFootballData(path: string, revalidateSeconds = 300) {
 
 // Function 1: Gets the individual matches (What we just used)
 export async function getPLMatches() {
-  return fetchFootballData('/competitions/PL/matches');
+  return fetchFootballData('/competitions/PL/matches', 300, { 'X-Unfold-Goals': 'true' });
 }
 
 // Function 2: Gets the Live League Table (New!)

@@ -4,6 +4,7 @@ import ContestNav from './ContestNav'
 import ContestIcon from '../../components/ContestIcon'
 import { getTranslations } from '../../../lib/i18n'
 import { getServerLocale } from '../../../lib/i18n-server'
+import { Globe } from 'lucide-react'
 import { Surface } from '@/components/ui/card'
 
 export default async function ContestLayout(props: { 
@@ -25,7 +26,8 @@ export default async function ContestLayout(props: {
         id,
         name,
         contest_key,
-        admin_id
+        admin_id,
+        is_public
       )
     `)
     .eq('contest_id', params.id)
@@ -41,6 +43,7 @@ export default async function ContestLayout(props: {
     name: string;
     contest_key: string;
     admin_id: string;
+    is_public?: boolean;
   }
   
   const isAdmin = membership.role === 'admin'
@@ -53,14 +56,26 @@ export default async function ContestLayout(props: {
         <h1 className="min-w-0 flex-1 truncate text-base font-black tracking-tight text-white">
           {contest.name}
         </h1>
-        <div className="shrink-0 rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-center">
-          <p className="text-[8px] font-black uppercase tracking-widest text-zinc-500">
-            {t('Invite Code')}
-          </p>
-          <p className="bg-gradient-to-r from-amber-400 to-orange-600 bg-clip-text font-mono text-[11px] font-black tracking-wider text-transparent">
-            {contest.contest_key}
-          </p>
-        </div>
+        {contest.is_public ? (
+          <div className="shrink-0 rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-center">
+            <p className="text-[8px] font-black uppercase tracking-widest text-zinc-500">
+              {t('Public')}
+            </p>
+            <p className="inline-flex items-center justify-center gap-1 font-mono text-[11px] font-black tracking-wider text-orange-300">
+              <Globe className="h-3 w-3" />
+              {t('Open')}
+            </p>
+          </div>
+        ) : (
+          <div className="shrink-0 rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-center">
+            <p className="text-[8px] font-black uppercase tracking-widest text-zinc-500">
+              {t('Invite Code')}
+            </p>
+            <p className="bg-gradient-to-r from-amber-400 to-orange-600 bg-clip-text font-mono text-[11px] font-black tracking-wider text-transparent">
+              {contest.contest_key}
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Desktop: full contest identity */}
@@ -78,14 +93,26 @@ export default async function ContestLayout(props: {
           </h1>
         </div>
 
-        <div className="z-10 shrink-0 rounded-xl border border-white/10 bg-white/5 px-5 py-3 text-center shadow-inner backdrop-blur-md">
-          <p className="mb-1 text-[10px] font-black uppercase tracking-widest text-zinc-500">
-            {t('Invite Code')}
-          </p>
-          <p className="bg-gradient-to-r from-amber-400 to-orange-600 bg-clip-text font-mono text-2xl font-black tracking-widest text-transparent">
-            {contest.contest_key}
-          </p>
-        </div>
+        {contest.is_public ? (
+          <div className="z-10 shrink-0 rounded-xl border border-white/10 bg-white/5 px-5 py-3 text-center shadow-inner backdrop-blur-md">
+            <p className="mb-1 text-[10px] font-black uppercase tracking-widest text-zinc-500">
+              {t('Public')}
+            </p>
+            <p className="inline-flex items-center justify-center gap-1.5 font-mono text-2xl font-black tracking-widest text-orange-300">
+              <Globe className="h-6 w-6" />
+              {t('Open')}
+            </p>
+          </div>
+        ) : (
+          <div className="z-10 shrink-0 rounded-xl border border-white/10 bg-white/5 px-5 py-3 text-center shadow-inner backdrop-blur-md">
+            <p className="mb-1 text-[10px] font-black uppercase tracking-widest text-zinc-500">
+              {t('Invite Code')}
+            </p>
+            <p className="bg-gradient-to-r from-amber-400 to-orange-600 bg-clip-text font-mono text-2xl font-black tracking-widest text-transparent">
+              {contest.contest_key}
+            </p>
+          </div>
+        )}
       </div>
 
       <ContestNav contestId={contest.id} isAdmin={isAdmin} />

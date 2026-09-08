@@ -4,6 +4,7 @@ import { getPLMatches } from '../../../../lib/football'
 import { isMatchInContestSeason, normalizeSeasonLength } from '../../../../lib/contest-season'
 import { isPredictionLocked, isPredictionRevealable } from '../../../../lib/scoring'
 import PredictionCard from './PredictionCard'
+import SuperLuckyButton from './SuperLuckyButton'
 import { getTranslations } from '../../../../lib/i18n'
 import { getServerLocale } from '../../../../lib/i18n-server'
 import LiveRefresh from '../../../components/LiveRefresh'
@@ -99,11 +100,20 @@ export default async function PredictionsPage(props: { params: Promise<{ id: str
   return (
     <div className="p-0 sm:p-2 md:p-4">
       <LiveRefresh refreshAfter={matchdayFixtures.map((match: any) => match.utcDate)} />
-      <div className="mb-2 flex items-center justify-between sm:mb-6">
-        <div>
+      <div className="mb-2 flex items-center justify-between gap-3 sm:mb-6">
+        <div className="min-w-0">
           <h2 className="text-base font-bold text-zinc-100 sm:text-2xl">{t('Matchday')} {currentMatchday}</h2>
-          <p className="mt-0.5 hidden text-sm text-zinc-500 sm:block">{t('Predictions lock one hour before kickoff. Results are revealed 30 minutes before each game.')}</p>
+          <p className="mt-0.5 hidden text-sm leading-snug text-zinc-500 sm:block">
+            <span className="block">{t('Picks lock 60 minutes before kickoff.')}</span>
+            <span className="block">{t('Results show 30 minutes before kickoff.')}</span>
+          </p>
         </div>
+        <SuperLuckyButton
+          contestId={params.id}
+          matchIds={matchdayFixtures
+            .filter((match: any) => !isPredictionLocked(match.utcDate) && !['IN_PLAY', 'PAUSED', 'FINISHED', 'AWARDED'].includes(String(match.status || '')))
+            .map((match: any) => String(match.id))}
+        />
       </div>
 
       <div className="grid grid-cols-1 gap-1.5 lg:grid-cols-2 lg:gap-2">

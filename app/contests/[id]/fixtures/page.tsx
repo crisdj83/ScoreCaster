@@ -253,11 +253,11 @@ export default async function FixturesPage(props: { params: Promise<{ id: string
             <span className="text-[13px] font-bold tabular-nums text-zinc-400">{row.position}</span>
           )}
           mobileTitle={(row) => (
-            <span className="inline-flex items-center gap-2">
+            <span className="inline-flex min-w-0 items-center gap-2">
               {row.team.crest ? (
-                <Image src={row.team.crest} alt="" width={18} height={18} className="h-[18px] w-[18px] object-contain" />
+                <Image src={row.team.crest} alt="" width={18} height={18} className="h-[18px] w-[18px] shrink-0 object-contain" />
               ) : null}
-              {row.team.shortName || row.team.name}
+              <span className="truncate">{row.team.shortName || row.team.name}</span>
             </span>
           )}
           mobileEnd={(row) => row.points}

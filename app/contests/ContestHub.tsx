@@ -1,13 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { Trophy, Plus, Search, ChevronRight } from 'lucide-react'
+import { Trophy, Plus, Search, ChevronRight, Globe, Lock } from 'lucide-react'
 import Link from 'next/link'
 import { createContest, joinContest } from './actions'
 import { useTranslations } from '../components/LocaleProvider'
 import ContestIcon from '../components/ContestIcon'
 import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
@@ -18,6 +18,7 @@ import { getSeasonLengthLabelKey } from '../../lib/contest-season'
 
 export default function ContestHub({ myContests, messages }: any) {
   const [activeTab, setActiveTab] = useState<'my_contests' | 'join' | 'create'>('my_contests')
+  const [visibility, setVisibility] = useState<'public' | 'private'>('private')
   const t = useTranslations()
 
   const tabClass = (tab: typeof activeTab) =>
@@ -48,7 +49,7 @@ export default function ContestHub({ myContests, messages }: any) {
         </button>
         <button type="button" onClick={() => setActiveTab('join')} className={tabClass('join')}>
           <Search className="h-4 w-4 shrink-0" />
-          <span className="hidden sm:inline">{t('Join Private')}</span>
+          <span className="hidden sm:inline">{t('Join Contest')}</span>
           <span className="sm:hidden">Join</span>
         </button>
         <button type="button" onClick={() => setActiveTab('create')} className={tabClass('create')}>
@@ -104,12 +105,19 @@ export default function ContestHub({ myContests, messages }: any) {
                         </Badge>
                       </div>
                       <div className="mt-auto flex items-center justify-between border-t border-zinc-800 pt-4 text-sm">
-                        <span className="rounded bg-zinc-900 px-2 py-1 text-xs text-zinc-400">
-                          {t('Key:')}{' '}
-                          <span className="font-mono font-bold text-zinc-200">
-                            {membership.contests.contest_key}
+                        {membership.contests.is_public ? (
+                          <span className="inline-flex items-center gap-1 rounded bg-zinc-900 px-2 py-1 text-xs font-bold uppercase tracking-wider text-orange-200">
+                            <Globe className="h-3 w-3" />
+                            {t('Public')}
                           </span>
-                        </span>
+                        ) : (
+                          <span className="rounded bg-zinc-900 px-2 py-1 text-xs text-zinc-400">
+                            {t('Key:')}{' '}
+                            <span className="font-mono font-bold text-zinc-200">
+                              {membership.contests.contest_key}
+                            </span>
+                          </span>
+                        )}
                         <span className="flex items-center text-xs font-bold uppercase tracking-wider text-orange-300 group-hover:text-orange-200">
                           {t('Dashboard')} <ChevronRight className="ml-0.5 h-4 w-4" />
                         </span>
@@ -122,9 +130,36 @@ export default function ContestHub({ myContests, messages }: any) {
           )}
 
           {activeTab === 'join' && (
-            <div className="mx-auto max-w-md py-4">
-              <div className="mb-6 text-center">
-                <Search className="mx-auto mb-3 h-10 w-10 text-xactscore-accent" />
+            <div className="mx-auto max-w-md space-y-8 py-4">
+              <div className="text-center">
+                <Globe className="mx-auto mb-3 h-10 w-10 text-xactscore-accent" />
+                <h2 className="text-xl font-extrabold uppercase tracking-tight text-zinc-100">
+                  {t('Join Public')}
+                </h2>
+                <p className="mt-1 text-sm text-zinc-400">
+                  {t('Browse public contests that anyone can join without a key.')}
+                </p>
+                <Link
+                  href="/contests/public"
+                  className={cn(buttonVariants(), 'mt-4 w-full uppercase tracking-wider')}
+                >
+                  {t('Join Public')}
+                </Link>
+              </div>
+
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center" aria-hidden>
+                  <div className="w-full border-t border-zinc-800" />
+                </div>
+                <div className="relative flex justify-center">
+                  <span className="bg-zinc-900 px-3 text-[10px] font-black uppercase tracking-widest text-zinc-500">
+                    {t('or')}
+                  </span>
+                </div>
+              </div>
+
+              <div className="text-center">
+                <Lock className="mx-auto mb-3 h-10 w-10 text-xactscore-accent" />
                 <h2 className="text-xl font-extrabold uppercase tracking-tight text-zinc-100">
                   {t('Join a Private Contest')}
                 </h2>
@@ -144,8 +179,8 @@ export default function ContestHub({ myContests, messages }: any) {
                     className="text-center font-mono text-lg uppercase tracking-widest"
                   />
                 </div>
-                <Button type="submit" className="w-full uppercase tracking-wider">
-                  {t('Join Contest')}
+                <Button type="submit" variant="secondary" className="w-full uppercase tracking-wider">
+                  {t('Join Private')}
                 </Button>
               </form>
             </div>
@@ -163,6 +198,7 @@ export default function ContestHub({ myContests, messages }: any) {
                 </p>
               </div>
               <form action={createContest} className="space-y-4">
+                <input type="hidden" name="visibility" value={visibility} />
                 <div>
                   <Label htmlFor="name">{t('Contest Name *')}</Label>
                   <Input
@@ -173,8 +209,42 @@ export default function ContestHub({ myContests, messages }: any) {
                     placeholder="e.g. Office Premier League 24/25"
                   />
                 </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setVisibility('public')}
+                    className={cn(
+                      'rounded-xl border px-3 py-3 text-left transition',
+                      visibility === 'public'
+                        ? 'border-orange-400/50 bg-orange-500/15'
+                        : 'border-zinc-800 bg-zinc-950/60 hover:border-zinc-600'
+                    )}
+                  >
+                    <Globe className="mb-1.5 h-4 w-4 text-xactscore-accent" />
+                    <p className="text-xs font-black uppercase tracking-wider text-zinc-100">{t('Public')}</p>
+                    <p className="mt-1 text-[11px] leading-snug text-zinc-500">
+                      {t('Anyone can join this league. No invite key needed.')}
+                    </p>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setVisibility('private')}
+                    className={cn(
+                      'rounded-xl border px-3 py-3 text-left transition',
+                      visibility === 'private'
+                        ? 'border-orange-400/50 bg-orange-500/15'
+                        : 'border-zinc-800 bg-zinc-950/60 hover:border-zinc-600'
+                    )}
+                  >
+                    <Lock className="mb-1.5 h-4 w-4 text-xactscore-accent" />
+                    <p className="text-xs font-black uppercase tracking-wider text-zinc-100">{t('Private')}</p>
+                    <p className="mt-1 text-[11px] leading-snug text-zinc-500">
+                      {t('Only people with the invite key can join.')}
+                    </p>
+                  </button>
+                </div>
                 <Button type="submit" className="w-full uppercase tracking-wider">
-                  {t('Create & Generate Key')}
+                  {visibility === 'public' ? t('Create Public Contest') : t('Create & Generate Key')}
                 </Button>
                 <p className="mt-4 text-center text-[11px] text-zinc-500">
                   {t('You will automatically become the Admin. You can customize settings after creation.')}
