@@ -14,6 +14,7 @@ import {
 import { useTranslations } from './LocaleProvider'
 import XactScoreLogo from './XactScoreLogo'
 import { cn } from '@/lib/utils'
+import { buttonVariants } from '@/components/ui/button'
 import { tabActive, tabBase, tabInactive } from '@/lib/tab-styles'
 
 type NavLinksProps = {
@@ -66,14 +67,26 @@ export default function NavLinks({ isAdmin, isLoggedIn, unreadMessageCount }: Na
       <Link href="/help" className={linkClass('/help')}>
         <CircleHelp className="h-4 w-4" /> {t('Help')}
       </Link>
+      {!isLoggedIn && (
+        <Link href="/compare" className={linkClass('/compare')}>
+          {t('Compare')}
+        </Link>
+      )}
       {isAdmin && (
         <Link href="/admin" className={linkClass('/admin')}>
           <ShieldCheck className="h-4 w-4" /> {t('Admin')}
         </Link>
       )}
       {!isLoggedIn && (
-        <Link href="/login" className={linkClass('/login')}>
-          <LogIn className="h-4 w-4" /> {t('Sign In')}
+        <Link
+          href="/login"
+          className={cn(
+            buttonVariants({ size: 'sm' }),
+            'hidden uppercase tracking-wider lg:inline-flex',
+            pathname === '/login' && 'brightness-110'
+          )}
+        >
+          <LogIn className="h-4 w-4" /> {t('Start for free')}
         </Link>
       )}
     </>

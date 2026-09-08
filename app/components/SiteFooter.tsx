@@ -1,6 +1,23 @@
+import Link from 'next/link'
+import { getTranslations } from '../../lib/i18n'
+import { getServerLocale } from '../../lib/i18n-server'
+
 export default function SiteFooter() {
+  const t = getTranslations(getServerLocale())
+
   return (
     <footer className="mt-auto flex flex-col items-center gap-3 px-3 py-8 text-center">
+      <nav className="flex flex-wrap items-center justify-center gap-4 text-[11px] font-black uppercase tracking-wider text-zinc-500">
+        <Link href="/help" className="hover:text-zinc-200">
+          {t('Help')}
+        </Link>
+        <Link href="/compare" className="hover:text-zinc-200">
+          {t('Compare')}
+        </Link>
+        <Link href="/login" className="hover:text-zinc-200">
+          {t('Sign In')}
+        </Link>
+      </nav>
       <div className="flex items-center gap-5">
         <a
           href="https://instagram.com/cristiansfariac"

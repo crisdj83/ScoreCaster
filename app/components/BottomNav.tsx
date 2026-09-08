@@ -10,6 +10,7 @@ import {
   MessageSquare,
   ShieldCheck,
   CircleHelp,
+  GitCompare,
 } from 'lucide-react'
 import { useTranslations } from './LocaleProvider'
 import { cn } from '@/lib/utils'
@@ -40,6 +41,7 @@ export default function BottomNav({ isAdmin, isLoggedIn, unreadMessageCount }: B
       ]
     : [
         { href: '/', label: t('Dashboard'), short: t('Home'), icon: HomeIcon },
+        { href: '/compare', label: t('Compare'), short: t('Compare'), icon: GitCompare },
         { href: '/help', label: t('Help'), short: t('Help'), icon: CircleHelp },
         { href: '/login', label: t('Sign In'), short: t('Sign In'), icon: LogIn },
       ]

@@ -11,7 +11,7 @@ const sections = [
   },
   {
     title: 'Making predictions',
-    body: 'Open a contest and select Predictions to see the fixture calendar. Choose a score for both teams; your prediction is saved automatically until kickoff.',
+    body: 'Open a contest and select Predictions to see the fixture calendar. Choose a score for both teams; you can change it until picks lock, 60 minutes before kickoff.',
   },
   {
     title: 'Scoring and rankings',

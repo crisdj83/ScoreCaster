@@ -9,6 +9,7 @@ function isPublicPath(pathname: string) {
     pathname.startsWith('/auth/callback') ||
     pathname.startsWith('/update-password') ||
     pathname.startsWith('/help') ||
+    pathname.startsWith('/compare') ||
     pathname.startsWith('/join') ||
     pathname.startsWith('/api/')
   )

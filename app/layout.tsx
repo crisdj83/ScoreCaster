@@ -28,13 +28,23 @@ export async function generateMetadata(): Promise<Metadata> {
   const t = getTranslations(getServerLocale());
   const base = siteUrl();
   const title = t("XactScore | Premier League Predictions");
-  const description = t("Predict match scores and compete with friends.");
+  const description = t("Private Premier League prediction leagues. Exact scores with friends — no ads, no player cap, always free.");
   return {
     metadataBase: new URL(base),
     title,
     description,
     applicationName: "XactScore",
-    keywords: ["Premier League", "score predictions", "football predictor", "private league", "XactScore"],
+    keywords: [
+      "Premier League",
+      "score predictions",
+      "football predictor",
+      "private league",
+      "XactScore",
+      "office football predictor",
+      "Superbru alternative",
+      "PronoContest alternative",
+    ],
+    alternates: { canonical: base },
     openGraph: {
       type: "website",
       url: base,

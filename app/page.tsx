@@ -84,7 +84,8 @@ export default async function Home(props: { searchParams: Promise<{ success?: st
   } = await supabase.auth.getUser()
 
   if (!user) {
-    return <MarketingLanding locale={locale} />
+    const { recentScores, nextMatch } = await fetchPLData()
+    return <MarketingLanding locale={locale} nextMatch={nextMatch} recentScores={recentScores} />
   }
 
   const [{ data: profile }, { data: myContests }, plData] = await Promise.all([
