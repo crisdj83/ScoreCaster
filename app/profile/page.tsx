@@ -20,6 +20,7 @@ import {
   type FavoriteTeam,
 } from '../../lib/favorite-teams'
 import { soccerAvatarPath } from '../../lib/soccer-avatar'
+import Image from 'next/image'
 
 function FavoriteTeamGroup({
   label,
@@ -41,7 +42,7 @@ function FavoriteTeamGroup({
           className="flex cursor-pointer items-center gap-3 px-4 py-2 transition-colors hover:bg-zinc-800"
           onClick={() => onSelect(team.name)}
         >
-          <img src={team.crest} alt="" className="h-6 w-6 object-contain" />
+          <Image src={team.crest} alt="" width={24} height={24} className="h-6 w-6 object-contain" />
           <span className="text-zinc-200">{team.name}</span>
         </div>
       ))}
@@ -107,7 +108,17 @@ function ProfilePageInner() {
   const t = useTranslations()
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState('')
-  const [profile, setProfile] = useState<any>(null)
+  const [profile, setProfile] = useState<{
+    id: string
+    email: string | null
+    username: string | null
+    avatar_url: string | null
+    pending_avatar_url: string | null
+    favorite_team: string | null
+    country: string | null
+    quote: string | null
+    is_global_admin: boolean | null
+  } | null>(null)
   const [avatarUrl, setAvatarUrl] = useState('')
   const [isPending, setIsPending] = useState(false)
 
@@ -205,7 +216,14 @@ function ProfilePageInner() {
                   `}
                   >
                     {avatarUrl ? (
-                      <img src={avatarUrl} alt="Profile Preview" className="h-full w-full object-cover" />
+                      <Image
+                        src={avatarUrl}
+                        alt="Profile Preview"
+                        width={128}
+                        height={128}
+                        className="h-full w-full object-cover"
+                        unoptimized
+                      />
                     ) : (
                       <span className="text-sm text-zinc-500">{t('No Image')}</span>
                     )}
@@ -303,9 +321,11 @@ function ProfilePageInner() {
                   <div className="flex items-center gap-3">
                     {selectedTeamData ? (
                       <>
-                        <img
+                        <Image
                           src={selectedTeamData.crest}
                           alt={selectedTeamData.name}
+                          width={20}
+                          height={20}
                           className="h-5 w-5 object-contain"
                         />
                         <span>{selectedTeamData.name}</span>

@@ -23,8 +23,14 @@ export async function updateProfile(formData: FormData) {
     .single()
 
   // Base update payload with just the text fields
-  const updatePayload: any = { 
-    username, 
+  const updatePayload: {
+    username: string
+    favorite_team: string
+    quote: string
+    pending_avatar_url?: string | null
+    avatar_url?: string | null
+  } = {
+    username,
     favorite_team: favoriteTeam,
     quote,
   }

@@ -550,19 +550,22 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
 
   type PlayerRow = (typeof players)[number] & { rank: number; previousRank: number | null; movementRank: number }
 
-  const rankedPlayers: PlayerRow[] = players.map((player) => ({
-    ...player,
-    rank:
+  const rankedPlayers: PlayerRow[] = players.map((player) => {
+    const rank =
       players.findIndex(
         (other) =>
           other.totalPoints === player.totalPoints &&
           other.exactResults === player.exactResults &&
           other.closeResults === player.closeResults &&
           other.accuracy === player.accuracy
-      ) + 1,
-    previousRank: finishedMatches.length ? previousRankByUser.get(player.id) ?? null : null,
-    movementRank: finishedRankByUser.get(player.id) ?? player.rank,
-  }))
+      ) + 1
+    return {
+      ...player,
+      rank,
+      previousRank: finishedMatches.length ? previousRankByUser.get(player.id) ?? null : null,
+      movementRank: finishedRankByUser.get(player.id) ?? rank,
+    }
+  })
 
   const columns: RankColumn<PlayerRow>[] = [
     {

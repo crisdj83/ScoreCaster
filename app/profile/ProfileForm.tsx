@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { User, Quote, Trophy, ChevronDown, Check } from 'lucide-react'
+import Image from 'next/image'
 import { updateProfile } from './actions'
 import { useTranslations } from '../components/LocaleProvider'
 
@@ -28,7 +29,13 @@ const PREMIER_LEAGUE_TEAMS = [
   { name: "Wolverhampton Wanderers", logo: "https://crests.football-data.org/76.png" }
 ]
 
-export default function ProfileForm({ user, profile, messages }: any) {
+type ProfileFormProps = {
+  user: { email?: string | null }
+  profile: { username?: string | null; favorite_team?: string | null; quote?: string | null } | null
+  messages: { success?: string; error?: string }
+}
+
+export default function ProfileForm({ user, profile, messages }: ProfileFormProps) {
   const [teamOpen, setTeamOpen] = useState(false)
   const t = useTranslations()
   const [selectedTeam, setSelectedTeam] = useState(PREMIER_LEAGUE_TEAMS.find(t => t.name === profile?.favorite_team) || null)
@@ -69,7 +76,7 @@ export default function ProfileForm({ user, profile, messages }: any) {
         {/* Email Address */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">{t('Email Address')}</label>
-          <input type="text" disabled value={user.email} className="w-full rounded-xl px-4 py-3 bg-gray-50 border border-gray-200 text-gray-500 cursor-not-allowed" />
+          <input type="text" disabled value={user.email ?? ''} className="w-full rounded-xl px-4 py-3 bg-gray-50 border border-gray-200 text-gray-500 cursor-not-allowed" />
         </div>
 
         {/* Username */}
@@ -92,7 +99,7 @@ export default function ProfileForm({ user, profile, messages }: any) {
             <div className="flex items-center gap-3">
               {selectedTeam ? (
                 <>
-                  <img src={selectedTeam.logo} alt={selectedTeam.name} className="w-6 h-6 object-contain" />
+                  <Image src={selectedTeam.logo} alt={selectedTeam.name} width={24} height={24} className="h-6 w-6 object-contain" />
                   <span>{selectedTeam.name}</span>
                 </>
               ) : (
@@ -110,7 +117,7 @@ export default function ProfileForm({ user, profile, messages }: any) {
                   onClick={() => { setSelectedTeam(team); setTeamOpen(false); }}
                   className="flex items-center gap-3 px-4 py-2 cursor-pointer hover:bg-green-50 transition-colors"
                 >
-                  <img src={team.logo} alt={team.name} className="w-6 h-6 object-contain" />
+                  <Image src={team.logo} alt={team.name} width={24} height={24} className="h-6 w-6 object-contain" />
                   <span className="flex-1">{team.name}</span>
                   {selectedTeam?.name === team.name && <Check className="h-4 w-4 text-xactscore-green" />}
                 </div>

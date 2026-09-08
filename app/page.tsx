@@ -9,18 +9,33 @@ import { getTranslations } from '../lib/i18n'
 import { getServerLocale } from '../lib/i18n-server'
 import { findFavoriteTeam } from '../lib/favorite-teams'
 
+type PLMatch = {
+  id: number | string
+  utcDate: string
+  status?: string
+  venue?: string
+  stadium?: string
+  homeTeam: { name: string; shortName?: string; crest?: string }
+  awayTeam: { name: string; shortName?: string; crest?: string }
+  score?: {
+    fullTime?: { home?: number | null; away?: number | null }
+    halfTime?: { home?: number | null; away?: number | null }
+  }
+}
+
 // Fetch both the recent scores AND the next scheduled match
 async function fetchPLData() {
   try {
     const data = await getPLMatches();
+    const matches = ((data.matches || []) as PLMatch[])
 
     // 1. Get the Recent Scores (Finished or Live)
-    const recentMatchesRaw = data.matches
-      .filter((m: any) => ['FINISHED', 'IN_PLAY', 'PAUSED'].includes(m.status))
-      .sort((a: any, b: any) => new Date(b.utcDate).getTime() - new Date(a.utcDate).getTime())
+    const recentMatchesRaw = matches
+      .filter((m) => ['FINISHED', 'IN_PLAY', 'PAUSED'].includes(m.status || ''))
+      .sort((a, b) => new Date(b.utcDate).getTime() - new Date(a.utcDate).getTime())
       .slice(0, 5);
 
-    const recentScores = recentMatchesRaw.map((m: any) => ({
+    const recentScores = recentMatchesRaw.map((m) => ({
       id: m.id,
       homeTeam: m.homeTeam.shortName || m.homeTeam.name,
       awayTeam: m.awayTeam.shortName || m.awayTeam.name,
@@ -33,11 +48,11 @@ async function fetchPLData() {
 
     // 2. Get the Next Upcoming Match
     const now = Date.now();
-    const nextMatchRaw = data.matches
-      .filter((m: any) => ['SCHEDULED', 'TIMED'].includes(m.status))
-      .filter((m: any) => new Date(m.utcDate).getTime() > now)
+    const nextMatchRaw = matches
+      .filter((m) => ['SCHEDULED', 'TIMED'].includes(m.status || ''))
+      .filter((m) => new Date(m.utcDate).getTime() > now)
       // Sort ascending to get the closest future match
-      .sort((a: any, b: any) => new Date(a.utcDate).getTime() - new Date(b.utcDate).getTime())[0];
+      .sort((a, b) => new Date(a.utcDate).getTime() - new Date(b.utcDate).getTime())[0];
 
     let nextMatch = null;
     if (nextMatchRaw) {
@@ -115,10 +130,13 @@ export default async function Home(props: { searchParams: Promise<{ success?: st
 
       <div className="flex items-center gap-2.5 rounded-2xl border border-zinc-800 bg-gradient-to-br from-orange-600 via-zinc-900 to-zinc-950 px-3 py-2.5 shadow-lg shadow-black/30 sm:gap-4 sm:px-5 sm:py-4">
         {profile?.avatar_url ? (
-          <img
+          <Image
             src={profile.avatar_url}
             alt=""
+            width={48}
+            height={48}
             className="h-10 w-10 shrink-0 rounded-full border border-zinc-700 bg-zinc-800 object-cover sm:h-12 sm:w-12"
+            unoptimized
           />
         ) : (
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-xactscore-accent text-sm font-bold text-xactscore-bg sm:h-12 sm:w-12 sm:text-lg">
