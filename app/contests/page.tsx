@@ -25,12 +25,13 @@ export default async function ContestsPage(props: {
         is_public
       )
     `
-  let { data: myContests, error: contestsError } = await supabase
+  const { data: memberRows, error: contestsError } = await supabase
     .from('contest_members')
     .select(memberSelect)
     .eq('user_id', user.id)
     .order('joined_at', { ascending: false })
 
+  let myContests = memberRows
   if (contestsError) {
     const fallback = await supabase
       .from('contest_members')
@@ -47,7 +48,7 @@ export default async function ContestsPage(props: {
     `)
       .eq('user_id', user.id)
       .order('joined_at', { ascending: false })
-    myContests = fallback.data
+    myContests = fallback.data as typeof myContests
   }
 
   return (

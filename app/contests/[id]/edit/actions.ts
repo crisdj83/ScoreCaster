@@ -11,6 +11,7 @@ export async function updateContestSettings(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
+  const contestId = formData.get('contest_id') as string
   const newName = String(formData.get('name') || '').trim()
   if (!newName) {
     redirect(`/contests/${contestId}/edit?error=${encodeURIComponent('Please enter a contest name.')}`)

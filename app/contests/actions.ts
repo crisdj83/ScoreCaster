@@ -14,7 +14,7 @@ function escapeIlikeExact(value: string) {
   return value.replace(/\\/g, '\\\\').replace(/%/g, '\\%').replace(/_/g, '\\_')
 }
 
-function createContestError(message: string, extras?: { name?: string; seasonLength?: string; visibility?: 'public' | 'private' }) {
+function createContestError(message: string, extras?: { name?: string; seasonLength?: string; visibility?: 'public' | 'private' }): never {
   const params = new URLSearchParams()
   params.set('error', message)
   params.set('tab', 'create')
@@ -73,12 +73,12 @@ export async function createContest(formData: FormData) {
     .select('id')
     .single()
 
-  if (contestError) {
-    const missingPublicColumn = /is_public/.test(contestError.message || '')
+  if (contestError || !newContest) {
+    const missingPublicColumn = /is_public/.test(contestError?.message || '')
     createContestError(
       missingPublicColumn
         ? 'Public contests need a one-time database update. Paste supabase/public-contests.sql into the Supabase SQL editor, then try again.'
-        : `Failed to create contest: ${contestError.message}`,
+        : `Failed to create contest: ${contestError?.message || 'Contest was not created.'}`,
       { name, seasonLength, visibility: isPublic ? 'public' : 'private' }
     )
   }
