@@ -2,7 +2,9 @@ import { createClient } from '../../lib/supabase/server'
 import { redirect } from 'next/navigation'
 import ContestHub from './ContestHub'
 
-export default async function ContestsPage(props: { searchParams: Promise<{ error?: string }> }) {
+export default async function ContestsPage(props: {
+  searchParams: Promise<{ error?: string; tab?: string; name?: string; season_length?: string; visibility?: string }>
+}) {
   const searchParams = await props.searchParams;
   const supabase = await createClient()
 

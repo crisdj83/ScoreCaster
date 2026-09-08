@@ -3,10 +3,25 @@
 import { createClient } from '../../lib/supabase/server'
 import { createAdminClient } from '../../lib/supabase/admin'
 import { redirect } from 'next/navigation'
+import { isValidSeasonLength, type ContestSeasonLength } from '../../lib/contest-season'
 
 // Helper function to generate a 7-character alphanumeric string (e.g., "btyfwtx")
 function generateContestKey() {
   return Math.random().toString(36).substring(2, 9).toLowerCase()
+}
+
+function escapeIlikeExact(value: string) {
+  return value.replace(/\\/g, '\\\\').replace(/%/g, '\\%').replace(/_/g, '\\_')
+}
+
+function createContestError(message: string, extras?: { name?: string; seasonLength?: string; visibility?: 'public' | 'private' }) {
+  const params = new URLSearchParams()
+  params.set('error', message)
+  params.set('tab', 'create')
+  if (extras?.name) params.set('name', extras.name)
+  if (extras?.seasonLength) params.set('season_length', extras.seasonLength)
+  if (extras?.visibility) params.set('visibility', extras.visibility)
+  redirect(`/contests?${params.toString()}`)
 }
 
 export async function createContest(formData: FormData) {
@@ -17,12 +32,33 @@ export async function createContest(formData: FormData) {
 
   const name = String(formData.get('name') || '').trim()
   if (!name) {
-    redirect('/contests?error=Please enter a contest name.')
+    createContestError('Please enter a contest name.')
   }
 
   const isPublic = formData.get('visibility') === 'public'
+  const requestedLength = String(formData.get('season_length') || 'full')
+  const seasonLength: ContestSeasonLength = isValidSeasonLength(requestedLength)
+    ? requestedLength
+    : 'full'
   const contestKey = generateContestKey()
   const serviceSupabase = createAdminClient()
+
+  if (isPublic) {
+    const { data: existingPublic, error: existingError } = await serviceSupabase
+      .from('contests')
+      .select('id')
+      .eq('is_public', true)
+      .ilike('name', escapeIlikeExact(name))
+      .limit(1)
+      .maybeSingle()
+
+    if (!existingError && existingPublic) {
+      createContestError(
+        'A public league with this name already exists. Please choose another name.',
+        { name, seasonLength, visibility: isPublic ? 'public' : 'private' }
+      )
+    }
+  }
 
   // 1. Create the contest
   const { data: newContest, error: contestError } = await serviceSupabase
@@ -31,7 +67,7 @@ export async function createContest(formData: FormData) {
       admin_id: user.id,
       name,
       contest_key: contestKey,
-      season_length: 'full',
+      season_length: seasonLength,
       is_public: isPublic,
     })
     .select('id')
@@ -39,12 +75,11 @@ export async function createContest(formData: FormData) {
 
   if (contestError) {
     const missingPublicColumn = /is_public/.test(contestError.message || '')
-    redirect(
-      `/contests?error=${encodeURIComponent(
-        missingPublicColumn
-          ? 'Public contests need a one-time database update. Paste supabase/public-contests.sql into the Supabase SQL editor, then try again.'
-          : `Failed to create contest: ${contestError.message}`
-      )}`
+    createContestError(
+      missingPublicColumn
+        ? 'Public contests need a one-time database update. Paste supabase/public-contests.sql into the Supabase SQL editor, then try again.'
+        : `Failed to create contest: ${contestError.message}`,
+      { name, seasonLength, visibility: isPublic ? 'public' : 'private' }
     )
   }
 
@@ -58,7 +93,11 @@ export async function createContest(formData: FormData) {
     })
 
   if (memberError) {
-    redirect(`/contests?error=Failed to join your own contest: ${memberError.message}`)
+    createContestError(`Failed to join your own contest: ${memberError.message}`, {
+      name,
+      seasonLength,
+      visibility: isPublic ? 'public' : 'private',
+    })
   }
 
   // Redirect straight to the new contest dashboard!

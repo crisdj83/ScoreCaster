@@ -14,11 +14,18 @@ import { Badge } from '@/components/ui/badge'
 import { EmptyState, PageHeader } from '@/components/ui/page-header'
 import { cn } from '@/lib/utils'
 import { segmentActive, segmentBase, segmentInactive } from '@/lib/tab-styles'
-import { getSeasonLengthLabelKey } from '../../lib/contest-season'
+import { getSeasonLengthLabelKey, isValidSeasonLength, type ContestSeasonLength } from '../../lib/contest-season'
 
 export default function ContestHub({ myContests, messages }: any) {
-  const [activeTab, setActiveTab] = useState<'my_contests' | 'join' | 'create'>('my_contests')
-  const [visibility, setVisibility] = useState<'public' | 'private'>('private')
+  const initialTab =
+    messages?.tab === 'create' ? 'create' : messages?.tab === 'join' ? 'join' : 'my_contests'
+  const [activeTab, setActiveTab] = useState<'my_contests' | 'join' | 'create'>(initialTab)
+  const [visibility, setVisibility] = useState<'public' | 'private'>(
+    messages?.visibility === 'public' ? 'public' : 'private'
+  )
+  const [seasonLength, setSeasonLength] = useState<ContestSeasonLength>(
+    isValidSeasonLength(messages?.season_length) ? messages.season_length : 'full'
+  )
   const t = useTranslations()
 
   const tabClass = (tab: typeof activeTab) =>
@@ -206,8 +213,43 @@ export default function ContestHub({ myContests, messages }: any) {
                     type="text"
                     name="name"
                     required
+                    defaultValue={messages?.name || ''}
                     placeholder="e.g. Office Premier League 24/25"
                   />
+                </div>
+                <div>
+                  <Label>{t('Season Length')}</Label>
+                  <p className="mb-2 text-xs text-zinc-500">
+                    {t('Choose full season, first half, or second half of the Premier League.')}
+                  </p>
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                    {([
+                      { value: 'full', title: t('Full season'), detail: t('All 38 Premier League matchdays.') },
+                      { value: 'first_half', title: t('First half'), detail: t('The first 19 Premier League matchdays.') },
+                      { value: 'second_half', title: t('Second half'), detail: t('Matchdays 20 through 38.') },
+                    ] as const).map(option => (
+                      <label
+                        key={option.value}
+                        className={cn(
+                          'cursor-pointer rounded-xl border px-3 py-3 text-left transition',
+                          seasonLength === option.value
+                            ? 'border-orange-400/50 bg-orange-500/15'
+                            : 'border-zinc-800 bg-zinc-950/60 hover:border-zinc-600'
+                        )}
+                      >
+                        <input
+                          type="radio"
+                          name="season_length"
+                          value={option.value}
+                          checked={seasonLength === option.value}
+                          onChange={() => setSeasonLength(option.value)}
+                          className="sr-only"
+                        />
+                        <p className="text-xs font-black uppercase tracking-wider text-zinc-100">{option.title}</p>
+                        <p className="mt-1 text-[11px] leading-snug text-zinc-500">{option.detail}</p>
+                      </label>
+                    ))}
+                  </div>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <button

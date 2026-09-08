@@ -11,13 +11,41 @@ export async function updateContestSettings(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const contestId = formData.get('contest_id') as string
-  const newName = formData.get('name') as string
+  const newName = String(formData.get('name') || '').trim()
+  if (!newName) {
+    redirect(`/contests/${contestId}/edit?error=${encodeURIComponent('Please enter a contest name.')}`)
+  }
 
   const { data: membership, error: membershipError } = await supabase
     .from('contest_members').select('role').eq('contest_id', contestId).eq('user_id', user.id).single()
 
   if (membershipError || membership?.role !== 'admin') redirect(`/contests/${contestId}?error=Unauthorized.`)
+
+  const { data: contest } = await supabase
+    .from('contests')
+    .select('id, is_public')
+    .eq('id', contestId)
+    .single()
+
+  if (contest?.is_public) {
+    const escapedName = newName.replace(/\\/g, '\\\\').replace(/%/g, '\\%').replace(/_/g, '\\_')
+    const { data: existingPublic } = await supabase
+      .from('contests')
+      .select('id')
+      .eq('is_public', true)
+      .ilike('name', escapedName)
+      .neq('id', contestId)
+      .limit(1)
+      .maybeSingle()
+
+    if (existingPublic) {
+      redirect(
+        `/contests/${contestId}/edit?error=${encodeURIComponent(
+          'A public league with this name already exists. Please choose another name.'
+        )}`
+      )
+    }
+  }
 
   const { error: updateError } = await supabase
     .from('contests').update({ name: newName }).eq('id', contestId).select().single()
