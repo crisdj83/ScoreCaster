@@ -2,7 +2,9 @@ import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 import {
   calculatePoints,
+  getActiveMatchday,
   getOfficialScore,
+  isOpenForPrediction,
   isPredictionLocked,
   isPredictionRevealable,
   resolveContestScoring,
@@ -87,5 +89,17 @@ describe('contest helpers', () => {
     assert.equal(getOfficialScore({ status: 'FINISHED', score: { fullTime: { home: 1, away: 0 } } })?.home, 1)
     assert.equal(getOfficialScore({ status: 'IN_PLAY', score: { fullTime: { home: null, away: null } } }), null)
     assert.equal(getOfficialScore({ status: 'SCHEDULED', score: { fullTime: { home: 0, away: 0 } } }), null)
+  })
+
+  it('uses the live or next fixture matchday as this week', () => {
+    const now = Date.parse('2026-09-12T12:00:00.000Z')
+    const matches = [
+      { matchday: 4, status: 'FINISHED', utcDate: '2026-09-06T14:00:00.000Z' },
+      { matchday: 5, status: 'SCHEDULED', utcDate: '2026-09-13T14:00:00.000Z' },
+      { matchday: 6, status: 'SCHEDULED', utcDate: '2026-09-20T14:00:00.000Z' },
+    ]
+    assert.equal(getActiveMatchday(matches, now), 5)
+    assert.equal(isOpenForPrediction(matches[1], now), true)
+    assert.equal(isOpenForPrediction(matches[0], now), false)
   })
 })

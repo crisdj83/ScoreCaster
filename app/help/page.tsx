@@ -19,7 +19,7 @@ const sections = [
   },
   {
     title: 'Contests and invites',
-    body: 'Contest admins can choose full season, first half, or second half, customize scoring, and share the invite key with friends. You can belong to multiple contests at once.',
+    body: 'Contest admins can choose full season, first half, or second half, customize scoring, and share an invite link with friends. You can belong to multiple contests at once. There is no player cap and no ads.',
   },
   {
     title: 'Your profile',

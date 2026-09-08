@@ -9,6 +9,7 @@ import ServiceWorkerRegister from "./components/ServiceWorkerRegister";
 import { LocaleProvider } from "./components/LocaleProvider";
 import { getServerLocale } from "../lib/i18n-server";
 import { getTranslations } from "../lib/i18n";
+import { siteUrl } from "../lib/urls";
 
 const inter = Inter_Tight({
   subsets: ["latin"],
@@ -25,10 +26,29 @@ export const viewport: Viewport = {
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = getTranslations(getServerLocale());
+  const base = siteUrl();
+  const title = t("XactScore | Premier League Predictions");
+  const description = t("Predict match scores and compete with friends.");
   return {
-    title: t("XactScore | Premier League Predictions"),
-    description: t("Predict match scores and compete with friends."),
+    metadataBase: new URL(base),
+    title,
+    description,
     applicationName: "XactScore",
+    keywords: ["Premier League", "score predictions", "football predictor", "private league", "XactScore"],
+    openGraph: {
+      type: "website",
+      url: base,
+      siteName: "XactScore",
+      title,
+      description,
+      images: [{ url: "/icons/icon-512.png", width: 512, height: 512, alt: "XactScore" }],
+    },
+    twitter: {
+      card: "summary",
+      title,
+      description,
+      images: ["/icons/icon-512.png"],
+    },
     appleWebApp: {
       capable: true,
       title: "XactScore",

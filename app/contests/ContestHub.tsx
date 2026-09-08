@@ -18,7 +18,11 @@ import { getSeasonLengthLabelKey, isValidSeasonLength, type ContestSeasonLength 
 
 export default function ContestHub({ myContests, messages }: any) {
   const initialTab =
-    messages?.tab === 'create' ? 'create' : messages?.tab === 'join' ? 'join' : 'my_contests'
+    messages?.tab === 'create'
+      ? 'create'
+      : messages?.tab === 'join' || messages?.key
+        ? 'join'
+        : 'my_contests'
   const [activeTab, setActiveTab] = useState<'my_contests' | 'join' | 'create'>(initialTab)
   const [visibility, setVisibility] = useState<'public' | 'private'>(
     messages?.visibility === 'public' ? 'public' : 'private'
@@ -183,6 +187,7 @@ export default function ContestHub({ myContests, messages }: any) {
                     name="contest_key"
                     required
                     placeholder="e.g. btyfwtx"
+                    defaultValue={messages?.key || ''}
                     className="text-center font-mono text-lg uppercase tracking-widest"
                   />
                 </div>

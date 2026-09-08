@@ -42,7 +42,7 @@ export default async function RulesPage(props: { params: Promise<{ id: string }>
               <li>
                 <strong className="text-zinc-100">{t('Lockout Time:')}</strong>{' '}
                 {t(
-                  'You can change your prediction as many times as you want up until the exact minute the match kicks off. Once a match begins, predictions are locked.'
+                  'Picks lock 60 minutes before kickoff. You can change your score until then. After lock, the pick is final.'
                 )}
               </li>
             </ul>

@@ -6,6 +6,8 @@ import { getTranslations } from '../../../lib/i18n'
 import { getServerLocale } from '../../../lib/i18n-server'
 import { Globe } from 'lucide-react'
 import { Surface } from '@/components/ui/card'
+import CopyInviteButton from '../../components/CopyInviteButton'
+import { inviteUrl } from '../../../lib/urls'
 
 export default async function ContestLayout(props: { 
   children: React.ReactNode;
@@ -74,6 +76,7 @@ export default async function ContestLayout(props: {
             <p className="bg-gradient-to-r from-amber-400 to-orange-600 bg-clip-text font-mono text-[11px] font-black tracking-wider text-transparent">
               {contest.contest_key}
             </p>
+            <CopyInviteButton url={inviteUrl(contest.contest_key)} className="mt-1 min-h-8 w-full px-2 text-[9px]" />
           </div>
         )}
       </div>
@@ -111,6 +114,7 @@ export default async function ContestLayout(props: {
             <p className="bg-gradient-to-r from-amber-400 to-orange-600 bg-clip-text font-mono text-2xl font-black tracking-widest text-transparent">
               {contest.contest_key}
             </p>
+            <CopyInviteButton url={inviteUrl(contest.contest_key)} className="mt-3 w-full" />
           </div>
         )}
       </div>

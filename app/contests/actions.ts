@@ -104,45 +104,47 @@ export async function createContest(formData: FormData) {
   redirect(`/contests/${newContest.id}`)
 }
 
-export async function joinContest(formData: FormData) {
+export async function joinContestWithKey(contestKey: string): Promise<never> {
   const supabase = await createClient()
   const { data: { user }, error: authError } = await supabase.auth.getUser()
-  
-  if (authError || !user) redirect('/login')
+  const key = contestKey.trim().toLowerCase()
 
-  const contestKey = String(formData.get('contest_key') || '').trim().toLowerCase()
-  if (!contestKey) {
+  if (authError || !user) {
+    redirect(key ? `/login?next=${encodeURIComponent(`/join/${key}`)}` : '/login')
+  }
+  if (!key) {
     redirect('/contests?error=Please enter an invitation key.')
   }
 
-  // 1. Find the private contest by its unique key
   const { data: contest, error: searchError } = await supabase
     .from('contests')
     .select('id')
-    .eq('contest_key', contestKey)
+    .eq('contest_key', key)
     .maybeSingle()
 
   if (searchError || !contest) {
-    redirect(`/contests?error=Contest not found. Please check the code and try again.`)
+    redirect('/contests?error=Contest not found. Please check the code and try again.')
   }
 
-  // 2. Add the user as a 'member'
   const { error: joinError } = await supabase
     .from('contest_members')
     .insert({
       contest_id: contest.id,
       user_id: user.id,
-      role: 'member'
+      role: 'member',
     })
 
-  // If the error code is 23505, it means they are already in the contest (unique constraint violation)
   if (joinError && joinError.code === '23505') {
-    redirect(`/contests/${contest.id}`) // Just send them to it
+    redirect(`/contests/${contest.id}`)
   } else if (joinError) {
     redirect(`/contests?error=Failed to join contest: ${joinError.message}`)
   }
 
   redirect(`/contests/${contest.id}`)
+}
+
+export async function joinContest(formData: FormData) {
+  await joinContestWithKey(String(formData.get('contest_key') || ''))
 }
 
 export async function joinPublicContest(formData: FormData) {

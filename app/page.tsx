@@ -1,18 +1,22 @@
 import { createClient } from '../lib/supabase/server'
-import { redirect } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ShieldCheck } from 'lucide-react'
 import HeroBanner from './components/HeroBanner'
+import MarketingLanding from './components/MarketingLanding'
+import HomeWeekList, { type LeagueWeek } from './components/HomeWeekList'
 import { getPLMatches } from '../lib/football'
 import { getTranslations } from '../lib/i18n'
 import { getServerLocale } from '../lib/i18n-server'
 import { findFavoriteTeam } from '../lib/favorite-teams'
+import { isMatchInContestSeason } from '../lib/contest-season'
+import { getActiveMatchday, isOpenForPrediction } from '../lib/scoring'
 
 type PLMatch = {
   id: number | string
   utcDate: string
   status?: string
+  matchday?: number | null
   venue?: string
   stadium?: string
   homeTeam: { name: string; shortName?: string; crest?: string }
@@ -23,17 +27,15 @@ type PLMatch = {
   }
 }
 
-// Fetch both the recent scores AND the next scheduled match
 async function fetchPLData() {
   try {
-    const data = await getPLMatches();
+    const data = await getPLMatches()
     const matches = ((data.matches || []) as PLMatch[])
 
-    // 1. Get the Recent Scores (Finished or Live)
     const recentMatchesRaw = matches
       .filter((m) => ['FINISHED', 'IN_PLAY', 'PAUSED'].includes(m.status || ''))
       .sort((a, b) => new Date(b.utcDate).getTime() - new Date(a.utcDate).getTime())
-      .slice(0, 5);
+      .slice(0, 5)
 
     const recentScores = recentMatchesRaw.map((m) => ({
       id: m.id,
@@ -43,18 +45,16 @@ async function fetchPLData() {
       awayCrest: m.awayTeam.crest,
       homeScore: m.score?.fullTime?.home ?? m.score?.halfTime?.home ?? 0,
       awayScore: m.score?.fullTime?.away ?? m.score?.halfTime?.away ?? 0,
-      status: m.status === 'FINISHED' ? 'FT' : 'LIVE'
-    }));
+      status: m.status === 'FINISHED' ? 'FT' : 'LIVE',
+    }))
 
-    // 2. Get the Next Upcoming Match
-    const now = Date.now();
+    const now = Date.now()
     const nextMatchRaw = matches
       .filter((m) => ['SCHEDULED', 'TIMED'].includes(m.status || ''))
       .filter((m) => new Date(m.utcDate).getTime() > now)
-      // Sort ascending to get the closest future match
-      .sort((a, b) => new Date(a.utcDate).getTime() - new Date(b.utcDate).getTime())[0];
+      .sort((a, b) => new Date(a.utcDate).getTime() - new Date(b.utcDate).getTime())[0]
 
-    let nextMatch = null;
+    let nextMatch = null
     if (nextMatchRaw) {
       nextMatch = {
         date: nextMatchRaw.utcDate,
@@ -66,22 +66,25 @@ async function fetchPLData() {
       }
     }
 
-    return { recentScores, nextMatch };
+    return { matches, recentScores, nextMatch }
   } catch (error) {
-    console.error("API Fetch Error:", error);
-    return { recentScores: [], nextMatch: null };
+    console.error('API Fetch Error:', error)
+    return { matches: [] as PLMatch[], recentScores: [], nextMatch: null }
   }
 }
 
 export default async function Home(props: { searchParams: Promise<{ success?: string }> }) {
   const searchParams = await props.searchParams
+  const locale = getServerLocale()
+  const t = getTranslations(locale)
   const supabase = await createClient()
-  const t = getTranslations(getServerLocale())
 
-  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
-  if (authError || !user) {
-    redirect('/login')
+  if (!user) {
+    return <MarketingLanding locale={locale} />
   }
 
   const [{ data: profile }, { data: myContests }, plData] = await Promise.all([
@@ -98,35 +101,86 @@ export default async function Home(props: { searchParams: Promise<{ success?: st
     `).eq('user_id', user.id),
     fetchPLData(),
   ])
-  const { recentScores, nextMatch } = plData
-  const contestIds = (myContests || []).map(membership => membership.contest_id)
+  const { matches, recentScores, nextMatch } = plData
+  const contestIds = (myContests || []).map((membership) => membership.contest_id)
   const { data: contestPredictions } = contestIds.length
-    ? await supabase.from('predictions').select('contest_id, user_id, points').in('contest_id', contestIds)
+    ? await supabase
+        .from('predictions')
+        .select('contest_id, user_id, points, match_id, predicted_home_score')
+        .in('contest_id', contestIds)
     : { data: [] }
-  const bestRanking = (myContests || []).reduce<{ rank: number; year: number } | null>((best, membership) => {
+
+  const now = Date.now()
+  const leagues: LeagueWeek[] = (myContests || []).map((membership) => {
+    const contest = membership.contests as {
+      name?: string
+      season_length?: string
+      created_at?: string
+    } | null
     const members = new Map<string, number>()
     ;(contestPredictions || [])
-      .filter(prediction => prediction.contest_id === membership.contest_id)
-      .forEach(prediction => members.set(prediction.user_id, (members.get(prediction.user_id) || 0) + (Number(prediction.points) || 0)))
+      .filter((prediction) => prediction.contest_id === membership.contest_id)
+      .forEach((prediction) =>
+        members.set(prediction.user_id, (members.get(prediction.user_id) || 0) + (Number(prediction.points) || 0))
+      )
     const sortedScores = Array.from(members.entries()).sort((a, b) => b[1] - a[1])
     const rank = sortedScores.findIndex(([userId]) => userId === user.id) + 1
-    if (!rank) return best
-    const createdAt = (membership.contests as { created_at?: string } | null)?.created_at
-    const current = { rank, year: createdAt ? new Date(createdAt).getFullYear() : new Date().getFullYear() }
-    return !best || current.rank < best.rank ? current : best
+    const predicted = new Set(
+      (contestPredictions || [])
+        .filter(
+          (prediction) =>
+            prediction.contest_id === membership.contest_id &&
+            prediction.user_id === user.id &&
+            prediction.predicted_home_score !== null &&
+            prediction.predicted_home_score !== undefined
+        )
+        .map((prediction) => String(prediction.match_id))
+    )
+    const seasonMatches = matches.filter((match) => isMatchInContestSeason(match, contest?.season_length))
+    const matchday = getActiveMatchday(seasonMatches, now)
+    const openPicks =
+      matchday == null
+        ? 0
+        : seasonMatches.filter(
+            (match) =>
+              Number(match.matchday) === matchday &&
+              isOpenForPrediction(match, now) &&
+              !predicted.has(String(match.id))
+          ).length
+
+    return {
+      contestId: membership.contest_id,
+      name: contest?.name || t('Contests'),
+      openPicks,
+      rank: rank || null,
+    }
+  })
+
+  const bestRanking = leagues.reduce<{ rank: number } | null>((best, league) => {
+    if (!league.rank) return best
+    return !best || league.rank < best.rank ? { rank: league.rank } : best
   }, null)
+
+  const firstOpen = leagues.find((league) => league.openPicks > 0)
+  const predictHref = firstOpen
+    ? `/contests/${firstOpen.contestId}/predictions`
+    : leagues[0]
+      ? `/contests/${leagues[0].contestId}/predictions`
+      : '/contests'
 
   const selectedTeamData = findFavoriteTeam(profile?.favorite_team)
 
   return (
     <div className="space-y-3 pb-4 sm:space-y-6 sm:pb-8">
-    {searchParams?.success && (
-      <div className="rounded-xl border border-orange-500/50 bg-orange-500/15 px-4 py-3 text-sm font-bold text-orange-200">
-        {t(searchParams.success)}
-      </div>
-    )}
-      
-      <HeroBanner nextMatch={nextMatch} recentScores={recentScores} />
+      {searchParams?.success && (
+        <div className="rounded-xl border border-orange-500/50 bg-orange-500/15 px-4 py-3 text-sm font-bold text-orange-200">
+          {t(searchParams.success)}
+        </div>
+      )}
+
+      <HomeWeekList locale={locale} leagues={leagues} />
+
+      <HeroBanner nextMatch={nextMatch} recentScores={recentScores} predictHref={predictHref} />
 
       <div className="flex items-center gap-2.5 rounded-2xl border border-zinc-800 bg-gradient-to-br from-orange-600 via-zinc-900 to-zinc-950 px-3 py-2.5 shadow-lg shadow-black/30 sm:gap-4 sm:px-5 sm:py-4">
         {profile?.avatar_url ? (
@@ -187,5 +241,5 @@ export default async function Home(props: { searchParams: Promise<{ success?: st
         </Link>
       </div>
     </div>
-  );
+  )
 }

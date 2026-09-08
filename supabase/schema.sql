@@ -87,6 +87,23 @@ create table if not exists public.message_reads (
   last_read_at timestamptz not null default now()
 );
 
+create table if not exists public.push_subscriptions (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references public.users (id) on delete cascade,
+  endpoint text not null unique,
+  p256dh text not null,
+  auth text not null,
+  created_at timestamptz not null default timezone('utc'::text, now()),
+  updated_at timestamptz not null default timezone('utc'::text, now())
+);
+
+create table if not exists public.match_reminders (
+  user_id uuid not null references public.users (id) on delete cascade,
+  match_id bigint not null,
+  sent_at timestamptz not null default timezone('utc'::text, now()),
+  primary key (user_id, match_id)
+);
+
 create table if not exists public.news_posts (
   id uuid primary key default gen_random_uuid(),
   author_id uuid not null references public.users (id) on delete cascade,
@@ -294,6 +311,8 @@ alter table public.messages enable row level security;
 alter table public.message_replies enable row level security;
 alter table public.message_reads enable row level security;
 alter table public.news_posts enable row level security;
+alter table public.push_subscriptions enable row level security;
+alter table public.match_reminders enable row level security;
 
 -- USERS
 drop policy if exists "Allow public read access" on public.users;
@@ -535,6 +554,29 @@ create policy "Users can manage their message read state"
 drop policy if exists "news_posts_select_authenticated" on public.news_posts;
 create policy "news_posts_select_authenticated"
   on public.news_posts for select to authenticated using (true);
+
+-- PUSH SUBSCRIPTIONS
+drop policy if exists "push_subscriptions_select_own" on public.push_subscriptions;
+drop policy if exists "push_subscriptions_insert_own" on public.push_subscriptions;
+drop policy if exists "push_subscriptions_update_own" on public.push_subscriptions;
+drop policy if exists "push_subscriptions_delete_own" on public.push_subscriptions;
+
+create policy "push_subscriptions_select_own"
+  on public.push_subscriptions for select to authenticated
+  using ((select auth.uid()) = user_id);
+
+create policy "push_subscriptions_insert_own"
+  on public.push_subscriptions for insert to authenticated
+  with check ((select auth.uid()) = user_id);
+
+create policy "push_subscriptions_update_own"
+  on public.push_subscriptions for update to authenticated
+  using ((select auth.uid()) = user_id)
+  with check ((select auth.uid()) = user_id);
+
+create policy "push_subscriptions_delete_own"
+  on public.push_subscriptions for delete to authenticated
+  using ((select auth.uid()) = user_id);
 
 -- -----------------------------------------------------------------------------
 -- 6) Optional cleanup notes (DO NOT auto-drop; review manually)

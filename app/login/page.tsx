@@ -3,16 +3,20 @@ import Link from 'next/link'
 import { Trophy } from 'lucide-react'
 import { getTranslations } from '../../lib/i18n'
 import { getServerLocale } from '../../lib/i18n-server'
+import { safeNextPath } from '../../lib/urls'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
-export default async function LoginPage(props: { searchParams: Promise<{ message?: string }> }) {
+export default async function LoginPage(props: {
+  searchParams: Promise<{ message?: string; next?: string }>
+}) {
   const searchParams = await props.searchParams
   const t = getTranslations(getServerLocale())
   const isSuccessMessage = searchParams?.message?.includes('Check your email')
+  const next = safeNextPath(searchParams?.next)
 
   return (
     <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center py-8">
@@ -25,10 +29,18 @@ export default async function LoginPage(props: { searchParams: Promise<{ message
             <h1 className="text-2xl font-black uppercase tracking-tight text-zinc-100">
               {t('Welcome to XactScore')}
             </h1>
-            <p className="mt-1 text-sm text-zinc-400">{t('Sign in to predict and compete')}</p>
+            <p className="mt-1 text-center text-sm text-zinc-400">
+              {next.startsWith('/join/')
+                ? t('Sign in to join your league.')
+                : t('Sign in to predict and compete')}
+            </p>
+            <p className="mt-3 text-center text-[10px] font-bold uppercase tracking-widest text-zinc-500">
+              {t('No ads')} · {t('No player limit')} · {t('Always free')}
+            </p>
           </div>
 
           <form className="flex w-full flex-col gap-4 text-zinc-100">
+            <input type="hidden" name="next" value={next} />
             <div>
               <Label htmlFor="email">{t('Email')}</Label>
               <Input id="email" name="email" placeholder="you@example.com" required type="email" />

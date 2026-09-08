@@ -3,12 +3,15 @@ import { NextResponse, type NextRequest } from 'next/server'
 
 function isPublicPath(pathname: string) {
   return (
+    pathname === '/' ||
     pathname.startsWith('/login') ||
     pathname.startsWith('/forgot-password') ||
     pathname.startsWith('/auth/callback') ||
     pathname.startsWith('/update-password') ||
-    pathname.startsWith('/help/install') ||
+    pathname.startsWith('/help') ||
+    pathname.startsWith('/join') ||
     pathname.startsWith('/api/sync') ||
+    pathname.startsWith('/api/reminders') ||
     pathname.startsWith('/api/avatar')
   )
 }
@@ -52,8 +55,10 @@ export async function middleware(request: NextRequest) {
   }
 
   if (user && pathname.startsWith('/login')) {
+    const next = request.nextUrl.searchParams.get('next') || ''
     const url = request.nextUrl.clone()
-    url.pathname = '/'
+    url.pathname = next.startsWith('/join/') ? next : '/'
+    url.search = ''
     return NextResponse.redirect(url)
   }
 

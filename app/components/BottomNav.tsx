@@ -29,15 +29,20 @@ export default function BottomNav({ isAdmin, isLoggedIn, unreadMessageCount }: B
   const pathname = usePathname()
   const t = useTranslations()
 
-  const items = [
-    { href: '/', label: t('Dashboard'), short: t('Home'), icon: HomeIcon },
-    { href: '/contests', label: t('Contests'), short: t('Leagues'), icon: Trophy },
-    { href: '/profile', label: t('Profile'), short: t('Profile'), icon: UserIcon },
-    { href: '/news', label: t('Messages'), short: t('Messages'), icon: MessageSquare, badge: unreadMessageCount },
-    { href: '/help', label: t('Help'), short: t('Help'), icon: CircleHelp },
-    ...(isAdmin ? [{ href: '/admin', label: t('Admin'), short: t('Admin'), icon: ShieldCheck }] : []),
-    ...(!isLoggedIn ? [{ href: '/login', label: t('Sign In'), short: t('Sign In'), icon: LogIn }] : []),
-  ]
+  const items = isLoggedIn
+    ? [
+        { href: '/', label: t('Dashboard'), short: t('Home'), icon: HomeIcon },
+        { href: '/contests', label: t('Contests'), short: t('Leagues'), icon: Trophy },
+        { href: '/profile', label: t('Profile'), short: t('Profile'), icon: UserIcon },
+        { href: '/news', label: t('Messages'), short: t('Messages'), icon: MessageSquare, badge: unreadMessageCount },
+        { href: '/help', label: t('Help'), short: t('Help'), icon: CircleHelp },
+        ...(isAdmin ? [{ href: '/admin', label: t('Admin'), short: t('Admin'), icon: ShieldCheck }] : []),
+      ]
+    : [
+        { href: '/', label: t('Dashboard'), short: t('Home'), icon: HomeIcon },
+        { href: '/help', label: t('Help'), short: t('Help'), icon: CircleHelp },
+        { href: '/login', label: t('Sign In'), short: t('Sign In'), icon: LogIn },
+      ]
 
   return (
     <nav

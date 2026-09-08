@@ -3,6 +3,7 @@ import { getPLMatches } from '../../../lib/football'
 import { isMatchInContestSeason } from '../../../lib/contest-season'
 import { calculatePoints, resolveContestScoring } from '../../../lib/scoring'
 import { createAdminClient } from '../../../lib/supabase/admin'
+import { isCronAuthorized } from '../../../lib/cron-auth'
 import { chunk } from '../../../lib/utils'
 
 export const dynamic = 'force-dynamic'
@@ -26,21 +27,8 @@ type PredictionRow = {
   is_exact: boolean | null
 }
 
-function isAuthorized(request: Request) {
-  const { searchParams } = new URL(request.url)
-  const secret = searchParams.get('secret')
-  const expectedSecret = process.env.XACTSCORE_SYNC_SECRET || process.env.SCORECASTER_SYNC_SECRET
-  const cronSecret = process.env.CRON_SECRET
-  const authHeader = request.headers.get('authorization')
-  const bearer = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null
-
-  if (expectedSecret && (secret === expectedSecret || bearer === expectedSecret)) return true
-  if (cronSecret && bearer === cronSecret) return true
-  return false
-}
-
 export async function GET(request: Request) {
-  if (!isAuthorized(request)) {
+  if (!isCronAuthorized(request)) {
     return NextResponse.json({ error: 'Unauthorized access' }, { status: 401 })
   }
 

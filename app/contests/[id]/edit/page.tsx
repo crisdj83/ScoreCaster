@@ -11,6 +11,8 @@ import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { PageHeader } from '@/components/ui/page-header'
 import { normalizeSeasonLength } from '../../../../lib/contest-season'
+import CopyInviteButton from '../../../components/CopyInviteButton'
+import { inviteUrl } from '../../../../lib/urls'
 
 export default async function EditContestPage(props: { 
   params: Promise<{ id: string }>, 
@@ -285,6 +287,7 @@ export default async function EditContestPage(props: {
                 <span className="font-mono text-3xl font-black tracking-widest text-xactscore-accent md:text-4xl">
                   {contest.contest_key}
                 </span>
+                <CopyInviteButton url={inviteUrl(contest.contest_key)} className="mx-auto mt-4" />
               </div>
               <form action={generateNewInviteKey}>
                 <input type="hidden" name="contest_id" value={contest.id} />

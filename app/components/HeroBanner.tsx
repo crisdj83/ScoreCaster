@@ -52,10 +52,12 @@ export type NextMatchData = {
 
 export default function HeroBanner({ 
   nextMatch, 
-  recentScores 
+  recentScores,
+  predictHref = '/contests',
 }: { 
   nextMatch: NextMatchData | null;
   recentScores: ScoreData[];
+  predictHref?: string;
 }) {
   const [timeLeft, setTimeLeft] = useState({ days: '00', hours: '00', minutes: '00', seconds: '00' })
   const t = useTranslations()
@@ -256,7 +258,7 @@ export default function HeroBanner({
           </div>
 
           <Link 
-            href="/contests" 
+            href={predictHref} 
             className={cn(
               buttonVariants({ variant: 'glass', size: 'sm' }),
               'uppercase tracking-wider sm:h-11 sm:min-h-11 sm:px-5 sm:text-xs'

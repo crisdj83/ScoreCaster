@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { updateProfile, changePassword } from './actions'
 import { User, Shield, Image as ImageIcon, RefreshCw, Clock, ChevronDown, Lock } from 'lucide-react'
+import MatchReminderToggle from '../components/MatchReminderToggle'
 import { createClient } from '../../lib/supabase/client'
 import { useTranslations } from '../components/LocaleProvider'
 import { Card, CardContent } from '@/components/ui/card'
@@ -387,6 +388,8 @@ function ProfilePageInner() {
           </form>
         </CardContent>
       </Card>
+
+      <MatchReminderToggle />
 
       <Card>
         <CardContent className="p-6 md:p-8">

@@ -115,6 +115,31 @@ export function isPredictionRevealable(utcDate: string, now = Date.now()): boole
   return Number.isFinite(kickoff) && now >= kickoff - PREDICTION_REVEAL_MS
 }
 
+type MatchdayMatch = {
+  status?: string | null
+  utcDate: string
+  matchday?: number | null
+}
+
+export function getActiveMatchday(matches: MatchdayMatch[], now = Date.now()): number | null {
+  const live = matches.find((match) => ['IN_PLAY', 'PAUSED'].includes(String(match.status || '')))
+  const upcoming = matches
+    .filter((match) => {
+      if (!['TIMED', 'SCHEDULED'].includes(String(match.status || ''))) return false
+      const kickoff = new Date(match.utcDate).getTime()
+      return Number.isFinite(kickoff) && kickoff > now
+    })
+    .sort((a, b) => new Date(a.utcDate).getTime() - new Date(b.utcDate).getTime())[0]
+  const matchday = Number((live || upcoming)?.matchday)
+  return Number.isFinite(matchday) ? matchday : null
+}
+
+export function isOpenForPrediction(match: MatchdayMatch, now = Date.now()): boolean {
+  const status = String(match.status || '')
+  if (['FINISHED', 'AWARDED', 'IN_PLAY', 'PAUSED'].includes(status)) return false
+  return !isPredictionLocked(match.utcDate, now)
+}
+
 export function getOfficialScore(match: {
   status?: string | null
   score?: {

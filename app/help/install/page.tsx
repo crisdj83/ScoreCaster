@@ -112,6 +112,9 @@ export default function InstallHelpPage() {
         <p className="text-sm leading-6 text-zinc-400">
           {t('Add XactScore to your phone in about a minute. It is a Progressive Web App — the same site you already use, opening like an app.')}
         </p>
+        <p className="text-sm leading-6 text-zinc-400">
+          {t('After you install it, open Profile and turn on Match reminders to get a ping about 2 hours before kickoff.')}
+        </p>
       </div>
 
       <p className="rounded-2xl border border-orange-500/25 bg-orange-500/10 px-4 py-3 text-sm leading-6 text-orange-100">

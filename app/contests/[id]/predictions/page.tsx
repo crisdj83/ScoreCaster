@@ -2,7 +2,7 @@
 import { createClient } from '../../../../lib/supabase/server'
 import { getPLMatches } from '../../../../lib/football'
 import { isMatchInContestSeason, normalizeSeasonLength } from '../../../../lib/contest-season'
-import { isPredictionLocked, isPredictionRevealable } from '../../../../lib/scoring'
+import { getActiveMatchday, isOpenForPrediction, isPredictionLocked, isPredictionRevealable } from '../../../../lib/scoring'
 import PredictionCard from './PredictionCard'
 import SuperLuckyButton from './SuperLuckyButton'
 import { getTranslations } from '../../../../lib/i18n'
@@ -31,21 +31,9 @@ export default async function PredictionsPage(props: { params: Promise<{ id: str
   
   // 3. Figure out which matchday is currently active.
   // Ignore stale scheduled records and use the closest genuinely upcoming fixture.
-  const now = Date.now();
-  const liveMatch = seasonMatches.find((match: any) => (
-    ['IN_PLAY', 'PAUSED'].includes(match.status)
-  ));
-  const upcomingMatch = seasonMatches
-    .filter((m: any) => (
-      ['TIMED', 'SCHEDULED'].includes(m.status) &&
-      Number.isFinite(new Date(m.utcDate).getTime()) &&
-      new Date(m.utcDate).getTime() > now
-    ))
-    .sort((a: any, b: any) => new Date(a.utcDate).getTime() - new Date(b.utcDate).getTime())[0];
-  const activeMatch = liveMatch || upcomingMatch;
-  const currentMatchday = activeMatch ? Number(activeMatch.matchday) : null;
+  const now = Date.now()
+  const currentMatchday = getActiveMatchday(seasonMatches, now)
 
-  // Current matchday, with games you can still predict always first.
   const matchdayFixtures = currentMatchday
     ? seasonMatches
         .filter((m: any) => Number(m.matchday) === currentMatchday)
@@ -97,12 +85,34 @@ export default async function PredictionsPage(props: { params: Promise<{ id: str
     points_earned: prediction.points,
   }))
 
+  const openThisWeek = matchdayFixtures.filter((match: any) => isOpenForPrediction(match, now))
+  const picksLeft = openThisWeek.filter(
+    (match: any) =>
+      !myPredictions?.some(
+        (prediction) =>
+          String(prediction.match_id) === String(match.id) &&
+          prediction.predicted_home_score !== null &&
+          prediction.predicted_home_score !== undefined
+      )
+  ).length
+
   return (
     <div className="p-0 sm:p-2 md:p-4">
       <LiveRefresh refreshAfter={matchdayFixtures.map((match: any) => match.utcDate)} />
       <div className="mb-2 flex items-center justify-between gap-3 sm:mb-6">
         <div className="min-w-0">
-          <h2 className="text-base font-bold text-zinc-100 sm:text-2xl">{t('Matchday')} {currentMatchday}</h2>
+          <div className="flex flex-wrap items-center gap-2">
+            <h2 className="text-base font-bold text-zinc-100 sm:text-2xl">{t('Matchday')} {currentMatchday}</h2>
+            {picksLeft > 0 ? (
+              <span className="rounded-full bg-xactscore-accent px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-xactscore-bg">
+                {picksLeft} {picksLeft === 1 ? t('pick left') : t('picks left')}
+              </span>
+            ) : openThisWeek.length > 0 ? (
+              <span className="rounded-full border border-white/15 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-zinc-400">
+                {t('All picks in')}
+              </span>
+            ) : null}
+          </div>
           <p className="mt-0.5 hidden text-sm leading-snug text-zinc-500 sm:block">
             <span className="block">{t('Picks lock 60 minutes before kickoff.')}</span>
             <span className="block">{t('Results show 30 minutes before kickoff.')}</span>
@@ -110,9 +120,7 @@ export default async function PredictionsPage(props: { params: Promise<{ id: str
         </div>
         <SuperLuckyButton
           contestId={params.id}
-          matchIds={matchdayFixtures
-            .filter((match: any) => !isPredictionLocked(match.utcDate) && !['IN_PLAY', 'PAUSED', 'FINISHED', 'AWARDED'].includes(String(match.status || '')))
-            .map((match: any) => String(match.id))}
+          matchIds={openThisWeek.map((match: any) => String(match.id))}
         />
       </div>
 
