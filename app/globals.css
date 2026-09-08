@@ -128,10 +128,14 @@
   }
 
   html.android {
-    font-size: 15px;
-    letter-spacing: -0.02em;
+    font-size: 14px;
+    letter-spacing: -0.03em;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+
+  html.android .brand-wordmark {
+    font-size: 1.55rem;
   }
 
   button,

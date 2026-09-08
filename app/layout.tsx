@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
-import { Inter } from "next/font/google";
+import { Inter_Tight } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import Navbar from "./components/Navbar";
@@ -10,7 +10,7 @@ import { LocaleProvider } from "./components/LocaleProvider";
 import { getServerLocale } from "../lib/i18n-server";
 import { getTranslations } from "../lib/i18n";
 
-const inter = Inter({
+const inter = Inter_Tight({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-inter",

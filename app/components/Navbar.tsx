@@ -46,10 +46,10 @@ export default async function Navbar() {
   return (
     <>
       <header className="sticky top-0 z-40 w-full border-b border-white/10 bg-xactscore-bg/70 pt-[env(safe-area-inset-top)] backdrop-blur-xl">
-        <div className="flex w-full flex-wrap items-center gap-2 px-3 py-3 sm:gap-2.5 sm:px-5 lg:px-8 xl:px-10">
+        <div className="flex w-full flex-nowrap items-center gap-2 px-3 py-3 sm:gap-2.5 sm:px-5 lg:px-8 xl:px-10">
           <NavLinks isAdmin={isAdmin} isLoggedIn={Boolean(user)} unreadMessageCount={unreadMessageCount} />
 
-          <div className="ml-auto flex flex-wrap items-center gap-1.5 sm:gap-2">
+          <div className="ml-auto flex shrink-0 flex-nowrap items-center gap-1.5 sm:gap-2">
             <LanguageSwitcher />
             {user ? (
               <form action={signOut} className="inline-flex">

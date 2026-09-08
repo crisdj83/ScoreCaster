@@ -195,7 +195,7 @@ export default function HeroBanner({
         />
         <div className="relative z-10 flex h-full flex-col justify-between p-3 sm:p-8 lg:p-10">
         <div>
-          <p className="mb-1 max-w-md text-xl font-black uppercase leading-none tracking-tight text-white sm:mb-3 sm:text-4xl lg:text-5xl">
+          <p className="hero-headline mb-1 max-w-md whitespace-nowrap text-[clamp(0.95rem,4.6vw,1.25rem)] font-black uppercase leading-none tracking-tight text-white sm:mb-3 sm:whitespace-normal sm:text-4xl lg:text-5xl">
             {t('Call the scores.')}{' '}
             <span className="text-xactscore-accent">{t('Own the table.')}</span>
           </p>
