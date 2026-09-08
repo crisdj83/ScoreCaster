@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
-import { Outfit } from "next/font/google";
+import Script from "next/script";
+import { Inter } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import Navbar from "./components/Navbar";
@@ -9,7 +10,11 @@ import { LocaleProvider } from "./components/LocaleProvider";
 import { getServerLocale } from "../lib/i18n-server";
 import { getTranslations } from "../lib/i18n";
 
-const outfit = Outfit({ subsets: ["latin"], display: "swap" });
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-inter",
+});
 
 export const viewport: Viewport = {
   themeColor: "#050506",
@@ -39,8 +44,11 @@ export default function RootLayout({
 }>) {
   const locale = getServerLocale();
   return (
-    <html lang={locale} className="dark">
-      <body className={`${outfit.className} bg-xactscore-bg text-xactscore-text min-h-screen flex flex-col`}>
+    <html lang={locale} className={`${inter.variable} dark`} suppressHydrationWarning>
+      <body className="bg-xactscore-bg text-xactscore-text min-h-screen flex flex-col">
+        <Script id="android-class" strategy="beforeInteractive">
+          {`document.documentElement.classList.toggle("android",/Android/i.test(navigator.userAgent))`}
+        </Script>
         <LocaleProvider initialLocale={locale}>
           <Navbar />
           <main className="mx-auto w-full flex-grow px-3 py-5 pb-24 sm:px-5 sm:py-6 lg:px-8 lg:py-8 lg:pb-8 xl:px-10">

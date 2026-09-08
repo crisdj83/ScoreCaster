@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss"
+import defaultTheme from "tailwindcss/defaultTheme"
 
 const config = {
   darkMode: ["class"],
@@ -16,6 +17,14 @@ const config = {
       },
     },
     extend: {
+      fontFamily: {
+        sans: [
+          "-apple-system",
+          "BlinkMacSystemFont",
+          "var(--font-inter)",
+          ...defaultTheme.fontFamily.sans,
+        ],
+      },
       colors: {
         xactscore: {
           bg: "var(--xactscore-bg)",

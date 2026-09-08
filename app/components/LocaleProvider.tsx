@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useLayoutEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { defaultLocale, isLocale, type Locale, translate } from '../../lib/i18n'
 
@@ -12,6 +12,10 @@ const LocaleContext = createContext<{ locale: Locale; setLocale: (locale: Locale
 export function LocaleProvider({ initialLocale, children }: { initialLocale: Locale; children: React.ReactNode }) {
   const [locale, setLocaleState] = useState(initialLocale)
   const router = useRouter()
+
+  useLayoutEffect(() => {
+    document.documentElement.classList.toggle('android', /Android/i.test(navigator.userAgent))
+  }, [])
 
   useEffect(() => {
     const saved =
