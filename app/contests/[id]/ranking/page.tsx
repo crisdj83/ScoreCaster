@@ -16,7 +16,7 @@ import {
   resolveContestScoring,
   type ContestScoring,
 } from '../../../../lib/scoring'
-import { Target, Activity, CheckCircle2, Gauge } from 'lucide-react'
+import { Target, Activity, CheckCircle2, Gauge, ArrowUp, ArrowDown } from 'lucide-react'
 import Image from 'next/image'
 import RankingInsights from './RankingInsights'
 import CurrentGameweek from './CurrentGameweek'
@@ -118,6 +118,94 @@ function scorersForTeam(goals: MatchGoal[] | undefined, team: Match['homeTeam'])
     const entry = byPlayer.get(key)!
     return `${entry.name} ${entry.bits.join(', ')}`
   })
+}
+
+function ranksFromFinishedMatches(
+  members: { user_id: string }[],
+  finishedMatches: Match[],
+  predictions: Prediction[],
+  matchById: Map<string, Match>,
+  scoring: ContestScoring
+) {
+  const allowed = new Set(finishedMatches.map((match) => String(match.id)))
+  const totals = new Map(
+    members.map((member) => [member.user_id, { points: 0, exact: 0, close: 0, scored: 0, correct: 0 }])
+  )
+  for (const prediction of predictions) {
+    if (!allowed.has(String(prediction.match_id))) continue
+    const result = pointsForPrediction(prediction, matchById.get(String(prediction.match_id)), scoring)
+    if (!result) continue
+    const current = totals.get(prediction.user_id)
+    if (!current) continue
+    current.points += result.points
+    current.scored += 1
+    if (result.points > 0) current.correct += 1
+    if (result.points === scoring.exact) current.exact += 1
+    else if (result.points === scoring.close) current.close += 1
+  }
+  const ranked = members.map((member) => {
+    const current = totals.get(member.user_id)!
+    return {
+      playerId: member.user_id,
+      points: current.points,
+      exact: current.exact,
+      close: current.close,
+      accuracy: current.scored ? current.correct / current.scored : 0,
+    }
+  }).sort((a, b) => b.points - a.points || b.exact - a.exact || b.close - a.close || b.accuracy - a.accuracy)
+
+  return new Map(
+    ranked.map((player) => [
+      player.playerId,
+      ranked.findIndex(
+        (item) =>
+          item.points === player.points &&
+          item.exact === player.exact &&
+          item.close === player.close &&
+          item.accuracy === player.accuracy
+      ) + 1,
+    ])
+  )
+}
+
+function RankMovement({
+  current,
+  previous,
+  upLabel,
+  downLabel,
+  sameLabel,
+}: {
+  current: number
+  previous: number | null
+  upLabel: string
+  downLabel: string
+  sameLabel: string
+}) {
+  if (previous == null || previous === current) {
+    return (
+      <span
+        className="inline-flex h-3.5 w-3.5 shrink-0 items-center justify-center"
+        title={sameLabel}
+        aria-label={sameLabel}
+      >
+        <span className="h-1.5 w-1.5 rounded-full bg-zinc-500" />
+      </span>
+    )
+  }
+
+  if (current < previous) {
+    return (
+      <span className="inline-flex shrink-0" title={upLabel} aria-label={upLabel}>
+        <ArrowUp className="h-3.5 w-3.5 text-emerald-400" strokeWidth={2.75} aria-hidden />
+      </span>
+    )
+  }
+
+  return (
+    <span className="inline-flex shrink-0" title={downLabel} aria-label={downLabel}>
+      <ArrowDown className="h-3.5 w-3.5 text-red-400" strokeWidth={2.75} aria-hidden />
+    </span>
+  )
 }
 
 function PlayerAvatar({ src, name }: { src?: string | null; name: string }) {
@@ -320,6 +408,19 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
       })),
     }
   })
+  const finishedMatches = matches
+    .filter((match) => match.status === 'FINISHED')
+    .sort(
+      (a, b) =>
+        new Date(a.utcDate).getTime() - new Date(b.utcDate).getTime() ||
+        String(a.id).localeCompare(String(b.id))
+    )
+  const previousRankByUser = finishedMatches.length
+    ? ranksFromFinishedMatches(members, finishedMatches.slice(0, -1), predictions, matchById, scoring)
+    : new Map<string, number>()
+  const finishedRankByUser = finishedMatches.length
+    ? ranksFromFinishedMatches(members, finishedMatches, predictions, matchById, scoring)
+    : new Map<string, number>()
 
   const table: any[] = standingsData?.standings?.find((standing: any) => standing.type === 'TOTAL')?.table || standingsData?.standings?.[0]?.table || []
   const teamById = new Map(table.map((row: any) => [String(row.team?.id), row]))
@@ -447,7 +548,7 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
     finalScore: t('Final score'),
   }
 
-  type PlayerRow = (typeof players)[number] & { rank: number }
+  type PlayerRow = (typeof players)[number] & { rank: number; previousRank: number | null; movementRank: number }
 
   const rankedPlayers: PlayerRow[] = players.map((player) => ({
     ...player,
@@ -459,6 +560,8 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
           other.closeResults === player.closeResults &&
           other.accuracy === player.accuracy
       ) + 1,
+    previousRank: finishedMatches.length ? previousRankByUser.get(player.id) ?? null : null,
+    movementRank: finishedRankByUser.get(player.id) ?? player.rank,
   }))
 
   const columns: RankColumn<PlayerRow>[] = [
@@ -479,7 +582,16 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
         <div className="flex min-w-0 items-center gap-2.5">
           <PlayerAvatar src={player.avatar} name={player.username} />
           <div className="min-w-0">
-            <div className="font-bold text-zinc-100">{player.username}</div>
+            <div className="flex min-w-0 items-center gap-1.5">
+              <span className="truncate font-bold text-zinc-100">{player.username}</span>
+              <RankMovement
+                current={player.movementRank}
+                previous={player.previousRank}
+                upLabel={t('Rank up')}
+                downLabel={t('Rank down')}
+                sameLabel={t('Rank unchanged')}
+              />
+            </div>
             {player.motto ? (
               <div className="mt-0.5 max-w-[18ch] truncate text-xs italic text-xactscore-accent">
                 &ldquo;{player.motto}&rdquo;
@@ -597,6 +709,13 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
           <span className="flex min-w-0 items-center gap-1.5" title={player.motto ? `"${player.motto}"` : undefined}>
             <PlayerAvatar src={player.avatar} name={player.username} />
             <span className="min-w-0 truncate">{player.username}</span>
+            <RankMovement
+              current={player.movementRank}
+              previous={player.previousRank}
+              upLabel={t('Rank up')}
+              downLabel={t('Rank down')}
+              sameLabel={t('Rank unchanged')}
+            />
           </span>
         )}
         mobileStats={(player) => (

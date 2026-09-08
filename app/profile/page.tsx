@@ -2,8 +2,8 @@
 
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { updateProfile } from './actions'
-import { User, Shield, Image as ImageIcon, RefreshCw, Clock, ChevronDown } from 'lucide-react'
+import { updateProfile, changePassword } from './actions'
+import { User, Shield, Image as ImageIcon, RefreshCw, Clock, ChevronDown, Lock } from 'lucide-react'
 import { createClient } from '../../lib/supabase/client'
 import { useTranslations } from '../components/LocaleProvider'
 import { Card, CardContent } from '@/components/ui/card'
@@ -49,13 +49,24 @@ function FavoriteTeamGroup({
   )
 }
 
-function ProfileSuccessBanner() {
+function ProfileBanners() {
   const searchParams = useSearchParams()
+  const t = useTranslations()
   const success = searchParams.get('success')
-  if (!success) return null
+  const error = searchParams.get('error')
+  if (!success && !error) return null
   return (
-    <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm font-medium text-emerald-300">
-      {success}
+    <div className="space-y-3">
+      {success ? (
+        <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm font-medium text-emerald-300">
+          {t(success)}
+        </div>
+      ) : null}
+      {error ? (
+        <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm font-medium text-red-300">
+          {t(error)}
+        </div>
+      ) : null}
     </div>
   )
 }
@@ -175,7 +186,7 @@ function ProfilePageInner() {
       </div>
 
       <Suspense fallback={null}>
-        <ProfileSuccessBanner />
+        <ProfileBanners />
       </Suspense>
 
       <Card>
@@ -351,6 +362,67 @@ function ProfilePageInner() {
             <div className="flex justify-end border-t border-zinc-800 pt-4">
               <Button type="submit" className="relative z-0 uppercase tracking-wider">
                 {t('Save Profile')}
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent className="p-6 md:p-8">
+          <form action={changePassword} className="space-y-6">
+            <div>
+              <h3 className="mb-1 flex items-center gap-2 text-lg font-bold text-zinc-100">
+                <Lock className="h-5 w-5 text-xactscore-accent" /> {t('Settings')}
+              </h3>
+              <p className="text-sm text-zinc-400">{t('Change Password')}</p>
+            </div>
+
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <div className="md:col-span-2">
+                <Label htmlFor="current_password">{t('Current Password')}</Label>
+                <Input
+                  id="current_password"
+                  type="password"
+                  name="current_password"
+                  autoComplete="current-password"
+                  required
+                  minLength={6}
+                  placeholder="••••••••"
+                />
+              </div>
+              <div>
+                <Label htmlFor="new_password">{t('New Password')}</Label>
+                <Input
+                  id="new_password"
+                  type="password"
+                  name="new_password"
+                  autoComplete="new-password"
+                  required
+                  minLength={6}
+                  placeholder="••••••••"
+                />
+                <span className="mt-1 block text-xs text-zinc-500">
+                  {t('Password must be at least 6 characters.')}
+                </span>
+              </div>
+              <div>
+                <Label htmlFor="confirm_password">{t('Confirm new password')}</Label>
+                <Input
+                  id="confirm_password"
+                  type="password"
+                  name="confirm_password"
+                  autoComplete="new-password"
+                  required
+                  minLength={6}
+                  placeholder="••••••••"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end border-t border-zinc-800 pt-4">
+              <Button type="submit" className="uppercase tracking-wider">
+                {t('Update Password')}
               </Button>
             </div>
           </form>

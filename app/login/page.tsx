@@ -1,4 +1,5 @@
-import { login, signup, resetPassword } from './actions'
+import { login, signup } from './actions'
+import Link from 'next/link'
 import { Trophy } from 'lucide-react'
 import { getTranslations } from '../../lib/i18n'
 import { getServerLocale } from '../../lib/i18n-server'
@@ -78,13 +79,12 @@ export default async function LoginPage(props: { searchParams: Promise<{ message
             </div>
 
             <div className="mt-2 text-center">
-              <button
-                formAction={resetPassword}
-                formNoValidate
-                className="min-h-11 text-sm text-zinc-500 underline transition-colors hover:text-xactscore-accent"
+              <Link
+                href="/forgot-password"
+                className="inline-flex min-h-11 items-center justify-center text-sm text-zinc-500 underline transition-colors hover:text-xactscore-accent"
               >
                 {t('Forgot Password?')}
-              </button>
+              </Link>
             </div>
           </form>
         </CardContent>

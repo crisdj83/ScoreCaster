@@ -39,24 +39,3 @@ export async function signup(formData: FormData) {
   revalidatePath('/', 'layout')
   redirect('/')
 }
-
-export async function resetPassword(formData: FormData) {
-  const supabase = await createClient()
-  const email = formData.get('email') as string
-
-  if (!email) {
-    redirect('/login?message=Please enter your email address to reset your password.')
-  }
-
-  // Tells Supabase to send the email and where to send the user when they click the link
-  const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: 'http://localhost:3000/update-password',
-  })
-
-  if (error) {
-    redirect('/login?message=' + error.message)
-  }
-
-  // We redirect back to login with a success message
-  redirect('/login?message=Check your email for the password reset link.')
-}

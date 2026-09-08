@@ -57,3 +57,43 @@ export async function updateProfile(formData: FormData) {
   // REDIRECT TO HOME PAGE INSTEAD OF PROFILE
   redirect(`/?success=${encodeURIComponent(message)}`)
 }
+
+export async function changePassword(formData: FormData) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user?.email) redirect('/login')
+
+  const currentPassword = String(formData.get('current_password') || '')
+  const newPassword = String(formData.get('new_password') || '')
+  const confirmPassword = String(formData.get('confirm_password') || '')
+
+  const fail = (message: string) => {
+    redirect(`/profile?error=${encodeURIComponent(message)}`)
+  }
+
+  if (newPassword.length < 6) {
+    fail('Password must be at least 6 characters.')
+  }
+  if (newPassword !== confirmPassword) {
+    fail('New passwords do not match')
+  }
+  if (currentPassword === newPassword) {
+    fail('New password must be different from your current password')
+  }
+
+  const { error: currentError } = await supabase.auth.signInWithPassword({
+    email: user.email,
+    password: currentPassword,
+  })
+  if (currentError) {
+    fail('Current password is incorrect')
+  }
+
+  const { error } = await supabase.auth.updateUser({ password: newPassword })
+  if (error) {
+    fail(error.message || 'Could not update password')
+  }
+
+  revalidatePath('/profile')
+  redirect(`/profile?success=${encodeURIComponent('Password updated successfully!')}`)
+}
