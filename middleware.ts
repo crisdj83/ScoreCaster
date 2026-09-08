@@ -10,9 +10,7 @@ function isPublicPath(pathname: string) {
     pathname.startsWith('/update-password') ||
     pathname.startsWith('/help') ||
     pathname.startsWith('/join') ||
-    pathname.startsWith('/api/sync') ||
-    pathname.startsWith('/api/reminders') ||
-    pathname.startsWith('/api/avatar')
+    pathname.startsWith('/api/')
   )
 }
 
@@ -49,8 +47,12 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   if (!user && !isPublicPath(pathname)) {
+    if (pathname.startsWith('/api/')) {
+      return NextResponse.json({ error: 'Unauthorized access' }, { status: 401 })
+    }
     const url = request.nextUrl.clone()
     url.pathname = '/login'
+    url.search = ''
     return NextResponse.redirect(url)
   }
 
@@ -67,6 +69,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|sw.js|manifest.webmanifest|offline.html|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|sw.js|manifest.webmanifest|offline.html|api/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)',
   ],
 }
