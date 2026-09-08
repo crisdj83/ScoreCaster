@@ -5,6 +5,7 @@ function isPublicPath(pathname: string) {
   return (
     pathname.startsWith('/login') ||
     pathname.startsWith('/forgot-password') ||
+    pathname.startsWith('/auth/callback') ||
     pathname.startsWith('/update-password') ||
     pathname.startsWith('/help/install') ||
     pathname.startsWith('/api/sync') ||

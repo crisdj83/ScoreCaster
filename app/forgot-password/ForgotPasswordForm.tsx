@@ -2,28 +2,36 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import { Trophy } from 'lucide-react'
 import { useTranslations } from '../components/LocaleProvider'
+import { createClient } from '../../lib/supabase/client'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
-import {
-  completePasswordReset,
-  sendPasswordResetCode,
-  verifyPasswordResetCode,
-} from './actions'
+import { completePasswordReset } from './actions'
 
 type Step = 'email' | 'code' | 'password'
 
+function isHiddenSendError(message: string) {
+  const text = message.toLowerCase()
+  return (
+    text.includes('signups not allowed') ||
+    text.includes('user not found') ||
+    text.includes('unable to validate email')
+  )
+}
+
 export default function ForgotPasswordForm() {
   const t = useTranslations()
-  const [step, setStep] = useState<Step>('email')
+  const searchParams = useSearchParams()
+  const [step, setStep] = useState<Step>(searchParams.get('reset') === '1' ? 'password' : 'email')
   const [email, setEmail] = useState('')
   const [code, setCode] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-  const [error, setError] = useState('')
+  const [error, setError] = useState(searchParams.get('error') || '')
   const [pending, setPending] = useState(false)
   const [resendIn, setResendIn] = useState(0)
 
@@ -35,13 +43,23 @@ export default function ForgotPasswordForm() {
 
   async function sendCode() {
     setError('')
+    const trimmed = email.trim().toLowerCase()
+    if (!trimmed) {
+      setError('Please enter your email address')
+      return
+    }
+
     setPending(true)
     try {
-      const result = await sendPasswordResetCode(email)
-      if ('error' in result && result.error) {
-        setError(result.error)
+      const supabase = createClient()
+      const redirectTo = `${window.location.origin}/auth/callback?next=/forgot-password`
+
+      const recovery = await supabase.auth.resetPasswordForEmail(trimmed, { redirectTo })
+      if (recovery.error && !isHiddenSendError(recovery.error.message)) {
+        setError(recovery.error.message || 'Could not send reset code')
         return
       }
+
       setStep('code')
       setResendIn(30)
     } finally {
@@ -51,14 +69,33 @@ export default function ForgotPasswordForm() {
 
   async function verifyCode() {
     setError('')
+    const trimmedEmail = email.trim().toLowerCase()
+    const token = code.replace(/\s+/g, '')
+    if (!trimmedEmail || token.length < 6) {
+      setError('Invalid or expired code')
+      return
+    }
+
     setPending(true)
     try {
-      const result = await verifyPasswordResetCode(email, code)
-      if ('error' in result && result.error) {
-        setError(result.error)
-        return
+      const supabase = createClient()
+      const types = ['recovery', 'email', 'magiclink'] as const
+      let lastError = 'Invalid or expired code'
+
+      for (const type of types) {
+        const { error } = await supabase.auth.verifyOtp({
+          email: trimmedEmail,
+          token,
+          type,
+        })
+        if (!error) {
+          setStep('password')
+          return
+        }
+        lastError = error.message || lastError
       }
-      setStep('password')
+
+      setError(lastError)
     } finally {
       setPending(false)
     }
@@ -138,7 +175,8 @@ export default function ForgotPasswordForm() {
                   type="text"
                   name="code"
                   value={code}
-                  onChange={(event) => setCode(event.target.value.replace(/[^\d]/g, '').slice(0, 8))}
+                  onChange={(event) => setCode(event.target.value.replace(/[^\d]/g, '').slice(0, 6))}
+                  maxLength={6}
                   placeholder="123456"
                   inputMode="numeric"
                   autoComplete="one-time-code"
@@ -147,6 +185,9 @@ export default function ForgotPasswordForm() {
                   minLength={6}
                 />
                 <p className="mt-2 text-center text-xs text-zinc-500">{email}</p>
+                <p className="mt-1 text-center text-xs text-zinc-500">
+                  {t('Check spam too. The code is 6 digits.')}
+                </p>
               </div>
             ) : null}
 

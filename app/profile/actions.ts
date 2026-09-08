@@ -77,6 +77,9 @@ export async function changePassword(formData: FormData) {
     redirect(`/profile?error=${encodeURIComponent(message)}`)
   }
 
+  if (!currentPassword) {
+    fail('Current password is incorrect')
+  }
   if (newPassword.length < 6) {
     fail('Password must be at least 6 characters.')
   }
@@ -95,9 +98,13 @@ export async function changePassword(formData: FormData) {
     fail('Current password is incorrect')
   }
 
-  const { error } = await supabase.auth.updateUser({ password: newPassword })
+  const { error } = await supabase.auth.updateUser({
+    password: newPassword,
+    current_password: currentPassword,
+  })
   if (error) {
-    fail(error.message || 'Could not update password')
+    const message = error.message || 'Could not update password'
+    fail(message.toLowerCase().includes('current password') ? 'Current password is incorrect' : message)
   }
 
   revalidatePath('/profile')
