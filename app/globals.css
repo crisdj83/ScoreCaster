@@ -540,7 +540,7 @@
     position: relative;
     isolation: isolate;
     overflow: hidden;
-    border-radius: 0.75rem;
+    border-radius: 1rem;
     touch-action: manipulation;
     background-color: rgb(16 185 129 / 0.04);
     border: 1px solid rgb(209 250 229 / 0.9);
