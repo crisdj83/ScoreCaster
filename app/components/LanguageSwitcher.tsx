@@ -11,14 +11,14 @@ export default function LanguageSwitcher() {
   const t = useTranslations()
 
   return (
-    <label className={cn(tabBase, tabActive, 'h-10 gap-1.5 px-2.5 sm:h-11 sm:px-3')}>
-      <Languages className="h-4 w-4 shrink-0" aria-hidden="true" />
+    <label className={cn(tabBase, tabActive, 'h-8 shrink-0 gap-1 px-1.5 sm:h-11 sm:gap-1.5 sm:px-3')}>
+      <Languages className="hidden h-4 w-4 shrink-0 sm:block" aria-hidden="true" />
       <span className="sr-only">{t('Language')}</span>
       <select
         aria-label={t('Language')}
         value={locale}
         onChange={(event) => setLocale(event.target.value as Locale)}
-        className="cursor-pointer bg-transparent font-bold uppercase tracking-wider text-zinc-900 outline-none dark:text-orange-100"
+        className="cursor-pointer bg-transparent text-[11px] font-bold uppercase tracking-wider text-zinc-900 outline-none sm:text-[10px] dark:text-orange-100"
       >
         {locales.map((item) => (
             <option key={item} value={item} className="bg-white text-zinc-900 dark:bg-zinc-900 dark:text-white">

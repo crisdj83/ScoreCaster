@@ -330,10 +330,33 @@
     font-size: 0.6rem;
   }
 
-  html.android header .flex.w-full {
+  /* Keep the floating header pill from clipping theme / language / sign-out
+     on the right edge (Android Chrome often squeezes overflow). */
+  html.android header {
+    overflow: visible;
+  }
+
+  html.android header .app-topbar {
     gap: 0.35rem;
-    padding-left: 0.65rem;
-    padding-right: 0.65rem;
+    padding-left: 0.7rem;
+    padding-right: 1rem;
+    overflow: visible;
+    border-radius: 1rem;
+  }
+
+  html.android header .app-topbar-actions {
+    gap: 0.2rem;
+  }
+
+  html.android header .app-topbar-actions > form,
+  html.android header .app-topbar-actions > button,
+  html.android header .app-topbar-actions > label,
+  html.android header .app-topbar-actions > span {
+    flex-shrink: 0;
+  }
+
+  html.android header .brand-wordmark {
+    font-size: 1.35rem;
   }
 
   button,

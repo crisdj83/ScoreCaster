@@ -253,9 +253,9 @@ export default function RankingInsights({
                       {trend.predictions.length > 0 ? (
                         <div className="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                           {trend.predictions.map(prediction => (
-                            <div key={`${trend.matchId}-${prediction.userId}`} className="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2 text-sm">
-                              <span className="truncate font-semibold text-gray-700">{prediction.username}</span>
-                              <span className="ml-3 flex items-center gap-2 font-mono font-black text-gray-900">
+                            <div key={`${trend.matchId}-${prediction.userId}`} className="flex items-center gap-2 rounded-lg bg-gray-50 px-3 py-2 text-sm">
+                              <span className="min-w-0 flex-1 break-words font-semibold leading-snug text-gray-700 [overflow-wrap:anywhere]">{prediction.username}</span>
+                              <span className="ml-0 flex shrink-0 items-center gap-2 font-mono font-black text-gray-900">
                                 {prediction.homeScore} : {prediction.awayScore}
                                 {prediction.points !== null && <span className="rounded-full bg-xactscore-accent px-1.5 py-0.5 font-sans text-[10px] text-xactscore-bg">+{prediction.points}</span>}
                               </span>

@@ -346,13 +346,13 @@ export default function CurrentGameweek({
               selectedPlayers.map((player, index) => (
                 <div
                   key={player.id}
-                  className="mb-2.5 flex min-h-10 items-center justify-between gap-2 rounded-2xl border border-slate-200 bg-white p-3.5 text-sm shadow-sm dark:mb-0 dark:rounded-lg dark:border-transparent dark:bg-zinc-950 dark:p-1.5 dark:px-3 dark:shadow-none sm:grid sm:grid-cols-[4rem_minmax(0,1fr)_7rem_5rem] sm:gap-2"
+                  className="mb-2.5 flex min-h-10 items-center gap-1.5 rounded-2xl border border-slate-200 bg-white px-2.5 py-2.5 text-sm shadow-sm dark:mb-0 dark:rounded-lg dark:border-transparent dark:bg-zinc-950 dark:p-1.5 dark:px-3 dark:shadow-none sm:grid sm:grid-cols-[4rem_minmax(0,1fr)_7rem_5rem] sm:gap-2 sm:p-3.5"
                 >
-                  <span className="w-6 shrink-0 font-mono text-xs font-black text-xactscore-accent sm:w-auto sm:text-sm">
+                  <span className="w-7 shrink-0 font-mono text-xs font-black text-xactscore-accent sm:w-auto sm:text-sm">
                     {index + 1}
                     {index === 0 ? 'st' : index === 1 ? 'nd' : index === 2 ? 'rd' : 'th'}
                   </span>
-                  <div className="flex min-w-0 flex-1 items-center gap-2 sm:flex-none">
+                  <div className="flex min-w-0 flex-1 items-center gap-1.5 sm:gap-2 sm:flex-none">
                     {player.avatar ? (
                       <Image
                         src={player.avatar}
@@ -367,13 +367,15 @@ export default function CurrentGameweek({
                         <UserRound className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                       </span>
                     )}
-                    <span className="truncate font-bold text-slate-900 dark:text-zinc-100">{player.name}</span>
+                    <span className="min-w-0 flex-1 break-words font-bold leading-snug text-slate-900 [overflow-wrap:anywhere] dark:text-zinc-100">
+                      {player.name}
+                    </span>
                   </div>
-                  <span className="shrink-0 rounded-full border border-slate-200 bg-white px-2.5 py-1 font-mono text-xs font-bold text-slate-900 dark:rounded-md dark:border-zinc-700 dark:bg-transparent dark:px-1.5 dark:py-0.5 dark:text-zinc-200 sm:justify-self-start sm:px-2 sm:py-1 sm:text-sm">
+                  <span className="shrink-0 rounded-full border border-slate-200 bg-white px-2 py-1 font-mono text-xs font-bold text-slate-900 dark:rounded-md dark:border-zinc-700 dark:bg-transparent dark:px-1.5 dark:py-0.5 dark:text-zinc-200 sm:justify-self-start sm:px-2 sm:py-1 sm:text-sm">
                     {player.prediction}
                   </span>
                   <span
-                    className={`inline-flex shrink-0 items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-bold sm:justify-self-start sm:px-2 sm:py-1 ${
+                    className={`inline-flex shrink-0 items-center gap-0.5 rounded-full border px-2 py-1 text-xs font-bold sm:justify-self-start sm:gap-1 sm:px-2 sm:py-1 ${
                       player.outcome === 'exact'
                         ? 'border-amber-500/20 bg-amber-500/10 text-amber-600 dark:border-transparent dark:bg-amber-400/15 dark:text-amber-300 dark:font-black'
                         : player.outcome === 'zero'
