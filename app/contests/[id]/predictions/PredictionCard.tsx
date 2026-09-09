@@ -229,11 +229,13 @@ export default function PredictionCard({
       ? '…'
       : `${Math.floor(millisecondsUntilKickoff / 86400000)}d ${String(Math.floor((millisecondsUntilKickoff % 86400000) / 3600000)).padStart(2, '0')}:${String(Math.floor((millisecondsUntilKickoff % 3600000) / 60000)).padStart(2, '0')}:${String(Math.floor((millisecondsUntilKickoff % 60000) / 1000)).padStart(2, '0')}`
 
-  const dateCompact = new Intl.DateTimeFormat(locale === 'en' ? 'en-GB' : locale, {
-    weekday: 'short',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(kickoffTime)
+  const dateCompact = Number.isFinite(kickoffTime.getTime())
+    ? new Intl.DateTimeFormat(locale === 'en' ? 'en-GB' : locale, {
+        weekday: 'short',
+        hour: '2-digit',
+        minute: '2-digit',
+      }).format(kickoffTime)
+    : '—'
 
   const persistScores = (newHome: number | null, newAway: number | null) => {
     const home = newHome === null ? null : clampScore(newHome)

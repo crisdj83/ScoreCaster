@@ -55,7 +55,7 @@ export default async function PredictionsPage(props: {
     seasonMatches = (data.matches || []).filter((match) => isMatchInContestSeason(match, seasonLength))
   } catch (error) {
     console.error('Predictions fixtures fetch failed:', error)
-    throw new Error('Unable to load Premier League fixtures. Please try again.')
+    seasonMatches = []
   }
   
   // 3. Figure out which matchday is currently active.
@@ -130,7 +130,12 @@ export default async function PredictionsPage(props: {
     points_earned: prediction.points,
   }))
 
-  const venues = await getMatchVenues(matchdayFixtures)
+  let venues = new Map<string, string>()
+  try {
+    venues = await getMatchVenues(matchdayFixtures)
+  } catch (error) {
+    console.error('Predictions venues fetch failed:', error)
+  }
   const openThisWeek = matchdayFixtures.filter((match) => isOpenForPrediction(match, now))
   const unmadeMatches = openThisWeek.filter(
     (match) =>
@@ -154,7 +159,9 @@ export default async function PredictionsPage(props: {
           selected={selectedMatchday}
           active={activeMatchday}
         />
-      ) : null}
+      ) : (
+        <p className="mb-3 text-sm text-zinc-500">{t('Season Ended / No Fixtures')}</p>
+      )}
       {openThisWeek.length > 0 ? (
         <div className="mb-3 flex items-center gap-3">
           {picksLeft > 0 ? (
