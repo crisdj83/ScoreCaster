@@ -154,6 +154,9 @@ const translations: Record<Exclude<Locale, 'en'>, Dictionary> = {
     'Turn notifications on': 'Pornește notificările',
     'Turn notifications off': 'Oprește notificările',
     'Match reminders are not configured yet.': 'Reminder-urile nu sunt configurate încă.',
+    'Push notifications are misconfigured. Check the VAPID public key.':
+      'Notificările push sunt greșit configurate. Verifică cheia publică VAPID.',
+    'Could not save reminder subscription': 'Abonamentul pentru reminder nu a putut fi salvat',
     'On iPhone, install XactScore to your Home Screen first, then turn reminders on from that app icon.':
       'Pe iPhone, instalează mai întâi XactScore pe ecranul principal, apoi pornește reminder-urile din acea pictogramă.',
     'Notifications were blocked. Allow them in your phone settings, then try again.':
@@ -672,6 +675,9 @@ const translations: Record<Exclude<Locale, 'en'>, Dictionary> = {
     'Turn notifications on': 'Activar notificaciones',
     'Turn notifications off': 'Desactivar notificaciones',
     'Match reminders are not configured yet.': 'Los recordatorios aún no están configurados.',
+    'Push notifications are misconfigured. Check the VAPID public key.':
+      'Las notificaciones push están incorrectas. Revisa la clave pública VAPID.',
+    'Could not save reminder subscription': 'No se pudo guardar la suscripción de recordatorios',
     'On iPhone, install XactScore to your Home Screen first, then turn reminders on from that app icon.':
       'En iPhone, instala primero XactScore en la pantalla de inicio y luego activa los recordatorios desde ese icono.',
     'Notifications were blocked. Allow them in your phone settings, then try again.':
