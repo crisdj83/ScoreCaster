@@ -214,7 +214,7 @@ export default function CurrentGameweek({
     <section className="mb-5 rounded-xl border border-orange-500/40 bg-zinc-900 p-3 shadow-lg sm:p-5 md:p-6">
       <div className="flex items-center justify-between gap-2">
         <h3 className="truncate text-sm font-black uppercase tracking-wider text-zinc-100 sm:text-base">
-          GW {selectedMatchday} · Scores
+          GW {selectedMatchday} · {t('Predictions')}
         </h3>
         {focusedIndex >= 0 ? (
           <span className="shrink-0 text-[10px] font-bold tabular-nums text-zinc-500">
