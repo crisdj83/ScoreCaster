@@ -55,10 +55,10 @@ export default function SuperLuckyButton({
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="prediction-fixture-content prediction-lucky-pill inline-flex items-center gap-2 px-3 py-2 text-orange-200 drop-shadow-[0_1px_2px_rgb(0_0_0/0.75)] transition hover:brightness-110 active:scale-95 sm:gap-2.5 sm:px-4 sm:py-2.5"
+          className="prediction-fixture-content prediction-lucky-pill inline-flex items-center gap-1.5 px-2.5 py-1.5 text-orange-200 drop-shadow-[0_1px_2px_rgb(0_0_0/0.75)] transition hover:brightness-110 active:scale-95 sm:gap-2 sm:px-3 sm:py-2"
           aria-label={t("I'm lucky")}
         >
-          <Dices className={cn('h-6 w-6 sm:h-7 sm:w-7', rolling && 'animate-spin')} />
+          <Dices className={cn('h-4 w-4 sm:h-5 sm:w-5', rolling && 'animate-spin')} />
           <span className="text-[10px] font-black uppercase leading-none tracking-wider sm:text-xs">
             {t("I'm lucky")}
           </span>

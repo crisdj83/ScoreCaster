@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useTransition } from 'react'
 import Image from 'next/image'
-import { Plus, Minus, Clock, Eye, MapPin } from 'lucide-react'
+import { Plus, Minus, Eye } from 'lucide-react'
 import { savePrediction } from './actions'
 import Link from 'next/link'
 import { useLocale, useTranslations } from '../../../components/LocaleProvider'
@@ -10,38 +10,118 @@ import { cn } from '@/lib/utils'
 
 const SCORE_MAX = 5
 
+type MatchTeam = {
+  name: string
+  shortName?: string
+  tla?: string
+  crest?: string
+}
+
+type ExistingPrediction = {
+  predicted_home_score?: number | null
+  predicted_away_score?: number | null
+}
+
+type RevealedPrediction = {
+  match_id?: number | string
+}
+
 function clampScore(value: number) {
   return Math.min(SCORE_MAX, Math.max(0, value))
 }
 
-function TeamCrest({
-  src,
-  name,
-  dimmed,
-}: {
-  src?: string
-  name: string
-  dimmed?: boolean
-}) {
+function teamCode(team: MatchTeam) {
+  if (team.tla) return team.tla
+  const short = (team.shortName || team.name).replace(/[^A-Za-z]/g, '')
+  return short.slice(0, 3).toUpperCase()
+}
+
+function TeamCrest({ src, name, dimmed }: { src?: string; name: string; dimmed?: boolean }) {
   if (!src) {
     return (
-      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-[8px] font-bold text-zinc-400">
+      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-[9px] font-black text-zinc-700 shadow-[0_1px_6px_rgb(0_0_0/0.35)]">
         {name.slice(0, 2).toUpperCase()}
       </span>
     )
   }
   return (
-    <Image
-      src={src}
-      alt={name}
-      width={20}
-      height={20}
-      className={cn('h-5 w-5 shrink-0 object-contain', dimmed && 'opacity-50')}
-    />
+    <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white shadow-[0_1px_6px_rgb(0_0_0/0.35)]">
+      <Image
+        src={src}
+        alt={name}
+        width={22}
+        height={22}
+        className={cn('h-[22px] w-[22px] object-contain', dimmed && 'opacity-50')}
+      />
+    </span>
   )
 }
 
-export default function PredictionCard({ match, contestId, existingPrediction, revealedPredictions = [], venue }: any) {
+function ScoreStepper({
+  label,
+  score,
+  disabled,
+  onDec,
+  onInc,
+  canDec,
+  canInc,
+}: {
+  label: string
+  score: number
+  disabled?: boolean
+  onDec: () => void
+  onInc: () => void
+  canDec: boolean
+  canInc: boolean
+}) {
+  const btn =
+    'inline-flex h-5 w-7 items-center justify-center rounded-md transition active:scale-90 disabled:opacity-25'
+  return (
+    <div className="flex flex-col items-center">
+      <button
+        type="button"
+        disabled={disabled || !canInc}
+        onClick={onInc}
+        className={cn(btn, 'text-emerald-400 hover:bg-emerald-500/15')}
+        aria-label={`Increase ${label} score`}
+      >
+        <Plus className="h-3.5 w-3.5" strokeWidth={3} />
+      </button>
+      <span className="flex h-8 w-8 items-center justify-center rounded-md border border-white/15 bg-black/35 text-lg font-black tabular-nums text-white">
+        {score}
+      </span>
+      <button
+        type="button"
+        disabled={disabled || !canDec}
+        onClick={onDec}
+        className={cn(btn, 'text-rose-400 hover:bg-rose-500/15')}
+        aria-label={`Decrease ${label} score`}
+      >
+        <Minus className="h-3.5 w-3.5" strokeWidth={3} />
+      </button>
+    </div>
+  )
+}
+
+export default function PredictionCard({
+  match,
+  contestId,
+  existingPrediction,
+  revealedPredictions = [],
+  venue,
+}: {
+  match: {
+    id: number | string
+    utcDate: string
+    status?: string
+    homeTeam: MatchTeam
+    awayTeam: MatchTeam
+  }
+  contestId: string
+  existingPrediction?: ExistingPrediction | null
+  revealedPredictions?: RevealedPrediction[]
+  venue?: string
+}) {
   const initialHome = existingPrediction?.predicted_home_score ?? 0
   const initialAway = existingPrediction?.predicted_away_score ?? 0
   const [homeScore, setHomeScore] = useState(initialHome)
@@ -80,7 +160,7 @@ export default function PredictionCard({ match, contestId, existingPrediction, r
     const away = awayScoreRef.current
     if (home === lastSavedRef.current.home && away === lastSavedRef.current.away) return
     try {
-      await savePrediction(contestId, match.id, home, away)
+      await savePrediction(contestId, String(match.id), home, away)
       lastSavedRef.current = { home, away }
       if (homeScoreRef.current !== home || awayScoreRef.current !== away) {
         await saveLatest()
@@ -103,7 +183,7 @@ export default function PredictionCard({ match, contestId, existingPrediction, r
       const home = homeScoreRef.current
       const away = awayScoreRef.current
       if (home !== lastSavedRef.current.home || away !== lastSavedRef.current.away) {
-        void savePrediction(contestId, match.id, home, away)
+        void savePrediction(contestId, String(match.id), home, away)
       }
     }
   }, [contestId, match.id])
@@ -165,8 +245,6 @@ export default function PredictionCard({ match, contestId, existingPrediction, r
     persistScores(newHome, newAway)
   }
 
-  const stepperBtn =
-    'inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/[0.06] text-zinc-200 backdrop-blur-md transition-colors hover:border-orange-400/40 hover:bg-white/10 active:scale-90 disabled:opacity-40'
   const homeName = match.homeTeam.shortName || match.homeTeam.name
   const awayName = match.awayTeam.shortName || match.awayTeam.name
   const saveLabel = isPending
@@ -176,142 +254,128 @@ export default function PredictionCard({ match, contestId, existingPrediction, r
       : saveStatus === 'saved'
         ? `✓ ${t('Saved')}`
         : null
+  const urgencyLabel = statusLabel
+    ? statusLabel
+    : isLocked && !isEnded && !isInPlay
+      ? t('LOCKED')
+      : isHurryUp
+        ? countdown
+        : saveLabel
+  const showUrgency = Boolean(urgencyLabel)
 
   return (
     <div
       className={cn(
-        'prediction-fixture-content flex flex-col overflow-hidden rounded-[1.25rem] border p-1.5',
+        'prediction-fixture-content overflow-hidden rounded-2xl border px-2.5 py-2',
         isHurryUp && 'prediction-hurry border-red-400/35'
       )}
     >
-      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-1">
-        <TeamName crest={match.homeTeam.crest} name={homeName} dimmed={isLocked} />
-        <TeamSteppers
-          name={homeName}
-          score={homeScore}
-          disabled={isLocked}
-          onDec={() => handleScoreChange('home', -1)}
-          onInc={() => handleScoreChange('home', 1)}
-          canDec={homeScore > 0}
-          canInc={homeScore < SCORE_MAX}
-          stepperClass={stepperBtn}
-        />
-        <TeamName crest={match.awayTeam.crest} name={awayName} dimmed={isLocked} />
-        <TeamSteppers
-          name={awayName}
-          score={awayScore}
-          disabled={isLocked}
-          onDec={() => handleScoreChange('away', -1)}
-          onInc={() => handleScoreChange('away', 1)}
-          canDec={awayScore > 0}
-          canInc={awayScore < SCORE_MAX}
-          stepperClass={stepperBtn}
-        />
+      <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2">
+        <TeamBlock team={match.homeTeam} displayName={homeName} dimmed={isLocked} align="end" />
+
+        <div className="flex items-center justify-center gap-1">
+          <ScoreStepper
+            label={homeName}
+            score={homeScore}
+            disabled={isLocked}
+            onDec={() => handleScoreChange('home', -1)}
+            onInc={() => handleScoreChange('home', 1)}
+            canDec={homeScore > 0}
+            canInc={homeScore < SCORE_MAX}
+          />
+          <span className="pb-px text-sm font-black text-zinc-500">–</span>
+          <ScoreStepper
+            label={awayName}
+            score={awayScore}
+            disabled={isLocked}
+            onDec={() => handleScoreChange('away', -1)}
+            onInc={() => handleScoreChange('away', 1)}
+            canDec={awayScore > 0}
+            canInc={awayScore < SCORE_MAX}
+          />
+        </div>
+
+        <TeamBlock team={match.awayTeam} displayName={awayName} dimmed={isLocked} align="start" />
       </div>
 
-      {canReveal ? (
-        <Link
-          href={`/contests/${contestId}/ranking?matchId=${match.id}`}
-          className="mt-0.5 flex min-h-7 items-center justify-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.05] px-2 text-[11px] font-bold text-zinc-100 transition-colors hover:bg-white/10"
-        >
-          <Eye className="h-3.5 w-3.5 shrink-0 text-xactscore-accent" />
-          <span className="truncate">{t("View everyone's predictions")}</span>
-          <span className="tabular-nums text-xactscore-accent">{revealedPredictions.length}</span>
-        </Link>
-      ) : null}
-
-      <div className="mt-0.5 flex items-center gap-1.5 border-t border-white/[0.06] px-0.5 pt-1 text-[10px] font-semibold text-zinc-500">
-        <Clock className="h-3 w-3 shrink-0" />
-        <span className="min-w-0 truncate tabular-nums">{dateCompact}</span>
-        {isHurryUp ? (
-          <span className="shrink-0 rounded-full bg-red-500/20 px-1.5 py-px text-[9px] font-black uppercase tracking-wider text-red-300">
-            {t('Hurry up!')}
-          </span>
-        ) : null}
-        <span
-          className={cn(
-            'ml-auto shrink-0 tabular-nums',
-            isEnded
-              ? 'font-black text-zinc-400'
-              : isInPlay || isHurryUp
-                ? 'font-black text-red-300'
-                : 'text-orange-300/90'
-          )}
-        >
-          {countdown}
-        </span>
-        {isLocked && !isEnded && !isInPlay ? (
-          <span className="shrink-0 rounded-full border border-red-400/30 bg-red-500/15 px-1.5 py-px text-[9px] font-black uppercase tracking-wider text-red-300">
-            {t('LOCKED')}
-          </span>
-        ) : saveLabel ? (
-          <span
-            className={cn(
-              'max-w-[7rem] truncate text-[10px]',
-              saveError ? 'text-red-400' : isPending ? 'animate-pulse italic text-zinc-500' : 'text-xactscore-accent'
-            )}
-          >
-            {saveLabel}
-          </span>
-        ) : null}
-      </div>
-      {venue ? (
-        <p className="flex items-center gap-1 px-0.5 pb-0.5 text-[10px] font-semibold text-zinc-500">
-          <MapPin className="h-3 w-3 shrink-0" />
-          <span className="truncate">{venue}</span>
+      <div className="relative mt-1 min-h-[1.15rem] px-8">
+        <p className="truncate text-center text-[10px] font-semibold leading-tight text-zinc-400">
+          <span className="tabular-nums">{dateCompact}</span>
+          {venue ? (
+            <>
+              <span className="px-1 text-zinc-600">·</span>
+              <span>{venue}</span>
+            </>
+          ) : null}
         </p>
-      ) : null}
+        <span className="absolute inset-y-0 right-0 flex items-center gap-1.5 text-[10px] font-semibold">
+          {showUrgency ? (
+            <span
+              className={cn(
+                'max-w-[6.5rem] truncate tabular-nums',
+                saveError
+                  ? 'text-red-400'
+                  : isPending
+                    ? 'animate-pulse italic text-zinc-400'
+                    : isEnded
+                      ? 'text-zinc-400'
+                      : isHurryUp
+                        ? 'font-black tabular-nums text-red-300'
+                        : isInPlay || (isLocked && !isEnded)
+                          ? 'font-black uppercase tracking-wider text-red-300'
+                          : 'text-xactscore-accent'
+              )}
+            >
+              {urgencyLabel}
+            </span>
+          ) : null}
+          {canReveal ? (
+            <Link
+              href={`/contests/${contestId}/ranking?matchId=${match.id}`}
+              className="inline-flex items-center gap-0.5 text-zinc-400 transition hover:text-xactscore-accent"
+              aria-label={t("View everyone's predictions")}
+            >
+              <Eye className="h-3 w-3" />
+              <span className="tabular-nums">{revealedPredictions.length}</span>
+            </Link>
+          ) : null}
+        </span>
+      </div>
     </div>
   )
 }
 
-function TeamName({
-  crest,
-  name,
+function TeamBlock({
+  team,
+  displayName,
   dimmed,
+  align,
 }: {
-  crest?: string
-  name: string
+  team: MatchTeam
+  displayName: string
   dimmed?: boolean
+  align: 'start' | 'end'
 }) {
   return (
-    <div className="flex h-8 min-w-0 items-center gap-1.5 px-0.5">
-      <TeamCrest src={crest} name={name} dimmed={dimmed} />
-      <span className="min-w-0 flex-1 truncate text-xs font-semibold tracking-tight text-zinc-100">
-        {name}
+    <div
+      className={cn(
+        'flex min-w-0 flex-col items-center gap-1',
+        align === 'end' ? 'sm:flex-row sm:justify-end' : 'sm:flex-row-reverse sm:justify-end',
+        'sm:gap-2'
+      )}
+    >
+      <TeamCrest src={team.crest} name={displayName} dimmed={dimmed} />
+      <span
+        className={cn(
+          'max-w-full truncate text-center text-[11px] font-black uppercase tracking-wide text-zinc-100',
+          align === 'end' ? 'sm:text-right' : 'sm:text-left',
+          dimmed && 'opacity-60'
+        )}
+        title={team.name}
+      >
+        <span className="sm:hidden">{teamCode(team)}</span>
+        <span className="hidden sm:inline">{displayName}</span>
       </span>
-    </div>
-  )
-}
-
-function TeamSteppers({
-  name,
-  score,
-  disabled,
-  onDec,
-  onInc,
-  canDec,
-  canInc,
-  stepperClass,
-}: {
-  name: string
-  score: number
-  disabled?: boolean
-  onDec: () => void
-  onInc: () => void
-  canDec: boolean
-  canInc: boolean
-  stepperClass: string
-}) {
-  return (
-    <div className="flex h-8 shrink-0 items-center">
-      <button type="button" disabled={disabled || !canDec} onClick={onDec} className={stepperClass} aria-label={`Decrease ${name} score`}>
-        <Minus className="h-3 w-3" />
-      </button>
-      <span className="w-6 text-center text-base font-black tabular-nums text-white">{score}</span>
-      <button type="button" disabled={disabled || !canInc} onClick={onInc} className={stepperClass} aria-label={`Increase ${name} score`}>
-        <Plus className="h-3 w-3" />
-      </button>
     </div>
   )
 }

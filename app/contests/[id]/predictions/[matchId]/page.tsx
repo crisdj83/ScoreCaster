@@ -1,6 +1,6 @@
 import { createClient } from '../../../../../lib/supabase/server'
 import { getPLMatches } from '../../../../../lib/football'
-import { getMatchVenues } from '../../../../../lib/api-football'
+import { getMatchVenues } from '../../../../../lib/goal-api'
 import { isMatchInContestSeason } from '../../../../../lib/contest-season'
 import { isPredictionRevealable, type ContestPredictionRow } from '../../../../../lib/scoring'
 import { redirect } from 'next/navigation'

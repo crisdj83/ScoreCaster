@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import { createClient } from '../../../../lib/supabase/server'
 import { getPLMatches, getPLScorers, getPLStandings } from '../../../../lib/football'
-import { getMatchVenues } from '../../../../lib/api-football'
+import { getMatchVenues, getPlTopScorers } from '../../../../lib/goal-api'
 import {
   isMatchInContestSeason,
   normalizeSeasonLength,
@@ -116,10 +116,11 @@ export default async function FixturesPage(props: { params: Promise<{ id: string
     .single()
 
   const seasonLength = normalizeSeasonLength(contest?.season_length)
-  const [data, standingsData, scorerData] = await Promise.all([
+  const [data, standingsData, footballScorers, goalScorers] = await Promise.all([
     getPLMatches(),
     getPLStandings().catch(() => null),
-    getPLScorers().catch(() => ({ scorers: [] })),
+    getPLScorers().catch(() => ({ scorers: [] as Array<Record<string, unknown>> })),
+    getPlTopScorers().catch(() => ({ scorers: [] })),
   ])
 
   const matches = (data.matches || [])
@@ -129,6 +130,7 @@ export default async function FixturesPage(props: { params: Promise<{ id: string
       new Date(a.utcDate).getTime() - new Date(b.utcDate).getTime()
     ))
   const venues = await getMatchVenues(matches)
+  const scorerData = goalScorers.scorers.length ? goalScorers : footballScorers
   const matchesWithVenue = matches.map((match: any) => ({
     ...match,
     venue: venues.get(String(match.id)) || null,

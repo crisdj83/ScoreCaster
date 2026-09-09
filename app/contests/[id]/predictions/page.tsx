@@ -1,7 +1,7 @@
 // Fixed both imports to go up 4 folders instead of 5!
 import { createClient } from '../../../../lib/supabase/server'
 import { getPLMatches } from '../../../../lib/football'
-import { getMatchVenues } from '../../../../lib/api-football'
+import { getMatchVenues } from '../../../../lib/goal-api'
 import { isMatchInContestSeason, normalizeSeasonLength } from '../../../../lib/contest-season'
 import { getActiveMatchday, isOpenForPrediction, isPredictionLocked, isPredictionRevealable } from '../../../../lib/scoring'
 import PredictionCard from './PredictionCard'
@@ -15,8 +15,8 @@ type PlMatch = {
   utcDate: string
   status?: string
   matchday?: number | null
-  homeTeam: { name: string; shortName?: string; crest?: string }
-  awayTeam: { name: string; shortName?: string; crest?: string }
+  homeTeam: { name: string; shortName?: string; tla?: string; crest?: string }
+  awayTeam: { name: string; shortName?: string; tla?: string; crest?: string }
 }
 
 type RevealedPrediction = {
@@ -116,12 +116,12 @@ export default async function PredictionsPage(props: { params: Promise<{ id: str
   ).length
 
   return (
-    <div className="p-0 sm:p-2 md:p-4">
+    <div className="mx-auto max-w-xl p-0 sm:p-2 md:p-4">
       <LiveRefresh refreshAfter={matchdayFixtures.map((match) => match.utcDate)} />
-      <div className="mb-2 flex items-center justify-between gap-3 sm:mb-6">
+      <div className="mb-3 flex items-center justify-between gap-3">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <h2 className="text-base font-bold text-zinc-100 sm:text-2xl">{t('Matchday')} {currentMatchday}</h2>
+            <h2 className="text-base font-bold text-zinc-100 sm:text-xl">{t('Matchday')} {currentMatchday}</h2>
             {picksLeft > 0 ? (
               <span className="rounded-full bg-xactscore-accent px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-xactscore-bg">
                 {picksLeft} {picksLeft === 1 ? t('pick left') : t('picks left')}
@@ -132,18 +132,17 @@ export default async function PredictionsPage(props: { params: Promise<{ id: str
               </span>
             ) : null}
           </div>
-          <p className="mt-0.5 hidden text-sm leading-snug text-zinc-500 sm:block">
-            <span className="block">{t('Picks lock 60 minutes before kickoff.')}</span>
-            <span className="block">{t('Results show 30 minutes before kickoff.')}</span>
-          </p>
         </div>
         <SuperLuckyButton
           contestId={params.id}
           matchIds={openThisWeek.map((match) => String(match.id))}
         />
       </div>
+      <p className="mb-3 text-[10px] font-medium leading-snug text-zinc-500">
+        {t('Picks lock 60 minutes before kickoff.')}
+      </p>
 
-      <div className="grid grid-cols-1 gap-1.5 lg:grid-cols-2 lg:gap-2">
+      <div className="space-y-1.5">
         {matchdayFixtures.map((match) => {
           // Find if the user already made a prediction for this specific match
         const existingPrediction = myPredictions?.find(p => String(p.match_id) === String(match.id))

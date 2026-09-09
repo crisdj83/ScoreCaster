@@ -2,8 +2,8 @@ import { createClient } from '../../../../lib/supabase/server'
 import { notFound } from 'next/navigation'
 import { getTranslations } from '../../../../lib/i18n'
 import { getServerLocale } from '../../../../lib/i18n-server'
-import { getPLMatches, getPLStandings, getPLMatchGoals } from '../../../../lib/football'
-import { getLiveGoalScorers } from '../../../../lib/api-football'
+import { getPLMatches, getPLStandings } from '../../../../lib/football'
+import { getLiveGoalScorers } from '../../../../lib/goal-api'
 import { loadStoredScorers, persistMatchScorers } from '../../../../lib/match-scorers'
 import {
   getSeasonLengthLabelKey,
@@ -335,8 +335,7 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
   const storedScorers = await loadStoredScorers(supabase, allowedMatchIds)
   const needApiScorers = scorerMatches.filter((match) => {
     if (['IN_PLAY', 'PAUSED'].includes(match.status || '')) return true
-    const stored = storedScorers.get(String(match.id))
-    return !stored || !(stored.home.length || stored.away.length)
+    return !storedScorers.has(String(match.id))
   })
   const liveScorersPromise = getLiveGoalScorers(needApiScorers)
 
@@ -351,36 +350,14 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
   const members = membersRaw as ContestMember[]
 
   const liveScorers = await liveScorersPromise
-  const stillNeedGoals = scorerMatches.filter((match) => {
-    const live = liveScorers.get(String(match.id))
-    const stored = storedScorers.get(String(match.id))
-    return !((live && (live.home.length || live.away.length)) || (stored && (stored.home.length || stored.away.length)))
-  })
-  if (stillNeedGoals.length) {
-    const newestFirst = [...stillNeedGoals].sort(
-      (a, b) => new Date(b.utcDate).getTime() - new Date(a.utcDate).getTime()
-    )
-    const footballGoals = await getPLMatchGoals(newestFirst.map((match) => match.id))
-    for (const match of newestFirst) {
-      const goals = footballGoals.get(String(match.id))
-      if (!goals?.length) continue
-      const home = scorersForTeam(goals, match.homeTeam)
-      const away = scorersForTeam(goals, match.awayTeam)
-      if (home.length || away.length) {
-        liveScorers.set(String(match.id), { home, away, elapsed: null })
-      }
-    }
-  }
   await persistMatchScorers(
-    Array.from(liveScorers.entries())
-      .filter(([, item]) => item.home.length || item.away.length)
-      .map(([matchId, item]) => ({
-        matchId,
-        home: item.home,
-        away: item.away,
-        elapsed: item.elapsed ?? null,
-        status: scorerMatches.find((match) => String(match.id) === matchId)?.status,
-      }))
+    Array.from(liveScorers.entries()).map(([matchId, item]) => ({
+      matchId,
+      home: item.home,
+      away: item.away,
+      elapsed: item.elapsed ?? null,
+      status: scorerMatches.find((match) => String(match.id) === matchId)?.status,
+    }))
   )
 
   // Cross-member prediction aggregation is enforced via a SECURITY DEFINER

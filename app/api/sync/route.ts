@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getPLMatches } from '../../../lib/football'
-import { warmApiFootballCache } from '../../../lib/api-football'
+import { warmGoalApiCache } from '../../../lib/goal-api'
 import { refreshAndStoreScorers } from '../../../lib/match-scorers'
 import { isMatchInContestSeason } from '../../../lib/contest-season'
 import { calculatePoints, resolveContestScoring } from '../../../lib/scoring'
@@ -43,7 +43,7 @@ export async function GET(request: Request) {
 
   try {
     const data = await getPLMatches()
-    await warmApiFootballCache()
+    await warmGoalApiCache()
     const scorerSync = await refreshAndStoreScorers('daily').catch((error) => {
       console.error('Daily scorer sync failed:', error)
       return { fetched: 0, saved: 0, live: 0 }

@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { getPLMatches } from './football'
-import { getLiveGoalScorers, type FootballMatchRef, type LiveScorers } from './api-football'
+import { getLiveGoalScorers, type FootballMatchRef, type LiveScorers } from './goal-api'
 import { createAdminClient } from './supabase/admin'
 import { chunk } from './utils'
 
@@ -111,10 +111,6 @@ export async function persistMatchScorers(
   return persistScorerRows(rows)
 }
 
-function hasScorerNames(item?: LiveScorers | null) {
-  return Boolean(item && (item.home.length || item.away.length))
-}
-
 export async function refreshAndStoreScorers(mode: 'live' | 'daily') {
   const data = await getPLMatches()
   const matches = ((data.matches || []) as PlMatch[]).filter((match) => match?.id != null)
@@ -134,9 +130,14 @@ export async function refreshAndStoreScorers(mode: 'live' | 'daily') {
       createAdminClient(),
       latestGw.map((match) => String(match.id))
     )
-    toFetch = latestGw.filter((match) => !hasScorerNames(stored.get(String(match.id))))
+    toFetch = latestGw.filter((match) => !stored.has(String(match.id)))
     if (!toFetch.length) {
-      toFetch = matches.filter((match) => match.status === 'FINISHED' && kickedOffYesterday(match.utcDate))
+      const yesterday = matches.filter((match) => match.status === 'FINISHED' && kickedOffYesterday(match.utcDate))
+      const yesterdayStored = await loadStoredScorers(
+        createAdminClient(),
+        yesterday.map((match) => String(match.id))
+      )
+      toFetch = yesterday.filter((match) => !yesterdayStored.has(String(match.id)))
     }
   }
 
@@ -144,7 +145,7 @@ export async function refreshAndStoreScorers(mode: 'live' | 'daily') {
   const scorers = await getLiveGoalScorers(unique)
 
   const rows = unique
-    .filter((match) => hasScorerNames(scorers.get(String(match.id))))
+    .filter((match) => scorers.has(String(match.id)))
     .map((match) => {
       const item = scorers.get(String(match.id))!
       return {
