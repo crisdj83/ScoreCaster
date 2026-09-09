@@ -6,6 +6,7 @@ import HeroBanner from './components/HeroBanner'
 import MarketingLanding from './components/MarketingLanding'
 import HomeWeekList, { type LeagueWeek } from './components/HomeWeekList'
 import { getPLMatches } from '../lib/football'
+import { getMatchVenues } from '../lib/api-football'
 import { getTranslations } from '../lib/i18n'
 import { getServerLocale } from '../lib/i18n-server'
 import { findFavoriteTeam } from '../lib/favorite-teams'
@@ -56,13 +57,14 @@ async function fetchPLData() {
 
     let nextMatch = null
     if (nextMatchRaw) {
+      const venues = await getMatchVenues([nextMatchRaw])
       nextMatch = {
         date: nextMatchRaw.utcDate,
         homeTeam: nextMatchRaw.homeTeam.shortName || nextMatchRaw.homeTeam.name,
         awayTeam: nextMatchRaw.awayTeam.shortName || nextMatchRaw.awayTeam.name,
         homeCrest: nextMatchRaw.homeTeam.crest,
         awayCrest: nextMatchRaw.awayTeam.crest,
-        venue: nextMatchRaw.venue || nextMatchRaw.stadium || null,
+        venue: venues.get(String(nextMatchRaw.id)) || nextMatchRaw.venue || nextMatchRaw.stadium || null,
       }
     }
 

@@ -317,8 +317,23 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
     .sort((a: Match, b: Match) => Number(a.matchday) - Number(b.matchday) || new Date(a.utcDate).getTime() - new Date(b.utcDate).getTime())
   const allowedMatchIds = matches.map(match => String(match.id))
   const liveNow = matches.filter((match) => ['IN_PLAY', 'PAUSED'].includes(match.status || ''))
+  const selectedFromUrl = searchParams.matchId
+    ? matches.find((match) => String(match.id) === String(searchParams.matchId))
+    : undefined
+  const defaultGwMatch =
+    selectedFromUrl ||
+    [...matches]
+      .filter((match) => match.status === 'FINISHED')
+      .sort((a, b) => new Date(b.utcDate).getTime() - new Date(a.utcDate).getTime())[0] ||
+    matches[0]
+  const displayMatchday = Number(defaultGwMatch?.matchday)
+  const scorerMatches = matches.filter((match) => {
+    const started = ['IN_PLAY', 'PAUSED', 'FINISHED'].includes(match.status || '')
+    if (!started) return false
+    return Number(match.matchday) === displayMatchday || liveNow.includes(match)
+  })
   const storedScorersPromise = loadStoredScorers(supabase, allowedMatchIds)
-  const liveScorersPromise = getLiveGoalScorers(liveNow)
+  const liveScorersPromise = getLiveGoalScorers(scorerMatches)
 
   const { data: membersRaw, error: membersError } = await supabase
     .from('contest_members')

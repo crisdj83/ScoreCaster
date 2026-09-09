@@ -1,9 +1,10 @@
-const API_SPORTS_URL = 'https://v3.football.api-sports.io'
-const RAPID_API_URL = 'https://api-football-v1.p.rapidapi.com/v3'
+import { chunk } from './utils'
+
+const DEFAULT_API_SPORTS_URL = 'https://v3.football.api-sports.io'
 const PL_LEAGUE_ID = 39
 const SEASON_REVALIDATE = 60 * 60 * 24
 const LIVE_REVALIDATE = 10 * 60
-const KICKOFF_SLACK_MS = 12 * 60 * 60 * 1000
+const MATCH_SLACK_MS = 36 * 60 * 60 * 1000
 
 type AfVenue = { id?: number | null; name?: string | null; city?: string | null }
 
@@ -64,6 +65,33 @@ const NAME_ALIASES: Record<string, string> = {
   'ipswich town': 'ipswich',
   'sunderland afc': 'sunderland',
   'afc bournemouth': 'bournemouth',
+  'brighton hove': 'brighton',
+  'coventry city': 'coventry',
+  'hull city': 'hull',
+  nottingham: 'nottingham forest',
+}
+
+const HOME_VENUES: Record<string, string> = {
+  arsenal: 'Emirates Stadium, London',
+  'aston villa': 'Villa Park, Birmingham',
+  bournemouth: 'Vitality Stadium, Bournemouth',
+  brentford: 'Gtech Community Stadium, Brentford',
+  brighton: 'American Express Stadium, Brighton',
+  chelsea: 'Stamford Bridge, London',
+  coventry: 'Coventry Building Society Arena, Coventry',
+  'crystal palace': 'Selhurst Park, London',
+  everton: 'Hill Dickinson Stadium, Liverpool',
+  fulham: 'Craven Cottage, London',
+  hull: 'MKM Stadium, Hull',
+  ipswich: 'Portman Road, Ipswich',
+  leeds: 'Elland Road, Leeds',
+  liverpool: 'Anfield, Liverpool',
+  'manchester city': 'Etihad Stadium, Manchester',
+  'manchester united': 'Old Trafford, Manchester',
+  newcastle: "St James' Park, Newcastle",
+  'nottingham forest': 'The City Ground, Nottingham',
+  sunderland: 'Stadium of Light, Sunderland',
+  tottenham: 'Tottenham Hotspur Stadium, London',
 }
 
 function canonicalName(name: string) {
@@ -106,6 +134,21 @@ function formatVenue(venue?: AfVenue | null) {
   return name
 }
 
+function homeVenue(team: FootballMatchRef['homeTeam']) {
+  for (const name of [team.name, team.shortName]) {
+    if (!name) continue
+    const venue = HOME_VENUES[canonicalName(name)]
+    if (venue) return venue
+  }
+  return ''
+}
+
+function apiBaseUrl() {
+  const raw = process.env.API_FOOTBALL_URL?.trim() || DEFAULT_API_SPORTS_URL
+  const withProtocol = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`
+  return withProtocol.replace(/\/+$/, '')
+}
+
 function utcDay(value: string) {
   const date = new Date(value)
   if (!Number.isFinite(date.getTime())) return value.slice(0, 10)
@@ -134,10 +177,6 @@ function hasErrorPayload(errors: unknown) {
   return false
 }
 
-function isAuthError(errors: unknown) {
-  return JSON.stringify(errors || '').toLowerCase().includes('key')
-}
-
 type ApiFootballPayload = {
   errors?: unknown
   response?: unknown
@@ -150,42 +189,26 @@ async function apiFootballGet(path: string, revalidateSeconds: number): Promise<
     return null
   }
 
-  const attempts: Array<{ url: string; headers: Record<string, string> }> = [
-    {
-      url: `${API_SPORTS_URL}${path}`,
+  const url = `${apiBaseUrl()}${path.startsWith('/') ? path : `/${path}`}`
+  try {
+    const res = await fetch(url, {
       headers: { 'x-apisports-key': apiKey },
-    },
-    {
-      url: `${RAPID_API_URL}${path}`,
-      headers: {
-        'x-rapidapi-key': apiKey,
-        'x-rapidapi-host': 'api-football-v1.p.rapidapi.com',
-      },
-    },
-  ]
-
-  for (const attempt of attempts) {
-    try {
-      const res = await fetch(attempt.url, {
-        headers: attempt.headers,
-        next: { revalidate: revalidateSeconds, tags: ['api-football'] },
-      })
-      if (!res.ok) {
-        console.error(`API-Football request failed: ${res.status} ${path}`)
-        continue
-      }
-      const json = (await res.json()) as ApiFootballPayload
-      if (hasErrorPayload(json?.errors)) {
-        console.error('API-Football error:', json.errors)
-        if (isAuthError(json.errors)) continue
-        return null
-      }
-      return json
-    } catch (error) {
-      console.error('API-Football request error:', error)
+      next: { revalidate: revalidateSeconds, tags: ['api-football'] },
+    })
+    if (!res.ok) {
+      console.error(`API-Football request failed: ${res.status} ${path}`)
+      return null
     }
+    const json = (await res.json()) as ApiFootballPayload
+    if (hasErrorPayload(json?.errors)) {
+      console.error('API-Football error:', json.errors)
+      return null
+    }
+    return json
+  } catch (error) {
+    console.error('API-Football request error:', error)
+    return null
   }
-  return null
 }
 
 function asList<T>(value: unknown): T[] {
@@ -193,29 +216,46 @@ function asList<T>(value: unknown): T[] {
 }
 
 async function getSeasonFixtures(season: number): Promise<AfFixture[]> {
-  const primary = await apiFootballGet(`/fixtures?league=${PL_LEAGUE_ID}&season=${season}`, SEASON_REVALIDATE)
+  const path = `/fixtures?league=${PL_LEAGUE_ID}&season=${season}&timezone=UTC`
+  const primary = await apiFootballGet(path, SEASON_REVALIDATE)
   const primaryList = asList<AfFixture>(primary?.response)
   if (primaryList.length) return primaryList
-  const fallback = await apiFootballGet(`/fixtures?league=${PL_LEAGUE_ID}&season=${season - 1}`, SEASON_REVALIDATE)
+  const fallback = await apiFootballGet(
+    `/fixtures?league=${PL_LEAGUE_ID}&season=${season - 1}&timezone=UTC`,
+    SEASON_REVALIDATE
+  )
   return asList<AfFixture>(fallback?.response)
+}
+
+async function getFixturesByIds(ids: number[], revalidateSeconds: number): Promise<AfFixture[]> {
+  const unique = Array.from(new Set(ids.filter((id) => Number.isFinite(id))))
+  const fixtures: AfFixture[] = []
+  for (const group of chunk(unique, 20)) {
+    const data = await apiFootballGet(`/fixtures?ids=${group.join('-')}&timezone=UTC`, revalidateSeconds)
+    fixtures.push(...asList<AfFixture>(data?.response))
+  }
+  return fixtures
 }
 
 function findAfFixture(fixtures: AfFixture[], match: FootballMatchRef) {
   const kickoff = new Date(match.utcDate).getTime()
-  const day = utcDay(match.utcDate)
-  const sameDay = fixtures.filter((fixture) => utcDay(fixture.fixture.date) === day)
-  const nearby = Number.isFinite(kickoff)
-    ? fixtures.filter((fixture) => {
-        const at = new Date(fixture.fixture.date).getTime()
-        return Number.isFinite(at) && Math.abs(at - kickoff) <= KICKOFF_SLACK_MS
-      })
-    : sameDay
-
-  return (
-    nearby.find((fixture) => teamsMatch(fixture.teams.home.name, fixture.teams.away.name, match)) ||
-    sameDay.find((fixture) => teamsMatch(fixture.teams.home.name, fixture.teams.away.name, match)) ||
-    null
+  const teamHits = fixtures.filter((fixture) =>
+    teamsMatch(fixture.teams.home.name, fixture.teams.away.name, match)
   )
+  if (!teamHits.length) return null
+  if (Number.isFinite(kickoff)) {
+    const closest = [...teamHits]
+      .map((fixture) => ({
+        fixture,
+        dist: Math.abs(new Date(fixture.fixture.date).getTime() - kickoff),
+      }))
+      .sort((a, b) => a.dist - b.dist)[0]
+    if (closest && Number.isFinite(closest.dist) && closest.dist <= MATCH_SLACK_MS) {
+      return closest.fixture
+    }
+  }
+  const day = utcDay(match.utcDate)
+  return teamHits.find((fixture) => utcDay(fixture.fixture.date) === day) || teamHits[0]
 }
 
 function isGoalEvent(event: AfEvent) {
@@ -256,14 +296,23 @@ async function getFixtureEvents(fixtureId: number, revalidateSeconds: number): P
 
 export async function getMatchVenues(matches: FootballMatchRef[]): Promise<Map<string, string>> {
   const venues = new Map<string, string>()
-  if (!matches.length || !process.env.API_FOOTBALL_KEY?.trim()) return venues
-  const fixtures = await getSeasonFixtures(plSeasonFromMatches(matches))
+  if (!matches.length) return venues
+  const fixtures = process.env.API_FOOTBALL_KEY?.trim()
+    ? await getSeasonFixtures(plSeasonFromMatches(matches))
+    : []
   for (const match of matches) {
-    const fixture = findAfFixture(fixtures, match)
-    const venue = formatVenue(fixture?.fixture.venue)
+    const fixture = fixtures.length ? findAfFixture(fixtures, match) : null
+    const venue = formatVenue(fixture?.fixture.venue) || homeVenue(match.homeTeam)
     if (venue) venues.set(String(match.id), venue)
   }
   return venues
+}
+
+function elapsedFrom(fixture: AfFixture, events: AfEvent[]) {
+  const statusElapsed = fixture.fixture.status?.elapsed
+  if (typeof statusElapsed === 'number') return statusElapsed
+  const minutes = events.map((event) => Number(event.time?.elapsed) || 0)
+  return minutes.length ? Math.max(...minutes) : null
 }
 
 export async function getLiveGoalScorers(matches: FootballMatchRef[]): Promise<Map<string, LiveScorers>> {
@@ -286,20 +335,29 @@ export async function getLiveGoalScorers(matches: FootballMatchRef[]): Promise<M
     return scorers
   }
 
-  const eventResults = await Promise.all(
-    mapped.map(({ match, fixture }) =>
-      getFixtureEvents(fixture.fixture.id, isLiveStatus(match.status) ? LIVE_REVALIDATE : SEASON_REVALIDATE)
-    )
+  const revalidate = matches.some((match) => isLiveStatus(match.status)) ? LIVE_REVALIDATE : SEASON_REVALIDATE
+  const detailed = await getFixturesByIds(
+    mapped.map(({ fixture }) => fixture.fixture.id),
+    revalidate
   )
+  const byId = new Map(detailed.map((fixture) => [fixture.fixture.id, fixture]))
+  const missing = mapped.filter(({ fixture }) => !asList<AfEvent>(byId.get(fixture.fixture.id)?.events).length)
+  const extraEvents = await Promise.all(
+    missing.map(({ fixture }) => getFixtureEvents(fixture.fixture.id, revalidate))
+  )
+  const extraById = new Map(missing.map(({ fixture }, index) => [fixture.fixture.id, extraEvents[index] || []]))
 
-  mapped.forEach(({ match, fixture }, index) => {
-    const events = eventResults[index] || []
+  for (const { match, fixture } of mapped) {
+    const rich = byId.get(fixture.fixture.id) || fixture
+    const events = asList<AfEvent>(rich.events).length
+      ? asList<AfEvent>(rich.events)
+      : extraById.get(fixture.fixture.id) || []
     scorers.set(String(match.id), {
-      home: scorerLines(events, fixture.teams.home.name),
-      away: scorerLines(events, fixture.teams.away.name),
-      elapsed: fixture.fixture.status?.elapsed ?? null,
+      home: scorerLines(events, rich.teams.home.name),
+      away: scorerLines(events, rich.teams.away.name),
+      elapsed: elapsedFrom(rich, events),
     })
-  })
+  }
   return scorers
 }
 
