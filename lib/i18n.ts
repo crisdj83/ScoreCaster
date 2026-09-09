@@ -493,6 +493,42 @@ const translations: Record<Exclude<Locale, 'en'>, Dictionary> = {
     Submitted: 'Trimisă',
     Shared: 'Trimisă de comunitate',
     'Suggestion submitted.': 'Sugestia a fost trimisă.',
+    'Back to table': 'Înapoi la clasament',
+    'No favorite team': 'Nicio echipă favorită',
+    'Current rank': 'Locul actual',
+    'Scout report': 'Raportul scoutului',
+    'Based on last 3 scored predictions': 'Pe baza ultimelor 3 predicții punctate',
+    'Last 3 predictions': 'Ultimele 3 predicții',
+    'No scored predictions yet.': 'Încă nu există predicții punctate.',
+    Pick: 'Alegere',
+    Final: 'Final',
+    'Unknown Player': 'Jucător necunoscut',
+    'Still warming up the crystal ball… no scored picks yet. 😴🔮':
+      'Încă încălzește bila de cristal… nicio predicție punctată încă. 😴🔮',
+    'Three perfect hits in a row! Call the fire brigade — this sniper is cooking! 🎯🔥😎':
+      'Trei lovituri perfecte la rând! Chemați pompierii — lunetistul arde! 🎯🔥😎',
+    'Back-to-back exact scores. Someone checked the future. 🎯✨🐐':
+      'Două scoruri exacte consecutive. Cineva s-a uitat în viitor. 🎯✨🐐',
+    'Nailed the last pick exactly. Big main-character energy. 🎯😎':
+      'A nimerit ultima alegere exact. Energie de personaj principal. 🎯😎',
+    'Two exact scores in the last three. Absolute menace to the table. 🐐💥':
+      'Două scoruri exacte din ultimele trei. Amenințare absolută pentru clasament. 🐐💥',
+    'Three straight blanks. Did they predict with their eyes closed? 🙈📉💔':
+      'Trei rateuri la rând. A prezis cu ochii închiși? 🙈📉💔',
+    'Recent form: pure vibes, zero points. The football gods declined the call. 🫠📵':
+      'Formă recentă: doar vibe, zero puncte. Zeii fotbalului au refuzat apelul. 🫠📵',
+    'Mostly whiffs lately. Bold strategy — let’s see if it pays off. 🤡⚽📉':
+      'Mai ales rateuri în ultima vreme. Strategie îndrăzneață — vedem dacă merită. 🤡⚽📉',
+    'Hitting or nearly hitting every time. Elite vibes only. ✨👏🎯':
+      'Nimeră sau aproape nimeră de fiecare dată. Doar vibe de elită. ✨👏🎯',
+    'No zeros in the last stretch — solid form, keep cooking! 💪🔥':
+      'Niciun zero pe final — formă solidă, ține-o tot așa! 💪🔥',
+    'One minute a prophet, the next a tourist. Rollercoaster form! 🎢😵🎯':
+      'Un minut profet, următorul turist. Formă pe rollercoaster! 🎢😵🎯',
+    'Getting the gist but missing the fireworks. So close… yet so mid. 🤏😅':
+      'Prinde ideea, dar ratează focurile de artificii. Atât de aproape… și totuși mid. 🤏😅',
+    'Mixed bag lately — chaos merchant energy. Respect the unpredictability. 🎲😂':
+      'Amestecat în ultima vreme — energie de comerciant de haos. Respect pentru imprevizibil. 🎲😂',
   },
   es: {
     Dashboard: 'Panel',
@@ -975,6 +1011,42 @@ const translations: Record<Exclude<Locale, 'en'>, Dictionary> = {
     Submitted: 'Enviada',
     Shared: 'Compartida por la comunidad',
     'Suggestion submitted.': 'Sugerencia enviada.',
+    'Back to table': 'Volver a la tabla',
+    'No favorite team': 'Sin equipo favorito',
+    'Current rank': 'Puesto actual',
+    'Scout report': 'Informe del ojeador',
+    'Based on last 3 scored predictions': 'Según las últimas 3 predicciones puntuadas',
+    'Last 3 predictions': 'Últimas 3 predicciones',
+    'No scored predictions yet.': 'Aún no hay predicciones puntuadas.',
+    Pick: 'Pronóstico',
+    Final: 'Final',
+    'Unknown Player': 'Jugador desconocido',
+    'Still warming up the crystal ball… no scored picks yet. 😴🔮':
+      'Todavía calentando la bola de cristal… aún no hay pronósticos puntuados. 😴🔮',
+    'Three perfect hits in a row! Call the fire brigade — this sniper is cooking! 🎯🔥😎':
+      '¡Tres aciertos perfectos seguidos! Llamad a los bomberos — este francotirador está on fire! 🎯🔥😎',
+    'Back-to-back exact scores. Someone checked the future. 🎯✨🐐':
+      'Dos marcadores exactos seguidos. Alguien miró el futuro. 🎯✨🐐',
+    'Nailed the last pick exactly. Big main-character energy. 🎯😎':
+      'Clavó el último pronóstico exacto. Energía de protagonista. 🎯😎',
+    'Two exact scores in the last three. Absolute menace to the table. 🐐💥':
+      'Dos marcadores exactos en los últimos tres. Una amenaza total para la tabla. 🐐💥',
+    'Three straight blanks. Did they predict with their eyes closed? 🙈📉💔':
+      'Tres fallos seguidos. ¿Predijo con los ojos cerrados? 🙈📉💔',
+    'Recent form: pure vibes, zero points. The football gods declined the call. 🫠📵':
+      'Forma reciente: solo vibes, cero puntos. Los dioses del fútbol no cogieron la llamada. 🫠📵',
+    'Mostly whiffs lately. Bold strategy — let’s see if it pays off. 🤡⚽📉':
+      'Últimamente casi todo fallos. Estrategia valiente — ya veremos si funciona. 🤡⚽📉',
+    'Hitting or nearly hitting every time. Elite vibes only. ✨👏🎯':
+      'Acertando o casi acertando siempre. Solo vibes de élite. ✨👏🎯',
+    'No zeros in the last stretch — solid form, keep cooking! 💪🔥':
+      'Ningún cero en el tramo final — forma sólida, ¡sigue así! 💪🔥',
+    'One minute a prophet, the next a tourist. Rollercoaster form! 🎢😵🎯':
+      'Un minuto profeta, al siguiente turista. ¡Forma de montaña rusa! 🎢😵🎯',
+    'Getting the gist but missing the fireworks. So close… yet so mid. 🤏😅':
+      'Pilla la idea, pero se pierde los fuegos artificiales. Tan cerca… y tan mid. 🤏😅',
+    'Mixed bag lately — chaos merchant energy. Respect the unpredictability. 🎲😂':
+      'Un poco de todo últimamente — energía de mercader del caos. Respeto a lo imprevisible. 🎲😂',
   },
 }
 

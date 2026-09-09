@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { BadgeDollarSign, Gauge, SlidersHorizontal, UserRound, Check, Crosshair, X } from 'lucide-react'
 import { useTranslations } from '../../../components/LocaleProvider'
 import { cn } from '@/lib/utils'
@@ -60,10 +61,12 @@ function Crest({
 }
 
 export default function CurrentGameweek({
+  contestId,
   fixtures,
   playersByMatch,
   selectedMatchId,
 }: {
+  contestId: string
   fixtures: Fixture[]
   playersByMatch: Record<string, Player[]>
   selectedMatchId?: string
@@ -367,9 +370,12 @@ export default function CurrentGameweek({
                         <UserRound className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                       </span>
                     )}
-                    <span className="min-w-0 flex-1 break-words font-bold leading-snug text-slate-900 [overflow-wrap:anywhere] dark:text-zinc-100">
+                    <Link
+                      href={`/contests/${contestId}/members/${player.id}`}
+                      className="min-w-0 flex-1 break-words font-bold leading-snug text-slate-900 underline-offset-2 [overflow-wrap:anywhere] hover:underline dark:text-zinc-100"
+                    >
                       {player.name}
-                    </span>
+                    </Link>
                   </div>
                   <span className="shrink-0 rounded-full border border-slate-200 bg-white px-2 py-1 font-mono text-xs font-bold text-slate-900 dark:rounded-md dark:border-zinc-700 dark:bg-transparent dark:px-1.5 dark:py-0.5 dark:text-zinc-200 sm:justify-self-start sm:px-2 sm:py-1 sm:text-sm">
                     {player.prediction}

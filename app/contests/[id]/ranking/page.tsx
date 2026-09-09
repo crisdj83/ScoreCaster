@@ -20,6 +20,7 @@ import {
 } from '../../../../lib/scoring'
 import { Target, Activity, CheckCircle2, Gauge, ArrowUp, ArrowDown } from 'lucide-react'
 import Image from 'next/image'
+import Link from 'next/link'
 import RankingInsights from './RankingInsights'
 import CurrentGameweek from './CurrentGameweek'
 import LiveRefresh from '../../../components/LiveRefresh'
@@ -680,24 +681,31 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
       mobilePrimary: true,
       cell: (player) => (
         <div className="flex min-w-0 items-center gap-2.5">
-          <PlayerAvatar src={player.avatar} name={player.username} />
-          <div className="min-w-0">
-            <div className="flex min-w-0 items-center gap-1.5">
-              <span className="break-words font-bold text-zinc-100 [overflow-wrap:anywhere]">{player.username}</span>
-              <RankMovement
-                current={player.movementRank}
-                previous={player.previousRank}
-                upLabel={t('Rank up')}
-                downLabel={t('Rank down')}
-                sameLabel={t('Rank unchanged')}
-              />
-            </div>
-            {player.motto ? (
-              <div className="mt-0.5 inline-block max-w-[18ch] truncate rounded-full bg-indigo-100 px-2 py-0.5 text-xs italic text-indigo-700 dark:bg-transparent dark:px-0 dark:py-0 dark:text-xactscore-accent">
-                &ldquo;{player.motto}&rdquo;
+          <Link
+            href={`/contests/${params.id}/members/${player.id}`}
+            className="flex min-w-0 flex-1 items-center gap-2.5 outline-none transition-opacity hover:opacity-80"
+          >
+            <PlayerAvatar src={player.avatar} name={player.username} />
+            <div className="min-w-0">
+              <div className="flex min-w-0 items-center gap-1.5">
+                <span className="break-words font-bold text-zinc-100 underline-offset-2 [overflow-wrap:anywhere] hover:underline">
+                  {player.username}
+                </span>
+                <RankMovement
+                  current={player.movementRank}
+                  previous={player.previousRank}
+                  upLabel={t('Rank up')}
+                  downLabel={t('Rank down')}
+                  sameLabel={t('Rank unchanged')}
+                />
               </div>
-            ) : null}
-          </div>
+              {player.motto ? (
+                <div className="mt-0.5 inline-block max-w-[18ch] truncate rounded-full bg-indigo-100 px-2 py-0.5 text-xs italic text-indigo-700 dark:bg-transparent dark:px-0 dark:py-0 dark:text-xactscore-accent">
+                  &ldquo;{player.motto}&rdquo;
+                </div>
+              ) : null}
+            </div>
+          </Link>
         </div>
       ),
     },
@@ -775,6 +783,7 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
         }
       />
       <CurrentGameweek
+        contestId={params.id}
         fixtures={currentGameweekFixtures}
         playersByMatch={playersByMatch}
         selectedMatchId={searchParams.matchId}
@@ -810,9 +819,13 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
           <span className="text-[13px] font-bold tabular-nums text-zinc-400">{player.rank}.</span>
         )}
         mobileTitle={(player) => (
-          <span className="flex min-w-0 items-center gap-1.5" title={player.motto ? `"${player.motto}"` : undefined}>
+          <Link
+            href={`/contests/${params.id}/members/${player.id}`}
+            className="flex min-w-0 items-center gap-1.5 outline-none transition-opacity hover:opacity-80"
+            title={player.motto ? `"${player.motto}"` : undefined}
+          >
             <PlayerAvatar src={player.avatar} name={player.username} />
-            <span className="min-w-0 flex-1 break-words [overflow-wrap:anywhere] leading-snug">
+            <span className="min-w-0 flex-1 break-words font-semibold leading-snug [overflow-wrap:anywhere] underline-offset-2 hover:underline">
               {player.username}
             </span>
             <RankMovement
@@ -822,7 +835,7 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
               downLabel={t('Rank down')}
               sameLabel={t('Rank unchanged')}
             />
-          </span>
+          </Link>
         )}
         mobileStats={(player) => (
           <span className="inline-flex items-center">
