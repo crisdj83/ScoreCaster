@@ -138,14 +138,19 @@ function isAuthError(errors: unknown) {
   return JSON.stringify(errors || '').toLowerCase().includes('key')
 }
 
-async function apiFootballGet(path: string, revalidateSeconds: number): Promise<any | null> {
+type ApiFootballPayload = {
+  errors?: unknown
+  response?: unknown
+}
+
+async function apiFootballGet(path: string, revalidateSeconds: number): Promise<ApiFootballPayload | null> {
   const apiKey = process.env.API_FOOTBALL_KEY?.trim()
   if (!apiKey) {
     console.warn('API-Football: API_FOOTBALL_KEY is missing on the server')
     return null
   }
 
-  const attempts = [
+  const attempts: Array<{ url: string; headers: Record<string, string> }> = [
     {
       url: `${API_SPORTS_URL}${path}`,
       headers: { 'x-apisports-key': apiKey },
@@ -169,7 +174,7 @@ async function apiFootballGet(path: string, revalidateSeconds: number): Promise<
         console.error(`API-Football request failed: ${res.status} ${path}`)
         continue
       }
-      const json = await res.json()
+      const json = (await res.json()) as ApiFootballPayload
       if (hasErrorPayload(json?.errors)) {
         console.error('API-Football error:', json.errors)
         if (isAuthError(json.errors)) continue
@@ -183,11 +188,16 @@ async function apiFootballGet(path: string, revalidateSeconds: number): Promise<
   return null
 }
 
+function asList<T>(value: unknown): T[] {
+  return Array.isArray(value) ? (value as T[]) : []
+}
+
 async function getSeasonFixtures(season: number): Promise<AfFixture[]> {
   const primary = await apiFootballGet(`/fixtures?league=${PL_LEAGUE_ID}&season=${season}`, SEASON_REVALIDATE)
-  if (primary?.response?.length) return primary.response
+  const primaryList = asList<AfFixture>(primary?.response)
+  if (primaryList.length) return primaryList
   const fallback = await apiFootballGet(`/fixtures?league=${PL_LEAGUE_ID}&season=${season - 1}`, SEASON_REVALIDATE)
-  return fallback?.response || []
+  return asList<AfFixture>(fallback?.response)
 }
 
 function findAfFixture(fixtures: AfFixture[], match: FootballMatchRef) {
@@ -241,7 +251,7 @@ function scorerLines(events: AfEvent[] | undefined, teamName: string) {
 
 async function getFixtureEvents(fixtureId: number, revalidateSeconds: number): Promise<AfEvent[]> {
   const data = await apiFootballGet(`/fixtures/events?fixture=${fixtureId}`, revalidateSeconds)
-  return Array.isArray(data?.response) ? data.response : []
+  return asList<AfEvent>(data?.response)
 }
 
 export async function getMatchVenues(matches: FootballMatchRef[]): Promise<Map<string, string>> {

@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import Image from 'next/image'
 import {
   BarChart3,
   ChevronDown,
@@ -213,13 +214,13 @@ export default function RankingInsights({
               <details key={trend.matchId} className="group overflow-hidden rounded-xl border border-gray-200 bg-gray-50">
                 <summary className="flex cursor-pointer list-none flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between [&::-webkit-details-marker]:hidden">
                   <div className="flex min-w-0 items-center gap-2">
-                    {trend.homeTeam.crest && <img src={trend.homeTeam.crest} alt="" className="h-7 w-7 object-contain" />}
+                    {trend.homeTeam.crest && <Image src={trend.homeTeam.crest} alt="" width={28} height={28} className="h-7 w-7 object-contain" />}
                     {trend.homeTeam.rank && <span className="rounded bg-gray-200 px-1.5 py-0.5 text-[10px] font-black text-gray-600">#{trend.homeTeam.rank}</span>}
                     <span className="truncate font-bold text-gray-900">{trend.homeTeam.shortName || trend.homeTeam.name}</span>
                     <span className="text-xs font-black text-orange-600">vs</span>
                     <span className="truncate font-bold text-gray-900">{trend.awayTeam.shortName || trend.awayTeam.name}</span>
                     {trend.awayTeam.rank && <span className="rounded bg-gray-200 px-1.5 py-0.5 text-[10px] font-black text-gray-600">#{trend.awayTeam.rank}</span>}
-                    {trend.awayTeam.crest && <img src={trend.awayTeam.crest} alt="" className="h-7 w-7 object-contain" />}
+                    {trend.awayTeam.crest && <Image src={trend.awayTeam.crest} alt="" width={28} height={28} className="h-7 w-7 object-contain" />}
                   </div>
                   <div className="flex items-center gap-3 text-xs font-bold text-gray-500">
                     <span>{labels.matchday} {trend.matchday}</span>

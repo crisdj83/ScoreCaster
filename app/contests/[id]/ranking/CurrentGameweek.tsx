@@ -253,7 +253,7 @@ export default function CurrentGameweek({
                   <span className="mt-0.5 text-[9px] font-black uppercase tracking-wider text-zinc-500">FT</span>
                 ) : selectedFixture.isLive && typeof selectedFixture.liveMinute === 'number' ? (
                   <span className="mt-0.5 text-[9px] font-black uppercase tracking-wider text-emerald-400">
-                    {selectedFixture.liveMinute}'
+                    {`${selectedFixture.liveMinute}'`}
                   </span>
                 ) : null}
               </div>

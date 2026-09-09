@@ -60,6 +60,41 @@ type Prediction = {
   is_correct?: boolean | null
 }
 
+type MemberProfile = {
+  username?: string | null
+  email?: string | null
+  quote?: string | null
+  avatar_url?: string | null
+}
+
+type ContestMember = {
+  user_id: string
+  users: MemberProfile | MemberProfile[] | null
+}
+
+type RpcPrediction = {
+  user_id: string
+  match_id: number | string
+  predicted_home_score: number | null
+  predicted_away_score: number | null
+  points?: number | null
+  is_exact?: boolean | null
+  is_correct?: boolean | null
+}
+
+type PlTableRow = {
+  position?: number
+  form?: string
+  team?: { id?: number | string; name?: string }
+}
+
+type PlStandingsData = {
+  standings?: Array<{
+    type?: string
+    table?: PlTableRow[]
+  }>
+}
+
 function pointsForPrediction(prediction: Prediction, match: Match | undefined, scoring: ContestScoring) {
   if (!match) return null
   const score = getOfficialScore(match)
@@ -81,7 +116,7 @@ function outcomeFromPoints(points: number | null, scoring: ContestScoring) {
   return points > 0 ? 'R' : '0'
 }
 
-function displayName(member: any) {
+function displayName(member: ContestMember) {
   const user = Array.isArray(member.users) ? member.users[0] : member.users
   return user?.username || user?.email?.split('@')[0] || 'Unknown Player'
 }
@@ -285,14 +320,15 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
   const storedScorersPromise = loadStoredScorers(supabase, allowedMatchIds)
   const liveScorersPromise = getLiveGoalScorers(liveNow)
 
-  const { data: members, error: membersError } = await supabase
+  const { data: membersRaw, error: membersError } = await supabase
     .from('contest_members')
     .select('user_id, users(username, email, quote, avatar_url)')
     .eq('contest_id', params.id)
 
-  if (membersError || !members) {
+  if (membersError || !membersRaw) {
     throw new Error(membersError?.message || 'Error loading leaderboard.')
   }
+  const members = membersRaw as ContestMember[]
 
   const storedScorers = await storedScorersPromise
 
@@ -309,20 +345,25 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
   if (predictionsError) {
     throw new Error(predictionsError.message)
   }
-  const predictions: Prediction[] = (rawPredictions || []).map((prediction: any) => ({
-    ...prediction,
-    points_earned: prediction.points,
-  })) as Prediction[]
+  const predictions: Prediction[] = ((rawPredictions || []) as RpcPrediction[]).map((prediction) => ({
+    user_id: prediction.user_id,
+    match_id: prediction.match_id,
+    predicted_home_score: prediction.predicted_home_score ?? 0,
+    predicted_away_score: prediction.predicted_away_score ?? 0,
+    points_earned: prediction.points ?? null,
+    is_exact: prediction.is_exact,
+    is_correct: prediction.is_correct,
+  }))
   const matchById = new Map(matches.map(match => [String(match.id), match]))
-  const memberNames = new Map(members.map((member: any) => [member.user_id, displayName(member)]))
-  const memberByUserId = new Map(members.map((member: any) => [member.user_id, member]))
+  const memberNames = new Map(members.map((member) => [member.user_id, displayName(member)]))
+  const memberByUserId = new Map(members.map((member) => [member.user_id, member]))
   const predictionsByUser = new Map<string, Prediction[]>()
   for (const prediction of predictions) {
     const list = predictionsByUser.get(prediction.user_id)
     if (list) list.push(prediction)
     else predictionsByUser.set(prediction.user_id, [prediction])
   }
-  const players = members.map((member: any) => {
+  const players = members.map((member) => {
     const userPredictions = predictionsByUser.get(member.user_id) || []
     const evaluatedPredictions = userPredictions
       .map(prediction => ({
@@ -383,9 +424,9 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
     byMatchday.set(matchday, current)
   }
   const playedMatchdays = Array.from(new Set(matches.filter(match => match.status === 'FINISHED').map(match => Number(match.matchday)))).sort((a, b) => a - b)
-  const cumulative = new Map(members.map((member: any) => [member.user_id, { points: 0, exact: 0, close: 0, scored: 0, correct: 0 }]))
+  const cumulative = new Map(members.map((member) => [member.user_id, { points: 0, exact: 0, close: 0, scored: 0, correct: 0 }]))
   const evolution = playedMatchdays.map(matchday => {
-    members.forEach((member: any) => {
+    members.forEach((member) => {
       const totals = cumulative.get(member.user_id)!
       const delta = matchdayTotals.get(member.user_id)?.get(matchday)
       if (delta) {
@@ -396,7 +437,7 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
         totals.correct += delta.correct
       }
     })
-    const ranked = members.map((member: any) => {
+    const ranked = members.map((member) => {
       const totals = cumulative.get(member.user_id)!
       return {
         playerId: member.user_id,
@@ -429,9 +470,13 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
     ? ranksFromFinishedMatches(members, finishedMatches, predictions, matchById, scoring)
     : new Map<string, number>()
 
-  const table: any[] = standingsData?.standings?.find((standing: any) => standing.type === 'TOTAL')?.table || standingsData?.standings?.[0]?.table || []
-  const teamById = new Map(table.map((row: any) => [String(row.team?.id), row]))
-  const teamByName = new Map(table.map((row: any) => [row.team?.name, row]))
+  const plStandings = standingsData as PlStandingsData | null
+  const table: PlTableRow[] =
+    plStandings?.standings?.find((standing) => standing.type === 'TOTAL')?.table ||
+    plStandings?.standings?.[0]?.table ||
+    []
+  const teamById = new Map(table.map((row) => [String(row.team?.id), row]))
+  const teamByName = new Map(table.map((row) => [row.team?.name, row]))
   const teamInfo = (team: Match['homeTeam']) => {
     const row = (team.id && teamById.get(String(team.id))) || teamByName.get(team.name)
     return { name: team.name, shortName: team.shortName, crest: team.crest, rank: row?.position, form: row?.form }

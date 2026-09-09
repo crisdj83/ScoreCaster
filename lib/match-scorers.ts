@@ -1,3 +1,4 @@
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { getPLMatches } from './football'
 import { getLiveGoalScorers, type FootballMatchRef, type LiveScorers } from './api-football'
 import { createAdminClient } from './supabase/admin'
@@ -23,7 +24,7 @@ function kickedOffYesterday(utcDate: string, now = new Date()) {
 }
 
 export async function loadStoredScorers(
-  supabase: { from: (table: string) => any },
+  supabase: SupabaseClient,
   matchIds: string[]
 ): Promise<Map<string, LiveScorers>> {
   const stored = new Map<string, LiveScorers>()

@@ -10,6 +10,23 @@ import { getTranslations } from '../../../../lib/i18n'
 import { getServerLocale } from '../../../../lib/i18n-server'
 import LiveRefresh from '../../../components/LiveRefresh'
 
+type PlMatch = {
+  id: number | string
+  utcDate: string
+  status?: string
+  matchday?: number | null
+  homeTeam: { name: string; shortName?: string; crest?: string }
+  awayTeam: { name: string; shortName?: string; crest?: string }
+}
+
+type RevealedPrediction = {
+  user_id: string
+  match_id: number | string
+  points?: number | null
+  predicted_home_score?: number | null
+  predicted_away_score?: number | null
+}
+
 export default async function PredictionsPage(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   const t = getTranslations(getServerLocale())
@@ -27,8 +44,8 @@ export default async function PredictionsPage(props: { params: Promise<{ id: str
   const seasonLength = normalizeSeasonLength(contest?.season_length)
 
   // 2. Fetch the live matches from football-data.org and enforce the contest season.
-  const data = await getPLMatches()
-  const seasonMatches = data.matches.filter((match: any) => isMatchInContestSeason(match, seasonLength))
+  const data = (await getPLMatches()) as { matches?: PlMatch[] }
+  const seasonMatches = (data.matches || []).filter((match) => isMatchInContestSeason(match, seasonLength))
   
   // 3. Figure out which matchday is currently active.
   // Ignore stale scheduled records and use the closest genuinely upcoming fixture.
@@ -37,9 +54,9 @@ export default async function PredictionsPage(props: { params: Promise<{ id: str
 
   const matchdayFixtures = currentMatchday
     ? seasonMatches
-        .filter((m: any) => Number(m.matchday) === currentMatchday)
-        .sort((a: any, b: any) => {
-          const rank = (match: any) => {
+        .filter((m) => Number(m.matchday) === currentMatchday)
+        .sort((a, b) => {
+          const rank = (match: PlMatch) => {
             const status = String(match.status || '')
             const kickoff = new Date(match.utcDate).getTime()
             const finished =
@@ -54,7 +71,7 @@ export default async function PredictionsPage(props: { params: Promise<{ id: str
           return new Date(a.utcDate).getTime() - new Date(b.utcDate).getTime()
         })
     : []
-  const allowedMatchIds = seasonMatches.map((match: any) => String(match.id))
+  const allowedMatchIds = seasonMatches.map((match) => String(match.id))
 
   // 4. Fetch the user's existing predictions from Supabase for this contest
   const { data: myPredictions } = allowedMatchIds.length
@@ -81,15 +98,15 @@ export default async function PredictionsPage(props: { params: Promise<{ id: str
   if (revealedPredictionsError) {
     throw new Error(`Unable to load revealed predictions: ${revealedPredictionsError.message}`)
   }
-  const revealedPredictions = (revealedPredictionsRaw || []).map((prediction: any) => ({
+  const revealedPredictions = ((revealedPredictionsRaw || []) as RevealedPrediction[]).map((prediction) => ({
     ...prediction,
     points_earned: prediction.points,
   }))
 
   const venues = await getMatchVenues(matchdayFixtures)
-  const openThisWeek = matchdayFixtures.filter((match: any) => isOpenForPrediction(match, now))
+  const openThisWeek = matchdayFixtures.filter((match) => isOpenForPrediction(match, now))
   const picksLeft = openThisWeek.filter(
-    (match: any) =>
+    (match) =>
       !myPredictions?.some(
         (prediction) =>
           String(prediction.match_id) === String(match.id) &&
@@ -100,7 +117,7 @@ export default async function PredictionsPage(props: { params: Promise<{ id: str
 
   return (
     <div className="p-0 sm:p-2 md:p-4">
-      <LiveRefresh refreshAfter={matchdayFixtures.map((match: any) => match.utcDate)} />
+      <LiveRefresh refreshAfter={matchdayFixtures.map((match) => match.utcDate)} />
       <div className="mb-2 flex items-center justify-between gap-3 sm:mb-6">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
@@ -122,12 +139,12 @@ export default async function PredictionsPage(props: { params: Promise<{ id: str
         </div>
         <SuperLuckyButton
           contestId={params.id}
-          matchIds={openThisWeek.map((match: any) => String(match.id))}
+          matchIds={openThisWeek.map((match) => String(match.id))}
         />
       </div>
 
       <div className="grid grid-cols-1 gap-1.5 lg:grid-cols-2 lg:gap-2">
-        {matchdayFixtures.map((match: any) => {
+        {matchdayFixtures.map((match) => {
           // Find if the user already made a prediction for this specific match
         const existingPrediction = myPredictions?.find(p => String(p.match_id) === String(match.id))
           
@@ -137,7 +154,7 @@ export default async function PredictionsPage(props: { params: Promise<{ id: str
               match={match} 
               contestId={params.id} 
               existingPrediction={existingPrediction} 
-              revealedPredictions={revealedPredictions?.filter((prediction: any) => String(prediction.match_id) === String(match.id)) || []}
+              revealedPredictions={revealedPredictions?.filter((prediction) => String(prediction.match_id) === String(match.id)) || []}
               venue={venues.get(String(match.id))}
             />
           )
