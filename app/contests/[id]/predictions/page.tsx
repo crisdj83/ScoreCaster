@@ -179,7 +179,7 @@ export default async function PredictionsPage(props: {
         </p>
       </div>
 
-      <div className="space-y-1 pb-[calc(6rem+env(safe-area-inset-bottom,0px))] sm:space-y-1.5 lg:pb-16">
+      <div className="space-y-1.5 pb-[calc(6rem+env(safe-area-inset-bottom,0px))] sm:space-y-2 lg:pb-16">
         {matchdayFixtures.map((match) => {
           // Find if the user already made a prediction for this specific match
         const existingPrediction = myPredictions?.find(p => String(p.match_id) === String(match.id))
