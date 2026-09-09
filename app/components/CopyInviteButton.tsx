@@ -8,9 +8,11 @@ import { cn } from '@/lib/utils'
 export default function CopyInviteButton({
   url,
   className,
+  compact = false,
 }: {
   url: string
   className?: string
+  compact?: boolean
 }) {
   const t = useTranslations()
   const [copied, setCopied] = useState(false)
@@ -29,13 +31,18 @@ export default function CopyInviteButton({
     <button
       type="button"
       onClick={() => void copy()}
+      aria-label={copied ? t('Copied') : t('Copy invite link')}
+      title={copied ? t('Copied') : t('Copy invite link')}
       className={cn(
-        'inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/10 px-3 text-xs font-bold uppercase tracking-wider text-orange-100 transition hover:bg-white/20',
+        'inline-flex items-center justify-center gap-1.5 rounded-full transition active:scale-95',
+        compact
+          ? 'h-8 w-8 shrink-0 border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 dark:border-white/15 dark:bg-white/10 dark:text-orange-100 dark:hover:bg-white/20'
+          : 'min-h-10 border border-white/15 bg-white/10 px-3 text-xs font-bold uppercase tracking-wider text-orange-100 hover:bg-white/20',
         className
       )}
     >
       {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-      {copied ? t('Copied') : t('Copy invite link')}
+      {compact ? null : copied ? t('Copied') : t('Copy invite link')}
     </button>
   )
 }
