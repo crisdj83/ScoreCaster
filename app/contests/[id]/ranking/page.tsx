@@ -278,12 +278,12 @@ function ScoringChip({
 }) {
   return (
     <span
-      className="inline-flex w-10 shrink-0 items-center justify-center gap-0.5 py-0.5"
+      className="inline-flex shrink-0 items-center justify-center gap-0.5 px-0.5 py-0.5"
       title={`${label}: ${value}`}
       aria-label={`${label}: ${value}`}
     >
-      <Icon className={`h-3.5 w-3.5 shrink-0 ${iconClassName}`} aria-hidden />
-      <span className="w-4 text-center text-[11px] font-bold tabular-nums text-zinc-200">{value}</span>
+      <Icon className={`h-3 w-3 shrink-0 ${iconClassName}`} aria-hidden />
+      <span className="min-w-[0.75rem] text-center text-[10px] font-bold tabular-nums text-zinc-200">{value}</span>
     </span>
   )
 }
@@ -683,7 +683,7 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
           <PlayerAvatar src={player.avatar} name={player.username} />
           <div className="min-w-0">
             <div className="flex min-w-0 items-center gap-1.5">
-              <span className="truncate font-bold text-zinc-100">{player.username}</span>
+              <span className="break-words font-bold text-zinc-100 [overflow-wrap:anywhere]">{player.username}</span>
               <RankMovement
                 current={player.movementRank}
                 previous={player.previousRank}
@@ -812,7 +812,9 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
         mobileTitle={(player) => (
           <span className="flex min-w-0 items-center gap-1.5" title={player.motto ? `"${player.motto}"` : undefined}>
             <PlayerAvatar src={player.avatar} name={player.username} />
-            <span className="min-w-0 truncate">{player.username}</span>
+            <span className="min-w-0 flex-1 break-words [overflow-wrap:anywhere] leading-snug">
+              {player.username}
+            </span>
             <RankMovement
               current={player.movementRank}
               previous={player.previousRank}
@@ -823,8 +825,8 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
           </span>
         )}
         mobileStats={(player) => (
-          <span className="inline-flex items-center overflow-hidden rounded-full border border-white/[0.08] bg-white/[0.05] shadow-[inset_0_1px_0_rgb(255_255_255/0.07)] backdrop-blur-md">
-            <span className="inline-flex items-center divide-x divide-white/10">
+          <span className="inline-flex items-center">
+            <span className="inline-flex items-center">
               <ScoringChip
                 icon={Target}
                 value={player.exactResults}
@@ -844,13 +846,12 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
                 iconClassName="text-emerald-400"
               />
             </span>
-            <span className="ml-1 h-4 w-px shrink-0 bg-white/25" aria-hidden />
             <span
-              className="inline-flex w-[4.75rem] shrink-0 items-center justify-center py-0.5 text-sm font-black tabular-nums leading-none text-xactscore-accent"
+              className="inline-flex shrink-0 items-center justify-end pl-1 text-[13px] font-black tabular-nums leading-none text-xactscore-accent"
               title={t('Total Points')}
             >
               {player.totalPoints.toFixed(1).replace('.0', '')}
-              <span className="ml-0.5 text-[10px] font-bold tracking-wide text-xactscore-accent/80">pts.</span>
+              <span className="ml-0.5 text-[9px] font-bold tracking-wide text-xactscore-accent/80">pts</span>
             </span>
           </span>
         )}

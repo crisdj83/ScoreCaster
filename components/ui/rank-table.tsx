@@ -104,7 +104,7 @@ export function RankTable<T>({
                 ) : null}
 
                 <div className="flex min-w-0 flex-1 items-center">
-                  <div className="min-w-0 flex-1 text-[13px] font-semibold leading-none tracking-tight text-zinc-100">
+                  <div className="min-w-0 flex-1 text-[13px] font-semibold leading-snug tracking-tight text-zinc-100">
                     {mobileTitle ? mobileTitle(row, index) : null}
                   </div>
                   {showInlineSubtitle ? (
@@ -115,7 +115,7 @@ export function RankTable<T>({
                 </div>
 
                 {mobileStats ? (
-                  <div className="flex shrink-0 items-center gap-2.5 whitespace-nowrap leading-none">
+                  <div className="flex shrink-0 items-center gap-1 whitespace-nowrap leading-none">
                     {mobileStats(row, index)}
                   </div>
                 ) : null}
@@ -133,7 +133,7 @@ export function RankTable<T>({
                 <li
                   key={rowKey}
                   className={cn(
-                    "flex min-h-10 items-center gap-2 px-3 py-2",
+                    "flex min-h-10 items-center gap-1.5 px-2.5 py-2",
                     index % 2 === 1 && "bg-white/[0.02]"
                   )}
                 >

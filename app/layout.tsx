@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
-import { Inter_Tight } from "next/font/google";
+import { Inter } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import Navbar from "./components/Navbar";
@@ -12,17 +12,14 @@ import { getServerLocale } from "../lib/i18n-server";
 import { getTranslations } from "../lib/i18n";
 import { siteUrl } from "../lib/urls";
 
-const inter = Inter_Tight({
+const inter = Inter({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-inter",
 });
 
 export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#e5e9f0" },
-    { media: "(prefers-color-scheme: dark)", color: "#050506" },
-  ],
+  themeColor: "#e4e7eb",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
@@ -78,13 +75,13 @@ export default function RootLayout({
 }>) {
   const locale = getServerLocale();
   return (
-    <html lang={locale} className={inter.variable} suppressHydrationWarning>
+    <html lang={locale} className={`${inter.variable} ${inter.className}`} suppressHydrationWarning>
       <body className="flex min-h-screen flex-col bg-xactscore-bg text-xactscore-text transition-colors duration-300">
         <Script id="device-class" strategy="beforeInteractive">
           {`(function(){var ua=navigator.userAgent||"";var ios=/iP(hone|ad|od)/.test(ua)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);document.documentElement.classList.toggle("android",/Android/i.test(ua));document.documentElement.classList.toggle("ios",ios)})()`}
         </Script>
         <Script id="theme-init" strategy="beforeInteractive">
-          {`(function(){try{var stored=localStorage.getItem("xactscore-theme");var theme=stored||"dark";if(theme==="system"){theme=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}if(theme==="dark"){document.documentElement.classList.add("dark")}else{document.documentElement.classList.remove("dark")}}catch(e){document.documentElement.classList.add("dark")}})();`}
+          {`(function(){try{var stored=localStorage.getItem("xactscore-theme");var theme=stored||"dark";if(theme==="system"){theme=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}var dark=theme==="dark";if(dark){document.documentElement.classList.add("dark")}else{document.documentElement.classList.remove("dark")}var color=dark?"#050506":"#e4e7eb";var metas=document.querySelectorAll('meta[name="theme-color"]');if(!metas.length){var m=document.createElement("meta");m.setAttribute("name","theme-color");m.setAttribute("content",color);document.head.appendChild(m)}else{metas.forEach(function(meta,i){meta.removeAttribute("media");if(i===0)meta.setAttribute("content",color);else meta.parentNode&&meta.parentNode.removeChild(meta)})}}catch(e){document.documentElement.classList.add("dark")}})();`}
         </Script>
         <ThemeProvider>
           <LocaleProvider initialLocale={locale}>

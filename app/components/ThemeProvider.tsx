@@ -3,13 +3,28 @@
 import { ThemeProvider as NextThemesProvider, useTheme } from 'next-themes'
 import { useEffect } from 'react'
 
+function applyThemeColor(color: string) {
+  const metas = Array.from(document.querySelectorAll('meta[name="theme-color"]'))
+  if (metas.length === 0) {
+    const meta = document.createElement('meta')
+    meta.setAttribute('name', 'theme-color')
+    meta.setAttribute('content', color)
+    document.head.appendChild(meta)
+    return
+  }
+  metas.forEach((meta, index) => {
+    meta.removeAttribute('media')
+    if (index === 0) meta.setAttribute('content', color)
+    else meta.remove()
+  })
+}
+
 function ThemeColorSync() {
   const { resolvedTheme } = useTheme()
 
   useEffect(() => {
-    const color = resolvedTheme === 'light' ? '#e5e9f0' : '#050506'
-    const meta = document.querySelector('meta[name="theme-color"]')
-    if (meta) meta.setAttribute('content', color)
+    if (!resolvedTheme) return
+    applyThemeColor(resolvedTheme === 'light' ? '#e4e7eb' : '#050506')
   }, [resolvedTheme])
 
   return null

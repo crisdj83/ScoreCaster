@@ -5,7 +5,7 @@
 
 @layer utilities {
   .font-sans {
-    font-family: -apple-system, BlinkMacSystemFont, var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+    font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   }
 
   .text-balance {
@@ -241,10 +241,10 @@
 
   html {
     @apply font-sans antialiased;
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", var(--font-inter), "Segoe UI", sans-serif;
-    font-variation-settings: unset;
+    font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
     color-scheme: light;
   }
 
@@ -253,14 +253,17 @@
   }
 
   html.android {
-    font-size: 14px;
-    letter-spacing: -0.03em;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
-  html.android .brand-wordmark {
-    font-size: 1.55rem;
+  html.android,
+  html.android body,
+  html.android button,
+  html.android input,
+  html.android select,
+  html.android textarea {
+    font-family: var(--font-inter), ui-sans-serif, sans-serif;
   }
 
   button,
