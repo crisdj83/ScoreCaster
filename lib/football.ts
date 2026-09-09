@@ -1,5 +1,3 @@
-import { chunk } from './utils'
-
 const BASE_URL = 'https://api.football-data.org/v4';
 
 async function fetchFootballData(
@@ -52,22 +50,21 @@ export type FootballGoal = {
   scorer?: { id?: number | string; name?: string }
 }
 
-/** Per-match goals. The season list does not include them; this is a separate call per id. */
+/** Per-match goals. The season list omits them. Sequential to stay under football-data.org's 10 req/min. */
 export async function getPLMatchGoals(ids: Array<string | number>): Promise<Map<string, FootballGoal[]>> {
   const goalsByMatch = new Map<string, FootballGoal[]>()
-  for (const group of chunk(ids, 4)) {
-    const rows = await Promise.all(
-      group.map(async (id) => {
-        try {
-          const match = await fetchFootballData(`/matches/${id}`, 86400, { 'X-Unfold-Goals': 'true' })
-          return [String(id), Array.isArray(match?.goals) ? (match.goals as FootballGoal[]) : []] as const
-        } catch (error) {
-          console.error(`football-data.org match ${id} goals failed:`, error)
-          return [String(id), [] as FootballGoal[]] as const
-        }
-      })
-    )
-    for (const [id, goals] of rows) goalsByMatch.set(id, goals)
+  for (const id of ids.slice(0, 3)) {
+    try {
+      const match = await fetchFootballData(`/matches/${id}`, 3600, { 'X-Unfold-Goals': 'true' })
+      goalsByMatch.set(String(id), Array.isArray(match?.goals) ? (match.goals as FootballGoal[]) : [])
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error)
+      if (message.includes('429')) {
+        console.warn('football-data.org rate limit; skipping remaining goal fetches')
+        break
+      }
+      console.error(`football-data.org match ${id} goals failed:`, message)
+    }
   }
   return goalsByMatch
 }

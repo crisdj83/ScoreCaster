@@ -182,6 +182,10 @@ type ApiFootballPayload = {
   response?: unknown
 }
 
+function isSeasonPlanError(errors: unknown) {
+  return JSON.stringify(errors || '').toLowerCase().includes('do not have access to this season')
+}
+
 async function apiFootballGet(
   path: string,
   revalidateSeconds: number,
@@ -207,8 +211,12 @@ async function apiFootballGet(
     }
     const json = (await res.json()) as ApiFootballPayload
     if (hasErrorPayload(json?.errors)) {
-      console.error('API-Football error:', json.errors)
-      return null
+      if (isSeasonPlanError(json.errors)) {
+        console.warn('API-Football free plan does not include this season; using football-data.org and home stadiums instead.')
+      } else {
+        console.error('API-Football error:', json.errors)
+      }
+      return json
     }
     return json
   } catch (error) {
@@ -226,10 +234,12 @@ async function getSeasonFixtures(season: number): Promise<AfFixture[]> {
   const primary = await apiFootballGet(path, SEASON_REVALIDATE)
   const primaryList = asList<AfFixture>(primary?.response)
   if (primaryList.length) return primaryList
+  if (isSeasonPlanError(primary?.errors)) return []
   const fallback = await apiFootballGet(
     `/fixtures?league=${PL_LEAGUE_ID}&season=${season - 1}&timezone=UTC`,
     SEASON_REVALIDATE
   )
+  if (isSeasonPlanError(fallback?.errors)) return []
   return asList<AfFixture>(fallback?.response)
 }
 
@@ -377,7 +387,7 @@ export async function getLiveGoalScorers(matches: FootballMatchRef[]): Promise<M
   if (!matches.length || !process.env.API_FOOTBALL_KEY?.trim()) return scorers
   const fixtures = await getSeasonFixtures(plSeasonFromMatches(matches))
   if (!fixtures.length) {
-    console.error('API-Football: no Premier League fixtures returned for the current season')
+    console.warn('API-Football: no fixtures for this season on the current plan')
     return scorers
   }
 

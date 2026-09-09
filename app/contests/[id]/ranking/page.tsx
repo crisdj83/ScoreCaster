@@ -357,8 +357,11 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
     return !((live && (live.home.length || live.away.length)) || (stored && (stored.home.length || stored.away.length)))
   })
   if (stillNeedGoals.length) {
-    const footballGoals = await getPLMatchGoals(stillNeedGoals.slice(0, 8).map((match) => match.id))
-    for (const match of stillNeedGoals) {
+    const newestFirst = [...stillNeedGoals].sort(
+      (a, b) => new Date(b.utcDate).getTime() - new Date(a.utcDate).getTime()
+    )
+    const footballGoals = await getPLMatchGoals(newestFirst.map((match) => match.id))
+    for (const match of newestFirst) {
       const goals = footballGoals.get(String(match.id))
       if (!goals?.length) continue
       const home = scorersForTeam(goals, match.homeTeam)
