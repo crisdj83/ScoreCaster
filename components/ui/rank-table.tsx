@@ -163,7 +163,7 @@ export function RankTable<T>({
                 <div className="mb-3 flex items-start justify-between gap-3 border-b border-white/10 pb-3">
                   <div className="min-w-0">
                     {mobileTitle ? (
-                      <div className="truncate font-bold text-zinc-100">
+                      <div className="break-words font-bold leading-snug text-zinc-100 [overflow-wrap:anywhere]">
                         {mobileTitle(row, index)}
                       </div>
                     ) : null}
