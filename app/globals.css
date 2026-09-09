@@ -539,29 +539,35 @@
   .prediction-fixture-content {
     position: relative;
     isolation: isolate;
-    overflow: clip;
+    overflow: hidden;
     border-radius: 1.25rem;
-    clip-path: inset(0 round 1.25rem);
-    touch-action: pan-y;
+    touch-action: manipulation;
     background-color: rgb(16 185 129 / 0.05);
     border: 1px solid rgb(209 250 229);
     box-shadow: 0 8px 30px rgb(0 0 0 / 0.06);
     transition: background-color 300ms ease, border-color 300ms ease, box-shadow 300ms ease;
   }
 
-  html:not(.android) .prediction-fixture-content {
+  /* Desktop-only compositor tricks. Masks + translateZ + backdrop-filter have
+     crashed / blocked taps on mobile WebKit (iOS) and Chromium (Android). */
+  html:not(.android):not(.ios) .prediction-fixture-content {
+    overflow: clip;
+    clip-path: inset(0 round 1.25rem);
     transform: translateZ(0);
     -webkit-mask-image: -webkit-radial-gradient(white, black);
   }
 
-  html.android .prediction-fixture-content {
+  html.android .prediction-fixture-content,
+  html.ios .prediction-fixture-content {
     clip-path: none;
     -webkit-mask-image: none;
     mask-image: none;
+    transform: none;
   }
 
-  html.android .prediction-fixture-content button {
-    touch-action: pan-y;
+  html.android .prediction-fixture-content button,
+  html.ios .prediction-fixture-content button {
+    touch-action: manipulation;
   }
 
   html.dark .prediction-fixture-content {
@@ -582,14 +588,15 @@
     z-index: 0;
     pointer-events: none;
     background-color: #101410;
-    background-image: url("https://images.unsplash.com/photo-1550254478-ead259d59536?auto=format&fit=crop&w=1400&q=60");
+    background-image: none;
     background-size: cover;
     background-position: center;
     opacity: 0;
     filter: none;
   }
 
-  html.dark .prediction-fixture-content::before {
+  html:not(.android):not(.ios).dark .prediction-fixture-content::before {
+    background-image: url("https://images.unsplash.com/photo-1550254478-ead259d59536?auto=format&fit=crop&w=1400&q=60");
     opacity: 0.2;
     filter: saturate(0.22) brightness(0.62) contrast(0.95);
   }
@@ -612,6 +619,9 @@
       rgb(12 12 14 / 0.58),
       rgb(8 8 10 / 0.74)
     );
+  }
+
+  html:not(.android):not(.ios).dark .prediction-fixture-content::after {
     backdrop-filter: blur(10px) saturate(100%);
     -webkit-backdrop-filter: blur(10px) saturate(100%);
   }

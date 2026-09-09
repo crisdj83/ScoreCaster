@@ -123,7 +123,11 @@ export default function MatchdayStrip({
       pointerId = event.pointerId
       startX = event.clientX
       startLeft = strip.scrollLeft
-      strip.setPointerCapture(event.pointerId)
+      try {
+        strip.setPointerCapture(event.pointerId)
+      } catch {
+        /* iOS Safari can throw InvalidStateError here; drag still works without capture */
+      }
       strip.style.cursor = 'grabbing'
     }
 

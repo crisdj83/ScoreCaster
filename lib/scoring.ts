@@ -1,6 +1,6 @@
 export type ContestPredictionRow = {
   user_id: string
-  match_id: number
+  match_id: number | string
   predicted_home_score: number | null
   predicted_away_score: number | null
   points: number

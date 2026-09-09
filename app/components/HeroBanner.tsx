@@ -286,7 +286,9 @@ export default function HeroBanner({
         </div>
       </div>
 
-      <div className="relative z-0 -mt-8 h-[196px] w-full overflow-hidden bg-white sm:-mt-10 sm:h-[240px] lg:mt-0 lg:-ml-10 lg:h-auto lg:min-h-[360px] lg:w-1/2 dark:bg-transparent">
+      {/* pointer-events-none: the -mt overlap + CSS transform marquee creates a
+          stacking-context hit target that steals taps from Make Predictions on iOS. */}
+      <div className="pointer-events-none relative z-0 -mt-8 h-[196px] w-full overflow-hidden bg-white sm:-mt-10 sm:h-[240px] lg:mt-0 lg:-ml-10 lg:h-auto lg:min-h-[360px] lg:w-1/2 dark:bg-transparent">
         {recentScores.length > 0 ? (
           <div className="scores-crossfade absolute inset-0 overflow-hidden">
             <div className="animate-marquee-y flex min-h-full w-full flex-col gap-2 p-2 pt-5 sm:gap-2.5 sm:p-5 sm:pt-8 lg:pt-6">

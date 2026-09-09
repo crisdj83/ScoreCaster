@@ -16,19 +16,23 @@
 -- window" logic, since the caller passes only the match ids it wants to
 -- reveal.
 --
--- NOTE: match_id and points are `integer` in the live predictions table
--- (not bigint/numeric) — the return type below must match exactly or
--- Postgres raises "structure of query does not match function result type".
+-- Types must match public.predictions (see schema.sql): match_id is bigint
+-- and points is numeric (close predictions can score 1.5). A prior integer
+-- signature will fail with "structure of query does not match function
+-- result type" against the live table.
+drop function if exists public.get_contest_predictions(uuid, integer[]);
+drop function if exists public.get_contest_predictions(uuid, bigint[]);
+
 create or replace function public.get_contest_predictions(
   p_contest_id uuid,
-  p_match_ids integer[]
+  p_match_ids bigint[]
 )
 returns table (
   user_id uuid,
-  match_id integer,
+  match_id bigint,
   predicted_home_score integer,
   predicted_away_score integer,
-  points integer,
+  points numeric,
   is_exact boolean,
   is_correct boolean
 )
@@ -60,8 +64,7 @@ begin
 end;
 $$;
 
-drop function if exists public.get_contest_predictions(uuid, bigint[]);
-revoke all on function public.get_contest_predictions(uuid, integer[]) from public;
-grant execute on function public.get_contest_predictions(uuid, integer[]) to authenticated;
+revoke all on function public.get_contest_predictions(uuid, bigint[]) from public;
+grant execute on function public.get_contest_predictions(uuid, bigint[]) to authenticated;
 
 notify pgrst, 'reload schema';
