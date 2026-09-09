@@ -13,8 +13,8 @@ type ExpandableRowProps = {
 
 /**
  * Client-only wrapper for the mobile compact row toggle behavior.
- * Receives already-rendered nodes (not functions) so it can safely be
- * imported into server components without breaking the RSC boundary.
+ * Uses a div row + separate chevron button so nested links (e.g. profile
+ * names) remain tappable.
  */
 export function ExpandableRow({ trigger, content, className }: ExpandableRowProps) {
   const [isExpanded, setIsExpanded] = React.useState(false)
@@ -22,26 +22,30 @@ export function ExpandableRow({ trigger, content, className }: ExpandableRowProp
 
   return (
     <li className={className}>
-      <button
-        type="button"
-        disabled={!canExpand}
-        aria-expanded={canExpand ? isExpanded : undefined}
-        onClick={() => canExpand && setIsExpanded((prev) => !prev)}
+      <div
         className={cn(
           "flex min-h-9 w-full items-center gap-1.5 px-2.5 py-1.5 text-left transition-colors duration-200",
-          canExpand && "cursor-pointer hover:bg-white/[0.04] active:bg-white/[0.06]"
+          canExpand && "hover:bg-white/[0.04] active:bg-white/[0.06]"
         )}
       >
         {trigger}
         {canExpand ? (
-          <ChevronDown
-            className={cn(
-              "h-3.5 w-3.5 shrink-0 text-zinc-500 transition-transform duration-300",
-              isExpanded && "rotate-180 text-zinc-300"
-            )}
-          />
+          <button
+            type="button"
+            aria-expanded={isExpanded}
+            aria-label={isExpanded ? "Hide details" : "Show details"}
+            onClick={() => setIsExpanded((prev) => !prev)}
+            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-zinc-500 touch-manipulation"
+          >
+            <ChevronDown
+              className={cn(
+                "h-3.5 w-3.5 transition-transform duration-300",
+                isExpanded && "rotate-180 text-zinc-300"
+              )}
+            />
+          </button>
         ) : null}
-      </button>
+      </div>
 
       {canExpand && isExpanded ? (
         <div className="border-t border-white/[0.06] bg-white/[0.03] px-2.5 py-1.5">

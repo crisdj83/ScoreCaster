@@ -1,4 +1,5 @@
 import * as React from "react"
+import Link from "next/link"
 
 import { cn } from "@/lib/utils"
 import { ExpandableRow } from "@/components/ui/expandable-row"
@@ -35,6 +36,8 @@ type RankTableProps<T> = {
   mobileStats?: (row: T, index: number) => React.ReactNode
   /** One-line mobile rows; extra stats open in a dropdown when present */
   mobileSingleLine?: boolean
+  /** When set, the whole compact mobile row navigates here (profile, etc.) */
+  getRowHref?: (row: T, index: number) => string | null | undefined
 }
 
 export function RankTable<T>({
@@ -49,6 +52,7 @@ export function RankTable<T>({
   mobileEnd,
   mobileStats,
   mobileSingleLine = false,
+  getRowHref,
 }: RankTableProps<T>) {
   if (rows.length === 0) {
     return (
@@ -66,9 +70,10 @@ export function RankTable<T>({
   return (
     <div className={cn("w-full", className)}>
       {compactMode ? (
-        <ul className="glass-list divide-y divide-white/[0.06] overflow-hidden md:hidden">
+        <ul className="glass-list divide-y divide-slate-100 overflow-hidden dark:divide-white/[0.06] md:hidden">
           {rows.map((row, index) => {
             const rowKey = getRowKey(row, index)
+            const href = getRowHref?.(row, index) || null
             const subtitle =
               mobileSingleLine && mobileSubtitle ? mobileSubtitle(row, index) : null
             const details =
@@ -82,12 +87,12 @@ export function RankTable<T>({
                   {expandableColumns.map((col) => (
                     <div
                       key={col.key}
-                      className="min-w-0 rounded-md border border-white/[0.06] bg-black/20 px-1.5 py-1 text-center"
+                      className="min-w-0 rounded-md border border-slate-200 bg-slate-50 px-1.5 py-1 text-center dark:border-white/[0.06] dark:bg-black/20"
                     >
                       <div className="truncate text-[8px] font-bold uppercase tracking-wider text-zinc-500">
                         {col.mobileHeader ?? col.header}
                       </div>
-                      <div className="truncate text-[11px] font-bold tabular-nums text-zinc-100">
+                      <div className="truncate text-[11px] font-bold tabular-nums text-slate-900 dark:text-zinc-100">
                         {col.cell(row, index)}
                       </div>
                     </div>
@@ -104,7 +109,7 @@ export function RankTable<T>({
                 ) : null}
 
                 <div className="flex min-w-0 flex-1 items-center">
-                  <div className="min-w-0 flex-1 text-[13px] font-semibold leading-snug tracking-tight text-zinc-100">
+                  <div className="min-w-0 flex-1 text-[13px] font-semibold leading-snug tracking-tight text-slate-900 dark:text-zinc-100">
                     {mobileTitle ? mobileTitle(row, index) : null}
                   </div>
                   {showInlineSubtitle ? (
@@ -115,13 +120,13 @@ export function RankTable<T>({
                 </div>
 
                 {mobileStats ? (
-                  <div className="flex shrink-0 items-center gap-1 whitespace-nowrap leading-none">
+                  <div className="pointer-events-none flex shrink-0 items-center gap-1 whitespace-nowrap leading-none">
                     {mobileStats(row, index)}
                   </div>
                 ) : null}
 
                 {mobileEnd ? (
-                  <div className="min-w-[1.75rem] shrink-0 text-right font-black tabular-nums text-xactscore-accent">
+                  <div className="pointer-events-none min-w-[1.75rem] shrink-0 text-right font-black tabular-nums text-xactscore-accent">
                     {mobileEnd(row, index)}
                   </div>
                 ) : null}
@@ -129,15 +134,20 @@ export function RankTable<T>({
             )
 
             if (!details) {
+              const rowClass = cn(
+                "flex min-h-11 items-center gap-1.5 px-2.5 py-2 touch-manipulation",
+                index % 2 === 1 && "bg-slate-50/80 dark:bg-white/[0.02]",
+                href && "active:bg-indigo-50 dark:active:bg-white/[0.06]"
+              )
               return (
-                <li
-                  key={rowKey}
-                  className={cn(
-                    "flex min-h-10 items-center gap-1.5 px-2.5 py-2",
-                    index % 2 === 1 && "bg-white/[0.02]"
+                <li key={rowKey}>
+                  {href ? (
+                    <Link href={href} prefetch className={rowClass}>
+                      {trigger}
+                    </Link>
+                  ) : (
+                    <div className={rowClass}>{trigger}</div>
                   )}
-                >
-                  {trigger}
                 </li>
               )
             }
@@ -145,7 +155,7 @@ export function RankTable<T>({
             return (
               <ExpandableRow
                 key={rowKey}
-                className={cn(index % 2 === 1 && "bg-white/[0.02]")}
+                className={cn(index % 2 === 1 && "bg-slate-50/80 dark:bg-white/[0.02]")}
                 trigger={trigger}
                 content={details}
               />
@@ -160,10 +170,10 @@ export function RankTable<T>({
               className="glass-row p-4 transition-all duration-300 active:scale-[0.98]"
             >
               {(mobileTitle || mobileSubtitle) && (
-                <div className="mb-3 flex items-start justify-between gap-3 border-b border-white/10 pb-3">
+                <div className="mb-3 flex items-start justify-between gap-3 border-b border-slate-100 pb-3 dark:border-white/10">
                   <div className="min-w-0">
                     {mobileTitle ? (
-                      <div className="break-words font-bold leading-snug text-zinc-100 [overflow-wrap:anywhere]">
+                      <div className="break-words font-bold leading-snug text-slate-900 [overflow-wrap:anywhere] dark:text-zinc-100">
                         {mobileTitle(row, index)}
                       </div>
                     ) : null}
@@ -181,7 +191,7 @@ export function RankTable<T>({
                     <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
                       {col.header}
                     </div>
-                    <div className="mt-0.5 text-sm font-semibold text-zinc-100">
+                    <div className="mt-0.5 text-sm font-semibold text-slate-900 dark:text-zinc-100">
                       {col.cell(row, index)}
                     </div>
                   </div>
@@ -194,7 +204,7 @@ export function RankTable<T>({
 
       <div className="glass-list hidden overflow-x-auto md:block">
         <table className="w-full text-left text-sm">
-          <thead className="bg-white/[0.04] text-[11px] font-black uppercase tracking-wider text-zinc-500">
+          <thead className="bg-slate-50 text-[11px] font-black uppercase tracking-wider text-zinc-500 dark:bg-white/[0.04]">
             <tr>
               {columns.map((col) => (
                 <th
@@ -206,11 +216,11 @@ export function RankTable<T>({
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-white/10">
+          <tbody className="divide-y divide-slate-100 dark:divide-white/10">
             {rows.map((row, index) => (
               <tr
                 key={getRowKey(row, index)}
-                className="transition-colors duration-300 hover:bg-white/[0.06]"
+                className="transition-colors duration-300 hover:bg-slate-50 dark:hover:bg-white/[0.06]"
               >
                 {columns.map((col) => (
                   <td key={col.key} className={cn("px-4 py-3", col.className)}>
