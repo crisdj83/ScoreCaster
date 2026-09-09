@@ -1,4 +1,4 @@
-const CACHE_NAME = 'xactscore-shell-v3'
+const CACHE_NAME = 'xactscore-shell-v4'
 const PRECACHE_URLS = ['/offline.html', '/icons/icon-192.png', '/icons/icon-512.png', '/apple-touch-icon.png']
 
 self.addEventListener('install', (event) => {
@@ -26,7 +26,15 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url)
   if (url.origin !== self.location.origin) return
 
-  if (url.pathname.startsWith('/_next/static/') || url.pathname.startsWith('/icons/')) {
+  // Never cache Next.js build assets. Hashed chunks change every deploy; a
+  // stale cacheFirst entry (especially on iOS Home Screen PWAs) causes
+  // ChunkLoadError when navigating to routes like /predictions.
+  if (url.pathname.startsWith('/_next/')) {
+    event.respondWith(fetch(request))
+    return
+  }
+
+  if (url.pathname.startsWith('/icons/')) {
     event.respondWith(cacheFirst(request))
     return
   }
@@ -96,4 +104,3 @@ self.addEventListener('notificationclick', (event) => {
     })
   )
 })
-

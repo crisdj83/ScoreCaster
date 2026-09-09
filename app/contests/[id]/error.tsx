@@ -22,6 +22,13 @@ export default function ContestError({
       <p className="text-sm text-xactscore-muted">
         Something went wrong fetching the contest data. Please try again.
       </p>
+      {error?.digest || error?.message ? (
+        <p className="max-w-full break-words font-mono text-[11px] text-zinc-400">
+          {error.digest ? `Ref ${error.digest}` : null}
+          {error.digest && error.message ? ' · ' : null}
+          {error.message || null}
+        </p>
+      ) : null}
       <div className="flex gap-3">
         <button
           onClick={reset}

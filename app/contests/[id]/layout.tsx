@@ -8,20 +8,46 @@ import { Globe } from 'lucide-react'
 import CopyInviteButton from '../../components/CopyInviteButton'
 import { inviteUrl } from '../../../lib/urls'
 
-export default async function ContestLayout(props: { 
-  children: React.ReactNode;
-  params: Promise<{ id: string }>;
+type ContestRow = {
+  id: string
+  name: string
+  contest_key: string
+  admin_id: string
+  is_public?: boolean
+}
+
+function asContest(value: unknown): ContestRow | null {
+  const row = Array.isArray(value) ? value[0] : value
+  if (!row || typeof row !== 'object') return null
+  const contest = row as Partial<ContestRow>
+  if (!contest.id || !contest.name || !contest.contest_key) return null
+  return {
+    id: String(contest.id),
+    name: String(contest.name),
+    contest_key: String(contest.contest_key),
+    admin_id: String(contest.admin_id || ''),
+    is_public: Boolean(contest.is_public),
+  }
+}
+
+export default async function ContestLayout(props: {
+  children: React.ReactNode
+  params: Promise<{ id: string }>
 }) {
-  const params = await props.params;
+  const params = await props.params
   const t = getTranslations(getServerLocale())
   const supabase = await createClient()
 
-  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser()
   if (authError || !user) redirect('/login')
 
   const { data: membership, error: membershipError } = await supabase
     .from('contest_members')
-    .select(`
+    .select(
+      `
       role,
       contests (
         id,
@@ -30,23 +56,17 @@ export default async function ContestLayout(props: {
         admin_id,
         is_public
       )
-    `)
+    `
+    )
     .eq('contest_id', params.id)
     .eq('user_id', user.id)
     .single()
 
-  if (membershipError || !membership) {
+  const contest = asContest(membership?.contests)
+  if (membershipError || !membership || !contest) {
     redirect('/contests?error=You do not have access to this contest.')
   }
 
-  const contest = membership.contests as unknown as {
-    id: string;
-    name: string;
-    contest_key: string;
-    admin_id: string;
-    is_public?: boolean;
-  }
-  
   const isAdmin = membership.role === 'admin'
 
   return (
@@ -59,9 +79,7 @@ export default async function ContestLayout(props: {
         </h1>
         {contest.is_public ? (
           <div className="shrink-0 rounded-lg border border-slate-200 bg-white px-2 py-1 text-center shadow-sm dark:border-white/10 dark:bg-white/5 dark:shadow-none">
-            <p className="text-[8px] font-black uppercase tracking-widest text-zinc-500">
-              {t('Public')}
-            </p>
+            <p className="text-[8px] font-black uppercase tracking-widest text-zinc-500">{t('Public')}</p>
             <p className="inline-flex items-center justify-center gap-1 font-mono text-[11px] font-black tracking-wider text-orange-300">
               <Globe className="h-3 w-3" />
               {t('Open')}
@@ -69,9 +87,7 @@ export default async function ContestLayout(props: {
           </div>
         ) : (
           <div className="shrink-0 rounded-lg border border-slate-200 bg-white px-2 py-1 text-center shadow-sm dark:border-white/10 dark:bg-white/5 dark:shadow-none">
-            <p className="text-[8px] font-black uppercase tracking-widest text-zinc-500">
-              {t('Invite Code')}
-            </p>
+            <p className="text-[8px] font-black uppercase tracking-widest text-zinc-500">{t('Invite Code')}</p>
             <p className="bg-clip-text font-mono text-[11px] font-black tracking-wider text-zinc-900 dark:bg-gradient-to-r dark:from-amber-400 dark:to-orange-600 dark:text-transparent">
               {contest.contest_key}
             </p>
@@ -97,9 +113,7 @@ export default async function ContestLayout(props: {
 
         {contest.is_public ? (
           <div className="z-10 shrink-0 rounded-xl border border-slate-200 bg-white px-5 py-3 text-center shadow-sm dark:border-white/10 dark:bg-white/5 dark:shadow-inner">
-            <p className="mb-1 text-[10px] font-black uppercase tracking-widest text-zinc-500">
-              {t('Public')}
-            </p>
+            <p className="mb-1 text-[10px] font-black uppercase tracking-widest text-zinc-500">{t('Public')}</p>
             <p className="inline-flex items-center justify-center gap-1.5 font-mono text-2xl font-black tracking-widest text-orange-300">
               <Globe className="h-6 w-6" />
               {t('Open')}
@@ -107,9 +121,7 @@ export default async function ContestLayout(props: {
           </div>
         ) : (
           <div className="z-10 shrink-0 rounded-xl border border-slate-200 bg-white px-5 py-3 text-center shadow-sm dark:border-white/10 dark:bg-white/5 dark:shadow-inner">
-            <p className="mb-1 text-[10px] font-black uppercase tracking-widest text-zinc-500">
-              {t('Invite Code')}
-            </p>
+            <p className="mb-1 text-[10px] font-black uppercase tracking-widest text-zinc-500">{t('Invite Code')}</p>
             <p className="bg-clip-text font-mono text-2xl font-black tracking-widest text-zinc-900 dark:bg-gradient-to-r dark:from-amber-400 dark:to-orange-600 dark:text-transparent">
               {contest.contest_key}
             </p>

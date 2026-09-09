@@ -8,7 +8,7 @@ function iconIndex(value: string) {
 }
 
 export default function ContestIcon({ contestId, size = 'md' }: { contestId: string; size?: 'xs' | 'sm' | 'md' }) {
-  const Icon = ICONS[iconIndex(contestId)]
+  const Icon = ICONS[iconIndex(contestId || 'xactscore')]
   const dimensions = size === 'xs' ? 'h-5 w-5' : size === 'sm' ? 'h-9 w-9' : 'h-12 w-12'
   const iconSize = size === 'xs' ? 'h-3 w-3' : size === 'sm' ? 'h-5 w-5' : 'h-6 w-6'
   const radius = size === 'xs' ? 'rounded-md' : 'rounded-xl'
