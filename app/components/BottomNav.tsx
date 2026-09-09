@@ -51,7 +51,7 @@ export default function BottomNav({ isAdmin, isLoggedIn, unreadMessageCount }: B
       aria-label="Primary"
       className="ios-tab-bar fixed inset-x-3 z-40 dark:inset-x-0 lg:hidden"
     >
-      <div className="mx-auto flex max-w-2xl items-center gap-0.5 px-1 py-1 sm:gap-1 sm:px-2">
+      <div className="mx-auto flex max-w-2xl items-center gap-0.5 overflow-visible px-1 py-0.5 sm:gap-1 sm:px-2">
         {items.map(({ href, label, short, icon: Icon, badge }) => {
           const active = pathname === href
           return (
@@ -64,7 +64,7 @@ export default function BottomNav({ isAdmin, isLoggedIn, unreadMessageCount }: B
                 active ? 'ios-tab-item-active text-indigo-600 dark:text-orange-200' : 'text-xactscore-muted hover:text-xactscore-text'
               )}
             >
-              <span className="relative">
+              <span className="relative shrink-0">
                 <Icon className="h-5 w-5" strokeWidth={active ? 2.5 : 2} />
                 {badge ? (
                   <span className="absolute -right-2 -top-2 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-black leading-none text-white ring-2 ring-zinc-950/70">
@@ -72,7 +72,7 @@ export default function BottomNav({ isAdmin, isLoggedIn, unreadMessageCount }: B
                   </span>
                 ) : null}
               </span>
-              <span className="truncate">{short}</span>
+              <span className="max-w-full truncate leading-tight">{short}</span>
             </Link>
           )
         })}

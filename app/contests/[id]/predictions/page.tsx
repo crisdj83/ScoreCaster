@@ -150,7 +150,7 @@ export default async function PredictionsPage(props: {
 
   return (
     <>
-    <div className="min-w-0 bg-white p-2 shadow-xl shadow-slate-200/50 dark:border-0 dark:bg-transparent dark:p-0 dark:shadow-none sm:p-4">
+    <div className="min-w-0 bg-white p-1.5 shadow-xl shadow-slate-200/50 dark:border-0 dark:bg-transparent dark:p-0 dark:shadow-none sm:p-4">
       <LiveRefresh refreshAfter={matchdayFixtures.map((match) => match.utcDate)} />
       {selectedMatchday ? (
         <MatchdayNav
