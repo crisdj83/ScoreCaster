@@ -70,28 +70,27 @@ export default async function ContestLayout(props: {
   const isAdmin = membership.role === 'admin'
 
   return (
-    <div className="mx-auto w-full space-y-3 pb-12 pt-1 sm:space-y-6 sm:pt-4">
-      {/* Mobile: name + invite. Home/Leagues live in the bottom bar. */}
+    <div className="mx-auto w-full space-y-2.5 pb-12 pt-1 sm:space-y-6 sm:pt-4">
+      {/* Mobile: league name + slim invite chip on one row */}
       <div className="flex items-center gap-2 md:hidden">
-        <ContestIcon contestId={contest.id} size="sm" />
-        <h1 className="min-w-0 flex-1 truncate text-base font-black tracking-tight text-zinc-900 dark:text-white">
+        <ContestIcon contestId={contest.id} size="xs" />
+        <h1 className="min-w-0 flex-1 truncate text-sm font-black tracking-tight text-zinc-900 dark:text-white">
           {contest.name}
         </h1>
         {contest.is_public ? (
-          <div className="shrink-0 rounded-lg border border-slate-200 bg-white px-2 py-1 text-center shadow-sm dark:border-white/10 dark:bg-white/5 dark:shadow-none">
-            <p className="text-[8px] font-black uppercase tracking-widest text-zinc-500">{t('Public')}</p>
-            <p className="inline-flex items-center justify-center gap-1 font-mono text-[11px] font-black tracking-wider text-orange-300">
-              <Globe className="h-3 w-3" />
-              {t('Open')}
-            </p>
+          <div className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full border border-slate-200 bg-white px-2.5 shadow-sm dark:border-white/10 dark:bg-white/5 dark:shadow-none">
+            <Globe className="h-3 w-3 text-orange-400" />
+            <span className="text-[10px] font-black uppercase tracking-wider text-zinc-500">{t('Public')}</span>
           </div>
         ) : (
-          <div className="shrink-0 rounded-lg border border-slate-200 bg-white px-2 py-1 text-center shadow-sm dark:border-white/10 dark:bg-white/5 dark:shadow-none">
-            <p className="text-[8px] font-black uppercase tracking-widest text-zinc-500">{t('Invite Code')}</p>
-            <p className="bg-clip-text font-mono text-[11px] font-black tracking-wider text-zinc-900 dark:bg-gradient-to-r dark:from-amber-400 dark:to-orange-600 dark:text-transparent">
+          <div className="inline-flex h-8 max-w-[58%] shrink-0 items-center gap-1.5 rounded-full border border-slate-200 bg-white py-0 pl-2.5 pr-1 shadow-sm dark:border-white/10 dark:bg-white/5 dark:shadow-none">
+            <span className="text-[9px] font-bold uppercase tracking-wider text-zinc-400">
+              {t('Invite')}
+            </span>
+            <span className="truncate font-mono text-[11px] font-black tracking-wide text-zinc-900 dark:bg-gradient-to-r dark:from-amber-400 dark:to-orange-600 dark:bg-clip-text dark:text-transparent">
               {contest.contest_key}
-            </p>
-            <CopyInviteButton url={inviteUrl(contest.contest_key)} className="mt-1 min-h-8 w-full px-2 text-[9px]" />
+            </span>
+            <CopyInviteButton url={inviteUrl(contest.contest_key)} compact />
           </div>
         )}
       </div>

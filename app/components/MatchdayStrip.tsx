@@ -187,10 +187,10 @@ export default function MatchdayStrip({
   }, [matchdays.length, selected])
 
   return (
-    <div className="mb-6 min-w-0 max-w-full">
+    <div className="mb-3 min-w-0 max-w-full sm:mb-6">
       <div
         ref={stripRef}
-        className="relative flex w-full min-w-0 cursor-grab touch-none items-center overflow-x-auto overscroll-x-contain rounded-2xl bg-slate-100 py-1.5 select-none active:cursor-grabbing [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden dark:bg-white/[0.08]"
+        className="relative flex w-full min-w-0 cursor-grab touch-none items-center overflow-x-auto overscroll-x-contain rounded-2xl bg-slate-100 py-1 select-none active:cursor-grabbing [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden dark:bg-white/[0.08] sm:py-1.5"
         style={{ WebkitOverflowScrolling: 'touch' }}
         role="listbox"
         aria-label={t('Matchday')}
@@ -207,7 +207,7 @@ export default function MatchdayStrip({
               data-matchday={String(matchday)}
               aria-label={`${t('Matchday')} ${matchday}`}
               className={cn(
-                'flex shrink-0 items-center justify-center whitespace-nowrap px-6 py-2 text-center',
+                'flex shrink-0 items-center justify-center whitespace-nowrap px-4 py-1.5 text-center text-sm sm:px-6 sm:py-2',
                 isSelected
                   ? 'rounded-xl bg-white font-bold text-slate-900 shadow-sm dark:border-white/35 dark:bg-white/[0.1] dark:text-zinc-100 dark:shadow-[inset_0_1px_0_rgb(255_255_255/0.28),0_0_0_1px_rgb(255_149_61/0.35)]'
                   : 'rounded-xl font-semibold text-slate-500 transition-colors hover:text-slate-700 dark:text-zinc-400 dark:hover:text-zinc-200'
