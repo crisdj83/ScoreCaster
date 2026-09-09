@@ -1,5 +1,6 @@
 import webpush from 'web-push'
 import { createAdminClient } from './supabase/admin'
+import { normalizeVapidPublicKey } from './vapid'
 
 type PushKeys = {
   p256dh: string
@@ -13,12 +14,15 @@ export type StoredPushSubscription = {
 }
 
 function vapidConfigured() {
-  return Boolean(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY)
+  return Boolean(
+    normalizeVapidPublicKey(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY) &&
+      normalizeVapidPublicKey(process.env.VAPID_PRIVATE_KEY)
+  )
 }
 
 function setVapid() {
-  const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
-  const privateKey = process.env.VAPID_PRIVATE_KEY
+  const publicKey = normalizeVapidPublicKey(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY)
+  const privateKey = normalizeVapidPublicKey(process.env.VAPID_PRIVATE_KEY)
   if (!publicKey || !privateKey) return false
   webpush.setVapidDetails(
     process.env.VAPID_SUBJECT || 'mailto:noreply@xactscore.app',

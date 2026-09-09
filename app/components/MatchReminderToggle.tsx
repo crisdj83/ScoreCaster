@@ -6,6 +6,7 @@ import { Bell } from 'lucide-react'
 import { useTranslations } from './LocaleProvider'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { normalizeVapidPublicKey, vapidPublicKeyToUint8Array } from '../../lib/vapid'
 
 function isStandaloneDisplay() {
   if (typeof window === 'undefined') return false
@@ -19,20 +20,9 @@ function isIosDevice() {
   return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
 }
 
-function urlBase64ToUint8Array(base64String: string) {
-  const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
-  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')
-  const rawData = window.atob(base64)
-  const output = new Uint8Array(rawData.length)
-  for (let i = 0; i < rawData.length; i += 1) {
-    output[i] = rawData.charCodeAt(i)
-  }
-  return output
-}
-
 export default function MatchReminderToggle() {
   const t = useTranslations()
-  const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || ''
+  const vapidKey = normalizeVapidPublicKey(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || '')
   const [enabled, setEnabled] = useState(false)
   const [pending, setPending] = useState(false)
   const [message, setMessage] = useState('')
@@ -64,6 +54,14 @@ export default function MatchReminderToggle() {
 
     setPending(true)
     try {
+      let applicationServerKey: Uint8Array
+      try {
+        applicationServerKey = vapidPublicKeyToUint8Array(vapidKey)
+      } catch {
+        setMessage(t('Push notifications are misconfigured. Check the VAPID public key.'))
+        return
+      }
+
       const permission = await Notification.requestPermission()
       if (permission !== 'granted') {
         setMessage(t('Notifications were blocked. Allow them in your phone settings, then try again.'))
@@ -74,7 +72,7 @@ export default function MatchReminderToggle() {
       await navigator.serviceWorker.ready
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(vapidKey),
+        applicationServerKey: applicationServerKey as BufferSource,
       })
 
       const response = await fetch('/api/push/subscribe', {
@@ -83,11 +81,16 @@ export default function MatchReminderToggle() {
         body: JSON.stringify(subscription.toJSON()),
       })
       if (!response.ok) {
-        throw new Error('Could not save reminder subscription')
+        throw new Error(t('Could not save reminder subscription'))
       }
       setEnabled(true)
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : t('Could not enable match reminders'))
+      const raw = error instanceof Error ? error.message : ''
+      if (/invalid characters|atob|applicationServerKey|InvalidAccessError|DataError/i.test(raw)) {
+        setMessage(t('Push notifications are misconfigured. Check the VAPID public key.'))
+      } else {
+        setMessage(raw || t('Could not enable match reminders'))
+      }
     } finally {
       setPending(false)
     }
@@ -144,7 +147,7 @@ export default function MatchReminderToggle() {
             </p>
           ) : null}
 
-          {message ? <p className="text-sm text-red-300">{message}</p> : null}
+          {message ? <p className="text-sm text-red-600 dark:text-red-300">{message}</p> : null}
         </div>
       </CardContent>
     </Card>
