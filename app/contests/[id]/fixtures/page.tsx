@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import { createClient } from '../../../../lib/supabase/server'
 import { getPLMatches, getPLScorers, getPLStandings } from '../../../../lib/football'
+import { getMatchVenues } from '../../../../lib/api-football'
 import {
   isMatchInContestSeason,
   normalizeSeasonLength,
@@ -127,8 +128,13 @@ export default async function FixturesPage(props: { params: Promise<{ id: string
       Number(a.matchday) - Number(b.matchday) ||
       new Date(a.utcDate).getTime() - new Date(b.utcDate).getTime()
     ))
+  const venues = await getMatchVenues(matches)
+  const matchesWithVenue = matches.map((match: any) => ({
+    ...match,
+    venue: venues.get(String(match.id)) || null,
+  }))
 
-  const matchdays: number[] = Array.from(new Set<number>(matches.map((match: any) => Number(match.matchday))))
+  const matchdays: number[] = Array.from(new Set<number>(matchesWithVenue.map((match: any) => Number(match.matchday))))
 
   const standingsTable: StandingRow[] =
     standingsData?.standings?.find((standing: { type?: string }) => standing.type === 'TOTAL')?.table ||
@@ -234,7 +240,7 @@ export default async function FixturesPage(props: { params: Promise<{ id: string
       {matchdays.length === 0 ? (
         <EmptyState title={t('No fixtures available for this season.')} />
       ) : (
-        <FixturesCalendar matches={matches} contestId={id} locale={getServerLocale()} />
+        <FixturesCalendar matches={matchesWithVenue} contestId={id} locale={getServerLocale()} />
       )}
       <p className="text-xs text-zinc-500">{t('Click a fixture to view and manage predictions.')}</p>
 

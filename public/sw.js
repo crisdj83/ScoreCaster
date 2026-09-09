@@ -1,4 +1,4 @@
-const CACHE_NAME = 'xactscore-shell-v2'
+const CACHE_NAME = 'xactscore-shell-v3'
 const PRECACHE_URLS = ['/offline.html', '/icons/icon-192.png', '/icons/icon-512.png', '/apple-touch-icon.png']
 
 self.addEventListener('install', (event) => {
@@ -73,6 +73,8 @@ self.addEventListener('push', (event) => {
       body: payload.body,
       icon: '/icons/icon-192.png',
       badge: '/icons/icon-192.png',
+      tag: payload.tag || 'xactscore',
+      renotify: true,
       data: { url: payload.url || '/' },
     })
   )

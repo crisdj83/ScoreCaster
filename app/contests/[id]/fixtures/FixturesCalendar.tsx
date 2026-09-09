@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { ChevronLeft, ChevronRight, Clock, Calendar, Sparkles } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Clock, Calendar, Sparkles, MapPin } from 'lucide-react'
 import { useTranslations } from '../../../components/LocaleProvider'
 import { ScoreBadge } from '@/components/ui/badge'
 
@@ -17,6 +17,7 @@ export type Match = {
   score?: {
     fullTime?: { home?: number | null; away?: number | null }
   }
+  venue?: string | null
 }
 
 export default function FixturesCalendar({
@@ -192,6 +193,12 @@ export default function FixturesCalendar({
                       minute: '2-digit',
                     })}
                   </span>
+                  {match.venue ? (
+                    <span className="flex max-w-[11rem] items-center gap-1 text-[10px] font-semibold normal-case tracking-normal text-zinc-500">
+                      <MapPin className="h-3 w-3 shrink-0" />
+                      <span className="truncate">{match.venue}</span>
+                    </span>
+                  ) : null}
                 </span>
 
                 <span className="flex items-center gap-2 font-bold text-zinc-100">

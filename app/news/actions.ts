@@ -4,6 +4,7 @@ import { createClient } from '../../lib/supabase/server'
 import { createAdminClient } from '../../lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
+import { notifyContestMembers } from '../../lib/notify-contest'
 
 async function getUserAndAdmin() {
   const supabase = await createClient()
@@ -57,6 +58,13 @@ export async function createMessage(formData: FormData) {
     body,
   })
   if (error) redirect(`/news?error=${encodeURIComponent(error.message)}`)
+  await notifyContestMembers({
+    contestId,
+    authorId: user.id,
+    title,
+    body,
+    kind: 'message',
+  })
   revalidatePath('/news')
   redirect('/news')
 }
@@ -106,6 +114,13 @@ export async function createMessageReply(formData: FormData) {
     body,
   })
   if (error) redirect(`/news?error=${encodeURIComponent(error.message)}`)
+  await notifyContestMembers({
+    contestId: access.message.contest_id,
+    authorId: user.id,
+    title: 'Reply',
+    body,
+    kind: 'reply',
+  })
   revalidatePath('/news')
   redirect('/news')
 }

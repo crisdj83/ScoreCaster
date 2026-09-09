@@ -201,8 +201,8 @@ function ProfilePageInner() {
         <ProfileBanners />
       </Suspense>
 
-      <Card>
-        <CardContent className="p-6 md:p-8">
+      <Card className={showDropdown ? 'relative z-20 overflow-visible' : 'overflow-visible'}>
+        <CardContent className="overflow-visible p-6 md:p-8">
           <form action={updateProfile} className="space-y-8">
             <div>
               <h3 className="mb-4 flex items-center gap-2 text-lg font-bold text-zinc-100">
@@ -277,37 +277,7 @@ function ProfilePageInner() {
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="quote">{t('Player motto')}</Label>
-                <div className="flex flex-col gap-2 sm:flex-row">
-                  <Input
-                    id="quote"
-                    type="text"
-                    name="quote"
-                    value={motto}
-                    maxLength={18}
-                    onChange={(event) => setMotto(event.target.value.slice(0, 18))}
-                    placeholder={t('Enter a short motto')}
-                    className="min-w-0 flex-1"
-                  />
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    onClick={() =>
-                      setMotto(
-                        ['Play to win', 'Trust the process', 'Never stop scoring', 'Own the table'][
-                          Math.floor(Math.random() * 4)
-                        ]
-                      )
-                    }
-                  >
-                    {t('Generate motto')}
-                  </Button>
-                </div>
-                <p className="text-xs text-zinc-500">{motto.length}/18</p>
-              </div>
-
-              <div className="relative">
+              <div className={`relative ${showDropdown ? 'z-30' : ''}`}>
                 <Label className="flex items-center gap-2">
                   <Shield className="h-4 w-4 text-xactscore-accent" /> {t('Favorite Team')}
                 </Label>
@@ -337,14 +307,14 @@ function ProfilePageInner() {
                       <span className="text-zinc-500">{t('Select a team...')}</span>
                     )}
                   </div>
-                  <ChevronDown className="h-4 w-4 text-zinc-500" />
+                  <ChevronDown className={`h-4 w-4 text-zinc-500 transition-transform ${showDropdown ? 'rotate-180' : ''}`} />
                 </button>
 
                 {showDropdown && (
                   <>
-                    <div className="fixed inset-0 z-10" onClick={() => setShowDropdown(false)} />
+                    <div className="fixed inset-0 z-40" onClick={() => setShowDropdown(false)} />
 
-                    <div className="absolute z-20 mt-1 max-h-80 w-full overflow-y-auto rounded-xl border border-zinc-700 bg-zinc-900 shadow-lg shadow-black/40">
+                    <div className="absolute bottom-full z-50 mb-1 max-h-[min(20rem,calc(100dvh-10rem))] w-full overflow-y-auto rounded-xl border border-zinc-700 bg-zinc-900 shadow-lg shadow-black/40">
                       <div
                         className="flex cursor-pointer items-center gap-3 border-b border-zinc-800 px-4 py-3 text-zinc-500 hover:bg-zinc-800"
                         onClick={() => {
@@ -377,6 +347,36 @@ function ProfilePageInner() {
                     </div>
                   </>
                 )}
+              </div>
+
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="quote">{t('Player motto')}</Label>
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  <Input
+                    id="quote"
+                    type="text"
+                    name="quote"
+                    value={motto}
+                    maxLength={18}
+                    onChange={(event) => setMotto(event.target.value.slice(0, 18))}
+                    placeholder={t('Enter a short motto')}
+                    className="min-w-0 flex-1"
+                  />
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() =>
+                      setMotto(
+                        ['Play to win', 'Trust the process', 'Never stop scoring', 'Own the table'][
+                          Math.floor(Math.random() * 4)
+                        ]
+                      )
+                    }
+                  >
+                    {t('Generate motto')}
+                  </Button>
+                </div>
+                <p className="text-xs text-zinc-500">{motto.length}/18</p>
               </div>
             </div>
 

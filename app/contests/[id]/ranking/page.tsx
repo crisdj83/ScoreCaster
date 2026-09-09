@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation'
 import { getTranslations } from '../../../../lib/i18n'
 import { getServerLocale } from '../../../../lib/i18n-server'
 import { getPLMatches, getPLStandings } from '../../../../lib/football'
+import { getLiveGoalScorers } from '../../../../lib/api-football'
+import { loadStoredScorers } from '../../../../lib/match-scorers'
 import {
   getSeasonLengthLabelKey,
   isMatchInContestSeason,
@@ -279,6 +281,9 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
     .filter((match: Match) => isMatchInContestSeason(match, seasonLength))
     .sort((a: Match, b: Match) => Number(a.matchday) - Number(b.matchday) || new Date(a.utcDate).getTime() - new Date(b.utcDate).getTime())
   const allowedMatchIds = matches.map(match => String(match.id))
+  const liveNow = matches.filter((match) => ['IN_PLAY', 'PAUSED'].includes(match.status || ''))
+  const storedScorersPromise = loadStoredScorers(supabase, allowedMatchIds)
+  const liveScorersPromise = getLiveGoalScorers(liveNow)
 
   const { data: members, error: membersError } = await supabase
     .from('contest_members')
@@ -288,6 +293,8 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
   if (membersError || !members) {
     throw new Error(membersError?.message || 'Error loading leaderboard.')
   }
+
+  const storedScorers = await storedScorersPromise
 
   // Cross-member prediction aggregation is enforced via a SECURITY DEFINER
   // Postgres RPC (get_contest_predictions) that verifies contest membership
@@ -455,22 +462,34 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
       .sort((a, b) => (b.points ?? -1) - (a.points ?? -1) || a.name.localeCompare(b.name))
     return [String(match.id), scoredPlayers]
   }))
-  const currentGameweekFixtures = matches.map(match => ({
-    id: String(match.id),
-    matchday: Number(match.matchday),
-    home: match.homeTeam.shortName || match.homeTeam.name,
-    away: match.awayTeam.shortName || match.awayTeam.name,
-    homeCrest: match.homeTeam.crest,
-    awayCrest: match.awayTeam.crest,
-    kickoff: match.utcDate,
-    status: match.status || '',
-    isLive: ['IN_PLAY', 'PAUSED'].includes(match.status || ''),
-    score: match.score?.fullTime?.home !== null && match.score?.fullTime?.home !== undefined && match.score?.fullTime?.away !== null && match.score?.fullTime?.away !== undefined
-      ? `${match.score.fullTime.home} : ${match.score.fullTime.away}`
-      : null,
-    homeScorers: scorersForTeam(match.goals, match.homeTeam),
-    awayScorers: scorersForTeam(match.goals, match.awayTeam),
-  }))
+  const liveScorers = await liveScorersPromise
+  const currentGameweekFixtures = matches.map(match => {
+    const live = liveScorers.get(String(match.id))
+    const stored = storedScorers.get(String(match.id))
+    const fdHome = scorersForTeam(match.goals, match.homeTeam)
+    const fdAway = scorersForTeam(match.goals, match.awayTeam)
+    const inPlay = ['IN_PLAY', 'PAUSED'].includes(match.status || '')
+    const pick = inPlay
+      ? (live?.home.length || live?.away.length ? live : stored)
+      : (stored || (live?.home.length || live?.away.length ? live : null))
+    return {
+      id: String(match.id),
+      matchday: Number(match.matchday),
+      home: match.homeTeam.shortName || match.homeTeam.name,
+      away: match.awayTeam.shortName || match.awayTeam.name,
+      homeCrest: match.homeTeam.crest,
+      awayCrest: match.awayTeam.crest,
+      kickoff: match.utcDate,
+      status: match.status || '',
+      isLive: inPlay,
+      liveMinute: live?.elapsed ?? stored?.elapsed ?? null,
+      score: match.score?.fullTime?.home !== null && match.score?.fullTime?.home !== undefined && match.score?.fullTime?.away !== null && match.score?.fullTime?.away !== undefined
+        ? `${match.score.fullTime.home} : ${match.score.fullTime.away}`
+        : null,
+      homeScorers: pick?.home?.length || pick?.away?.length ? pick!.home : fdHome,
+      awayScorers: pick?.home?.length || pick?.away?.length ? pick!.away : fdAway,
+    }
+  })
   const trends = matches.map(match => {
     const revealable = isPredictionRevealable(match.utcDate, now)
     const matchPredictions = predictions.filter(prediction => String(prediction.match_id) === String(match.id))
@@ -655,9 +674,9 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
 
   return (
     <div className="p-0">
-      <LiveRefresh refreshAfter={matches.map((match) => match.utcDate)} always />
+      <LiveRefresh refreshAfter={matches.map((match) => match.utcDate)} always pingUrl="/api/scorers" />
       <PageHeader
-        title={t('League Ranking')}
+        title={t('League table')}
         description={`${t('Tiered Scoring')}: ${t('Exact Score')} (${ptsExact}pts) • ${t('Close Prediction')} (${ptsClose}pts) • ${t('Correct Result')} (${ptsResult}pts)`}
         actions={
           <div className="flex items-center gap-1.5 text-xactscore-accent">

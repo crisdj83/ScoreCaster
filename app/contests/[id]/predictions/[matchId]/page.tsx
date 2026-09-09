@@ -1,10 +1,11 @@
 import { createClient } from '../../../../../lib/supabase/server'
 import { getPLMatches } from '../../../../../lib/football'
+import { getMatchVenues } from '../../../../../lib/api-football'
 import { isMatchInContestSeason } from '../../../../../lib/contest-season'
 import { isPredictionRevealable, type ContestPredictionRow } from '../../../../../lib/scoring'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Clock, Eye, Lock, Trophy } from 'lucide-react'
+import { ArrowLeft, Clock, Eye, Lock, Trophy, MapPin } from 'lucide-react'
 import { getTranslations } from '../../../../../lib/i18n'
 import { getServerLocale } from '../../../../../lib/i18n-server'
 import { ScoreBadge } from '@/components/ui/badge'
@@ -29,6 +30,7 @@ export default async function MatchPredictionsPage({ params }: PageProps) {
   const data = await getPLMatches()
   const match = data.matches.find((item: { id: number | string }) => String(item.id) === matchId)
   if (!match) redirect(`/contests/${id}/predictions?error=Match not found.`)
+  const venue = (await getMatchVenues([match])).get(String(match.id))
   const contest = Array.isArray(membership.contests) ? membership.contests[0] : membership.contests
   if (!isMatchInContestSeason(match, contest?.season_length)) {
     redirect(`/contests/${id}/predictions?error=This fixture is not part of this contest season.`)
@@ -81,6 +83,12 @@ export default async function MatchPredictionsPage({ params }: PageProps) {
         <p className="mt-2 flex items-center gap-2 text-sm text-zinc-400">
           <Clock className="h-4 w-4" /> {new Date(match.utcDate).toLocaleString(getServerLocale())}
         </p>
+        {venue ? (
+          <p className="mt-1 flex items-center gap-2 text-sm text-zinc-400">
+            <MapPin className="h-4 w-4 shrink-0" />
+            <span>{venue}</span>
+          </p>
+        ) : null}
       </div>
       <div
         className={`rounded-xl border p-5 ${

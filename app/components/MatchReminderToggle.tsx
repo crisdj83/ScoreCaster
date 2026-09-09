@@ -115,10 +115,10 @@ export default function MatchReminderToggle() {
         <div className="space-y-4">
           <div>
             <h3 className="mb-1 flex items-center gap-2 text-lg font-bold text-zinc-100">
-              <Bell className="h-5 w-5 text-xactscore-accent" /> {t('Match reminders')}
+              <Bell className="h-5 w-5 text-xactscore-accent" /> {t('Notifications')}
             </h3>
             <p className="text-sm text-zinc-400">
-              {t('Get a phone notification about 2 hours before kickoff if you still need to put scores in.')}
+              {t('Get a phone notification about 2 hours before kickoff if you still need to put scores in, and when someone posts in your league.')}
             </p>
           </div>
 
@@ -131,7 +131,7 @@ export default function MatchReminderToggle() {
               onClick={() => void (enabled ? disable() : enable())}
               className="uppercase tracking-wider"
             >
-              {pending ? '…' : enabled ? t('Turn reminders off') : t('Turn reminders on')}
+              {pending ? '…' : enabled ? t('Turn notifications off') : t('Turn notifications on')}
             </Button>
           )}
 

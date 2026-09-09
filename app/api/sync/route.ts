@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getPLMatches } from '../../../lib/football'
+import { warmApiFootballCache } from '../../../lib/api-football'
+import { refreshAndStoreScorers } from '../../../lib/match-scorers'
 import { isMatchInContestSeason } from '../../../lib/contest-season'
 import { calculatePoints, resolveContestScoring } from '../../../lib/scoring'
 import { createAdminClient } from '../../../lib/supabase/admin'
@@ -41,6 +43,11 @@ export async function GET(request: Request) {
 
   try {
     const data = await getPLMatches()
+    await warmApiFootballCache()
+    const scorerSync = await refreshAndStoreScorers('daily').catch((error) => {
+      console.error('Daily scorer sync failed:', error)
+      return { fetched: 0, saved: 0, live: 0 }
+    })
     const finishedMatches = (data.matches || []).filter((match: FootballMatch) => match.status === 'FINISHED') as FootballMatch[]
     const matchById = new Map(finishedMatches.map(match => [String(match.id), match]))
 
@@ -132,6 +139,7 @@ export async function GET(request: Request) {
       success: true,
       message: `Sync complete. ${pendingUpdates.length} predictions updated.`,
       finished_matches_processed: finishedMatches.length,
+      scorers_saved: scorerSync.saved,
     })
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Sync failed'

@@ -15,7 +15,7 @@ const sections = [
   },
   {
     title: 'Scoring and rankings',
-    body: 'You earn the most points for an exact score, with additional points for a close prediction or the correct result. Check Ranking to follow your progress against the rest of your league.',
+    body: 'You earn the most points for an exact score, with additional points for a close prediction or the correct result. Check Table to follow your progress against the rest of your league.',
   },
   {
     title: 'Contests and invites',

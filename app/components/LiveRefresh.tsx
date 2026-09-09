@@ -3,7 +3,15 @@
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 
-export default function LiveRefresh({ refreshAfter, always = false }: { refreshAfter: string[]; always?: boolean }) {
+export default function LiveRefresh({
+  refreshAfter,
+  always = false,
+  pingUrl,
+}: {
+  refreshAfter: string[]
+  always?: boolean
+  pingUrl?: string
+}) {
   const router = useRouter()
 
   useEffect(() => {
@@ -16,6 +24,16 @@ export default function LiveRefresh({ refreshAfter, always = false }: { refreshA
     const interval = window.setInterval(refresh, always ? 60 * 1000 : 5 * 60 * 1000)
     return () => window.clearInterval(interval)
   }, [always, refreshAfter, router])
+
+  useEffect(() => {
+    if (!pingUrl) return
+    const ping = () => {
+      void fetch(pingUrl, { method: 'GET' })
+    }
+    ping()
+    const interval = window.setInterval(ping, 10 * 60 * 1000)
+    return () => window.clearInterval(interval)
+  }, [pingUrl])
 
   return null
 }

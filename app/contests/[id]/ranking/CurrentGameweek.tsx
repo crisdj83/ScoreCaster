@@ -1,10 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
-import { BadgeDollarSign, ChevronLeft, ChevronRight, Gauge, SlidersHorizontal, UserRound, Check, Crosshair, X } from 'lucide-react'
+import { BadgeDollarSign, Gauge, SlidersHorizontal, UserRound, Check, Crosshair, X } from 'lucide-react'
 import { useTranslations } from '../../../components/LocaleProvider'
-import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 import { isUnoptimizedAvatar } from '../../../../lib/soccer-avatar'
 
 type Fixture = {
@@ -18,6 +18,7 @@ type Fixture = {
   status: string
   score: string | null
   isLive: boolean
+  liveMinute?: number | null
   homeScorers?: string[]
   awayScorers?: string[]
 }
@@ -31,16 +32,30 @@ type Player = {
   outcome: 'zero' | 'close' | 'exact' | 'result'
 }
 
-function Crest({ src, name }: { src?: string; name: string }) {
-  if (!src) {
-    return (
-      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-[8px] font-bold text-zinc-400">
-        {name.slice(0, 2).toUpperCase()}
-      </span>
-    )
-  }
+function Crest({
+  src,
+  name,
+  size = 40,
+}: {
+  src?: string
+  name: string
+  size?: number
+}) {
+  const inner = Math.round(size * 0.68)
   return (
-    <Image src={src} alt="" width={20} height={20} className="h-5 w-5 shrink-0 object-contain" />
+    <span
+      className="inline-flex shrink-0 items-center justify-center rounded-full bg-white shadow-[0_1px_8px_rgb(0_0_0/0.35)]"
+      style={{ width: size, height: size }}
+      title={name}
+    >
+      {src ? (
+        <Image src={src} alt="" width={inner} height={inner} draggable={false} className="pointer-events-none object-contain" />
+      ) : (
+        <span className="px-0.5 text-center text-[9px] font-black leading-none text-zinc-700">
+          {name.slice(0, 3).toUpperCase()}
+        </span>
+      )}
+    </span>
   )
 }
 
@@ -65,15 +80,124 @@ export default function CurrentGameweek({
   const [selectedMatchday] = useState(defaultFixture?.matchday ?? 1)
   const [focusedMatchId, setFocusedMatchId] = useState(defaultFixture?.id)
   const [now, setNow] = useState<number | null>(null)
+  const stripRef = useRef<HTMLDivElement>(null)
+  const focusedMatchIdRef = useRef(focusedMatchId)
   const t = useTranslations()
+  focusedMatchIdRef.current = focusedMatchId
+
+  const gameweekFixtures = fixtures.filter((fixture) => fixture.matchday === selectedMatchday)
 
   useEffect(() => {
     setNow(Date.now())
   }, [])
 
-  const gameweekFixtures = fixtures.filter((fixture) => fixture.matchday === selectedMatchday)
+  useEffect(() => {
+    const strip = stripRef.current
+    if (!strip) return
+
+    const chipAtCenter = () => {
+      const center = strip.scrollLeft + strip.clientWidth / 2
+      let bestId = ''
+      let bestChip: HTMLElement | null = null
+      let bestDist = Infinity
+      strip.querySelectorAll<HTMLElement>('[data-fixture-id]').forEach((chip) => {
+        const dist = Math.abs(chip.offsetLeft + chip.offsetWidth / 2 - center)
+        if (dist < bestDist) {
+          bestDist = dist
+          bestId = chip.dataset.fixtureId || ''
+          bestChip = chip
+        }
+      })
+      return { id: bestId, chip: bestChip }
+    }
+
+    const scrollChipToCenter = (chip: HTMLElement, smooth: boolean) => {
+      const left = chip.offsetLeft - strip.clientWidth / 2 + chip.offsetWidth / 2
+      strip.scrollTo({ left: Math.max(0, left), behavior: smooth ? 'smooth' : 'auto' })
+    }
+
+    const selectCentered = () => {
+      const { id } = chipAtCenter()
+      if (id && id !== focusedMatchIdRef.current) setFocusedMatchId(id)
+    }
+
+    const selected = strip.querySelector<HTMLElement>(
+      `[data-fixture-id="${CSS.escape(focusedMatchIdRef.current || '')}"]`
+    )
+    if (selected) scrollChipToCenter(selected, false)
+
+    let pointerId: number | null = null
+    let startX = 0
+    let startLeft = 0
+    let dragged = false
+    let settleTimer = 0
+
+    const onScroll = () => {
+      window.clearTimeout(settleTimer)
+      settleTimer = window.setTimeout(selectCentered, 80)
+    }
+
+    const onPointerDown = (event: PointerEvent) => {
+      if (event.pointerType === 'mouse' && event.button !== 0) return
+      dragged = false
+      pointerId = event.pointerId
+      startX = event.clientX
+      startLeft = strip.scrollLeft
+      strip.setPointerCapture(event.pointerId)
+      strip.style.cursor = 'grabbing'
+    }
+
+    const onPointerMove = (event: PointerEvent) => {
+      if (pointerId !== event.pointerId) return
+      const dx = event.clientX - startX
+      if (Math.abs(dx) < 8 && !dragged) return
+      dragged = true
+      strip.scrollLeft = startLeft - dx
+    }
+
+    const onPointerUp = (event: PointerEvent) => {
+      if (pointerId !== event.pointerId) return
+      pointerId = null
+      strip.style.cursor = ''
+      try {
+        strip.releasePointerCapture(event.pointerId)
+      } catch {
+        /* already released */
+      }
+
+      if (dragged) {
+        const { chip } = chipAtCenter()
+        if (chip) scrollChipToCenter(chip, true)
+        selectCentered()
+        return
+      }
+
+      const hit = document
+        .elementFromPoint(event.clientX, event.clientY)
+        ?.closest('[data-fixture-id]') as HTMLElement | null
+      if (hit) {
+        scrollChipToCenter(hit, true)
+        const id = hit.dataset.fixtureId
+        if (id) setFocusedMatchId(id)
+      }
+    }
+
+    strip.addEventListener('scroll', onScroll, { passive: true })
+    strip.addEventListener('pointerdown', onPointerDown)
+    strip.addEventListener('pointermove', onPointerMove)
+    strip.addEventListener('pointerup', onPointerUp)
+    strip.addEventListener('pointercancel', onPointerUp)
+
+    return () => {
+      window.clearTimeout(settleTimer)
+      strip.removeEventListener('scroll', onScroll)
+      strip.removeEventListener('pointerdown', onPointerDown)
+      strip.removeEventListener('pointermove', onPointerMove)
+      strip.removeEventListener('pointerup', onPointerUp)
+      strip.removeEventListener('pointercancel', onPointerUp)
+    }
+  }, [selectedMatchday, gameweekFixtures.length])
   const focusedIndex = gameweekFixtures.findIndex((fixture) => fixture.id === focusedMatchId)
-  const selectedFixtures = focusedIndex >= 0 ? [gameweekFixtures[focusedIndex]] : gameweekFixtures
   const selectedPlayers =
     focusedIndex >= 0 ? playersByMatch[gameweekFixtures[focusedIndex].id] || [] : []
   const selectedFixture = focusedIndex >= 0 ? gameweekFixtures[focusedIndex] : null
@@ -84,14 +208,6 @@ export default function CurrentGameweek({
     canReveal && selectedFixture
       ? selectedFixture.isLive || selectedFixture.status === 'FINISHED'
       : false
-
-  const moveMatch = (direction: -1 | 1) => {
-    if (focusedIndex < 0) return
-    const nextIndex = focusedIndex + direction
-    if (nextIndex >= 0 && nextIndex < gameweekFixtures.length) {
-      setFocusedMatchId(gameweekFixtures[nextIndex].id)
-    }
-  }
 
   return (
     <section className="mb-5 rounded-xl border border-orange-500/40 bg-zinc-900 p-3 shadow-lg sm:p-5 md:p-6">
@@ -107,91 +223,97 @@ export default function CurrentGameweek({
       </div>
 
       <div className="mt-3">
-        {selectedFixtures.length ? (
-          selectedFixtures.map((fixture) => {
-            const homeScorers = showSelectedScore ? fixture.homeScorers || [] : []
-            const awayScorers = showSelectedScore ? fixture.awayScorers || [] : []
-            const showScorers = homeScorers.length > 0 || awayScorers.length > 0
+        {selectedFixture ? (
+          <div className="rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-3 sm:px-4">
+            <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-start gap-2 sm:gap-4">
+              <div className="flex min-w-0 flex-col items-center gap-1.5">
+                <Crest src={selectedFixture.homeCrest} name={selectedFixture.home} size={44} />
+                <p className="line-clamp-2 w-full text-center text-xs font-semibold leading-tight text-zinc-100 sm:text-sm">
+                  {selectedFixture.home}
+                </p>
+                {showSelectedScore
+                  ? (selectedFixture.homeScorers || []).map((scorer) => (
+                      <p key={scorer} className="w-full truncate text-center text-[10px] leading-tight text-zinc-500">
+                        {scorer}
+                      </p>
+                    ))
+                  : null}
+              </div>
 
-            return (
-              <div
-                key={fixture.id}
-                className="grid grid-cols-[auto_minmax(0,1fr)_auto_minmax(0,1fr)_auto] items-center gap-x-1 rounded-xl border border-zinc-800 bg-zinc-950 px-1 py-2 sm:gap-x-2 sm:px-3"
-              >
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className={`h-8 w-auto shrink-0 gap-0.5 px-1.5 text-[8px] font-black uppercase tracking-wider ${showScorers ? 'row-span-2 self-center' : ''}`}
-                  onClick={() => moveMatch(-1)}
-                  disabled={focusedIndex <= 0}
-                  aria-label={t('Previous')}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                  {t('Previous')}
-                </Button>
-
-                <div className="flex min-w-0 items-center justify-end gap-1.5">
-                  <span className="truncate text-right text-xs font-semibold text-zinc-100 sm:text-sm">
-                    {fixture.home}
-                  </span>
-                  <Crest src={fixture.homeCrest} name={fixture.home} />
-                </div>
-
-                <div className="flex min-w-[4.5rem] shrink-0 items-center justify-center gap-0.5 whitespace-nowrap sm:min-w-[5.5rem]">
-                  {fixture.isLive ? (
+              <div className="flex flex-col items-center pt-1">
+                <div className="flex items-center gap-1.5">
+                  {selectedFixture.isLive ? (
                     <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" title="Live" />
                   ) : null}
-                  <span className="font-mono text-sm font-black tabular-nums text-xactscore-accent sm:text-lg">
-                    {showSelectedScore ? fixture.score || '0 : 0' : '— : —'}
-                  </span>
-                  {!fixture.isLive && fixture.status === 'FINISHED' && showSelectedScore ? (
-                    <span className="text-[8px] font-black uppercase tracking-wider text-zinc-500">FT</span>
-                  ) : null}
-                </div>
-
-                <div className="flex min-w-0 items-center gap-1.5">
-                  <Crest src={fixture.awayCrest} name={fixture.away} />
-                  <span className="truncate text-xs font-semibold text-zinc-100 sm:text-sm">
-                    {fixture.away}
+                  <span className="font-mono text-lg font-black tabular-nums text-xactscore-accent sm:text-xl">
+                    {showSelectedScore ? selectedFixture.score || '0 : 0' : '— : —'}
                   </span>
                 </div>
-
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className={`h-8 w-auto shrink-0 gap-0.5 px-1.5 text-[8px] font-black uppercase tracking-wider ${showScorers ? 'row-span-2 self-center' : ''}`}
-                  onClick={() => moveMatch(1)}
-                  disabled={focusedIndex < 0 || focusedIndex === gameweekFixtures.length - 1}
-                  aria-label={t('Next')}
-                >
-                  {t('Next')}
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-
-                {showScorers ? (
-                  <>
-                    <div className="col-start-2 min-w-0 space-y-0.5 pt-1 text-right text-[10px] leading-tight text-zinc-500">
-                      {homeScorers.map((scorer) => (
-                        <div key={scorer} className="truncate">
-                          {scorer}
-                        </div>
-                      ))}
-                    </div>
-                    <div />
-                    <div className="min-w-0 space-y-0.5 pt-1 text-[10px] leading-tight text-zinc-500">
-                      {awayScorers.map((scorer) => (
-                        <div key={scorer} className="truncate">
-                          {scorer}
-                        </div>
-                      ))}
-                    </div>
-                  </>
+                {!selectedFixture.isLive && selectedFixture.status === 'FINISHED' && showSelectedScore ? (
+                  <span className="mt-0.5 text-[9px] font-black uppercase tracking-wider text-zinc-500">FT</span>
+                ) : selectedFixture.isLive && typeof selectedFixture.liveMinute === 'number' ? (
+                  <span className="mt-0.5 text-[9px] font-black uppercase tracking-wider text-emerald-400">
+                    {selectedFixture.liveMinute}'
+                  </span>
                 ) : null}
               </div>
-            )
-          })
+
+              <div className="flex min-w-0 flex-col items-center gap-1.5">
+                <Crest src={selectedFixture.awayCrest} name={selectedFixture.away} size={44} />
+                <p className="line-clamp-2 w-full text-center text-xs font-semibold leading-tight text-zinc-100 sm:text-sm">
+                  {selectedFixture.away}
+                </p>
+                {showSelectedScore
+                  ? (selectedFixture.awayScorers || []).map((scorer) => (
+                      <p key={scorer} className="w-full truncate text-center text-[10px] leading-tight text-zinc-500">
+                        {scorer}
+                      </p>
+                    ))
+                  : null}
+              </div>
+            </div>
+
+            {gameweekFixtures.length > 1 ? (
+              <div className="relative mt-3 h-14">
+                <div
+                  className="pointer-events-none absolute left-1/2 top-1/2 z-0 h-12 w-[6.5rem] -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-white/35 bg-white/[0.1] shadow-[inset_0_1px_0_rgb(255_255_255/0.28),0_0_0_1px_rgb(255_149_61/0.35)]"
+                  aria-hidden
+                />
+                <div
+                  ref={stripRef}
+                  className="hide-scrollbar relative z-10 flex h-14 cursor-grab touch-none items-center gap-2 overflow-x-auto overscroll-x-contain py-1 select-none active:cursor-grabbing [padding-inline:calc(50%-3.25rem)]"
+                  role="listbox"
+                  aria-label={t('Fixtures')}
+                >
+                  {gameweekFixtures.map((fixture) => {
+                    const selected = fixture.id === focusedMatchId
+                    return (
+                      <button
+                        key={fixture.id}
+                        type="button"
+                        role="option"
+                        aria-selected={selected}
+                        data-fixture-id={fixture.id}
+                        data-selected={selected ? 'true' : undefined}
+                        title={`${fixture.home} vs ${fixture.away}`}
+                        aria-label={`${fixture.home} vs ${fixture.away}`}
+                        className={cn(
+                          'flex h-12 w-[6.5rem] shrink-0 snap-center items-center justify-center gap-1 rounded-2xl bg-transparent transition-opacity',
+                          selected ? 'opacity-100' : 'opacity-40'
+                        )}
+                      >
+                        <Crest src={fixture.homeCrest} name={fixture.home} size={26} />
+                        <span className="text-[8px] font-black uppercase tracking-wider text-zinc-400">vs</span>
+                        <Crest src={fixture.awayCrest} name={fixture.away} size={26} />
+                      </button>
+                    )
+                  })}
+                </div>
+                <div className="pointer-events-none absolute inset-y-0 left-0 z-20 w-8 bg-gradient-to-r from-zinc-950 to-transparent" />
+                <div className="pointer-events-none absolute inset-y-0 right-0 z-20 w-8 bg-gradient-to-l from-zinc-950 to-transparent" />
+              </div>
+            ) : null}
+          </div>
         ) : (
           <p className="text-sm text-zinc-400">No fixtures available for this gameweek.</p>
         )}

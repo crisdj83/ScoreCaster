@@ -97,7 +97,7 @@ const translations: Record<Exclude<Locale, 'en'>, Dictionary> = {
     'Next up': 'Urmează',
     'Recent results': 'Rezultate recente',
     'Your pick': 'Predicția ta',
-    'League table': 'Clasament',
+    'League table': 'Clasamentul ligii',
     pts: 'pct',
     vs: 'vs',
     Compare: 'Compară',
@@ -144,10 +144,15 @@ const translations: Record<Exclude<Locale, 'en'>, Dictionary> = {
     'Confirm new password': 'Confirmă parola nouă',
     'Password updated successfully!': 'Parola a fost actualizată!',
     'Match reminders': 'Reminder-uri meci',
+    Notifications: 'Notificări',
     'Get a phone notification about 2 hours before kickoff if you still need to put scores in.':
       'Primești o notificare pe telefon cu circa 2 ore înainte de start dacă încă nu ți-ai pus scorurile.',
+    'Get a phone notification about 2 hours before kickoff if you still need to put scores in, and when someone posts in your league.':
+      'Primești o notificare pe telefon cu circa 2 ore înainte de start dacă încă nu ți-ai pus scorurile, și când cineva scrie în ligă.',
     'Turn reminders on': 'Pornește reminder-urile',
     'Turn reminders off': 'Oprește reminder-urile',
+    'Turn notifications on': 'Pornește notificările',
+    'Turn notifications off': 'Oprește notificările',
     'Match reminders are not configured yet.': 'Reminder-urile nu sunt configurate încă.',
     'On iPhone, install XactScore to your Home Screen first, then turn reminders on from that app icon.':
       'Pe iPhone, instalează mai întâi XactScore pe ecranul principal, apoi pornește reminder-urile din acea pictogramă.',
@@ -210,7 +215,9 @@ const translations: Record<Exclude<Locale, 'en'>, Dictionary> = {
     'First half': 'Prima jumătate',
     'Second half': 'A doua jumătate',
     Ranking: 'Clasament',
+    Table: 'Clasament',
     'League Ranking': 'Clasamentul ligii',
+    'The official table — same in every league.': 'Clasamentul oficial — același în fiecare ligă.',
     'PL Standings': 'Clasamentul PL',
     'Top 5 scorers': 'Top 5 marcatori',
     'Top 5 assists': 'Top 5 pase decisive',
@@ -250,6 +257,7 @@ const translations: Record<Exclude<Locale, 'en'>, Dictionary> = {
     GW: 'E',
     Previous: 'Anterioară',
     Next: 'Următoare',
+    Venue: 'Stadion',
     'Jump to current': 'Sari la etapa curentă',
     'Picks lock 60 minutes before kickoff.': 'Se blochează cu 60 min înainte de start.',
     'Results show 30 minutes before kickoff.': 'Se afișează cu 30 min înainte de start.',
@@ -422,7 +430,8 @@ const translations: Record<Exclude<Locale, 'en'>, Dictionary> = {
     'Open a contest and select Predictions to see the fixture calendar. Choose a score for both teams; you can change it until picks lock, 60 minutes before kickoff.':
       'Deschide un concurs și selectează Predicții pentru a vedea calendarul meciurilor. Alege un scor pentru ambele echipe; poți schimba până se blochează, cu 60 de minute înainte de start.',
     'Scoring and rankings': 'Punctaj și clasamente',
-    'You earn the most points for an exact score, with additional points for a close prediction or the correct result. Check Ranking to follow your progress against the rest of your league.': 'Primești cele mai multe puncte pentru un scor exact, cu puncte suplimentare pentru o predicție apropiată sau rezultatul corect. Verifică Clasamentul pentru a-ți urmări progresul în ligă.',
+    'You earn the most points for an exact score, with additional points for a close prediction or the correct result. Check Table to follow your progress against the rest of your league.':
+      'Primești cele mai multe puncte pentru un scor exact, cu puncte suplimentare pentru o predicție apropiată sau rezultatul corect. Verifică Clasamentul pentru a-ți urmări progresul în ligă.',
     'Contests and invites': 'Concursuri și invitații',
     'Contest admins can choose full season, first half, or second half, customize scoring, and share an invite link with friends. You can belong to multiple contests at once. There is no player cap and no ads.':
       'Administratorii pot alege sezon complet, prima jumătate sau a doua jumătate, pot personaliza punctajul și pot trimite un link de invitație prietenilor. Poți participa simultan la mai multe concursuri. Nu există limită de jucători și nici reclame.',
@@ -565,7 +574,7 @@ const translations: Record<Exclude<Locale, 'en'>, Dictionary> = {
     'Next up': 'Próximo',
     'Recent results': 'Resultados recientes',
     'Your pick': 'Tu pronóstico',
-    'League table': 'Clasificación',
+    'League table': 'Tabla de la liga',
     pts: 'pts',
     vs: 'vs',
     Compare: 'Comparar',
@@ -612,10 +621,15 @@ const translations: Record<Exclude<Locale, 'en'>, Dictionary> = {
     'Confirm new password': 'Confirmar nueva contraseña',
     'Password updated successfully!': '¡Contraseña actualizada!',
     'Match reminders': 'Recordatorios de partido',
+    Notifications: 'Notificaciones',
     'Get a phone notification about 2 hours before kickoff if you still need to put scores in.':
       'Recibe una notificación en el teléfono unas 2 horas antes del inicio si aún te faltan marcadores.',
+    'Get a phone notification about 2 hours before kickoff if you still need to put scores in, and when someone posts in your league.':
+      'Recibe una notificación en el teléfono unas 2 horas antes del saque si aún te faltan marcadores, y cuando alguien escribe en tu liga.',
     'Turn reminders on': 'Activar recordatorios',
     'Turn reminders off': 'Desactivar recordatorios',
+    'Turn notifications on': 'Activar notificaciones',
+    'Turn notifications off': 'Desactivar notificaciones',
     'Match reminders are not configured yet.': 'Los recordatorios aún no están configurados.',
     'On iPhone, install XactScore to your Home Screen first, then turn reminders on from that app icon.':
       'En iPhone, instala primero XactScore en la pantalla de inicio y luego activa los recordatorios desde ese icono.',
@@ -678,7 +692,9 @@ const translations: Record<Exclude<Locale, 'en'>, Dictionary> = {
     'First half': 'Primera mitad',
     'Second half': 'Segunda mitad',
     Ranking: 'Clasificación',
+    Table: 'Tabla',
     'League Ranking': 'Clasificación de la liga',
+    'The official table — same in every league.': 'La tabla oficial — la misma en cada liga.',
     'PL Standings': 'Clasificación PL',
     'Top 5 scorers': 'Top 5 goleadores',
     'Top 5 assists': 'Top 5 asistencias',
@@ -718,6 +734,7 @@ const translations: Record<Exclude<Locale, 'en'>, Dictionary> = {
     GW: 'J',
     Previous: 'Anterior',
     Next: 'Siguiente',
+    Venue: 'Estadio',
     'Jump to current': 'Ir a la jornada actual',
     'Picks lock 60 minutes before kickoff.': 'Se bloquean 60 minutos antes del inicio.',
     'Results show 30 minutes before kickoff.': 'Se muestran 30 minutos antes del inicio.',
@@ -890,7 +907,8 @@ const translations: Record<Exclude<Locale, 'en'>, Dictionary> = {
     'Open a contest and select Predictions to see the fixture calendar. Choose a score for both teams; you can change it until picks lock, 60 minutes before kickoff.':
       'Abre un concurso y selecciona Predicciones para ver el calendario. Elige un marcador para ambos equipos; puedes cambiarlo hasta el cierre, 60 minutos antes del saque.',
     'Scoring and rankings': 'Puntuación y clasificaciones',
-    'You earn the most points for an exact score, with additional points for a close prediction or the correct result. Check Ranking to follow your progress against the rest of your league.': 'Obtienes más puntos por un marcador exacto, con puntos adicionales por una predicción cercana o el resultado correcto. Consulta Clasificación para seguir tu progreso en la liga.',
+    'You earn the most points for an exact score, with additional points for a close prediction or the correct result. Check Table to follow your progress against the rest of your league.':
+      'Obtienes más puntos por un marcador exacto, con puntos adicionales por una predicción cercana o el resultado correcto. Consulta Tabla para seguir tu progreso en la liga.',
     'Contests and invites': 'Concursos e invitaciones',
     'Contest admins can choose full season, first half, or second half, customize scoring, and share an invite link with friends. You can belong to multiple contests at once. There is no player cap and no ads.':
       'Los administradores pueden elegir temporada completa, primera mitad o segunda mitad, personalizar la puntuación y compartir un enlace de invitación. Puedes participar en varios concursos a la vez. No hay límite de jugadores ni anuncios.',

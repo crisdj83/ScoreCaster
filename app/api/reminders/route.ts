@@ -154,7 +154,7 @@ export async function GET(request: Request) {
         try {
           const result = await sendWebPush(
             { endpoint: sub.endpoint, p256dh: sub.p256dh, auth: sub.auth },
-            { title, body, url: `${siteUrl}${path}` }
+            { title, body, url: `${siteUrl}${path}`, tag: 'xactscore-reminders' }
           )
           if (!result.gone) delivered = true
         } catch {

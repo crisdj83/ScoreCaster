@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useTransition } from 'react'
 import Image from 'next/image'
-import { Plus, Minus, Clock, Eye } from 'lucide-react'
+import { Plus, Minus, Clock, Eye, MapPin } from 'lucide-react'
 import { savePrediction } from './actions'
 import Link from 'next/link'
 import { useLocale, useTranslations } from '../../../components/LocaleProvider'
@@ -41,7 +41,7 @@ function TeamCrest({
   )
 }
 
-export default function PredictionCard({ match, contestId, existingPrediction, revealedPredictions = [] }: any) {
+export default function PredictionCard({ match, contestId, existingPrediction, revealedPredictions = [], venue }: any) {
   const initialHome = existingPrediction?.predicted_home_score ?? 0
   const initialAway = existingPrediction?.predicted_away_score ?? 0
   const [homeScore, setHomeScore] = useState(initialHome)
@@ -255,6 +255,12 @@ export default function PredictionCard({ match, contestId, existingPrediction, r
           </span>
         ) : null}
       </div>
+      {venue ? (
+        <p className="flex items-center gap-1 px-0.5 pb-0.5 text-[10px] font-semibold text-zinc-500">
+          <MapPin className="h-3 w-3 shrink-0" />
+          <span className="truncate">{venue}</span>
+        </p>
+      ) : null}
     </div>
   )
 }

@@ -34,7 +34,7 @@ export function isPushConfigured() {
 
 export async function sendWebPush(
   subscription: StoredPushSubscription,
-  payload: { title: string; body: string; url?: string }
+  payload: { title: string; body: string; url?: string; tag?: string }
 ) {
   if (!setVapid()) {
     throw new Error('Web push is not configured')
