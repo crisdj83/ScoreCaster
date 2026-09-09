@@ -30,6 +30,14 @@ const TEAMS = [
   { name: 'Wolverhampton Wanderers', crest: 'https://a.espncdn.com/i/teamlogos/soccer/500/380.png' }
 ]
 
+function compactClubName(name: string) {
+  if (name.length <= 11) return name
+  return name
+    .replace(/\s+Wanderers$/i, '')
+    .replace(/\s+Hotspur$/i, '')
+    .replace(/\s+(City|Town)$/i, '')
+}
+
 export type ScoreData = {
   id: string | number;
   homeTeam: string;
@@ -111,7 +119,7 @@ export default function HeroBanner({
   )
 
   return (
-    <div className="hero-score-card relative flex w-full flex-col overflow-hidden rounded-3xl bg-white p-6 shadow-xl shadow-slate-200/50 dark:border-white/10 dark:bg-gradient-to-bl dark:from-orange-600 dark:via-zinc-900 dark:to-zinc-950 dark:p-0 dark:shadow-2xl dark:shadow-black/40 lg:flex-row">
+    <div className="hero-score-card relative flex w-full flex-col overflow-hidden rounded-3xl bg-white p-4 shadow-xl shadow-slate-200/50 dark:border-white/10 dark:bg-gradient-to-bl dark:from-orange-600 dark:via-zinc-900 dark:to-zinc-950 dark:p-0 dark:shadow-2xl dark:shadow-black/40 sm:p-6 lg:flex-row">
       
       <style dangerouslySetInnerHTML={{__html: `
         @keyframes scroll-y {
@@ -197,13 +205,13 @@ export default function HeroBanner({
           aria-hidden
           className="hero-glass-veil pointer-events-none absolute inset-0 bg-transparent dark:bg-white/[0.08]"
         />
-        <div className="relative z-10 flex h-full flex-col justify-between p-3 sm:p-8 lg:p-10">
+        <div className="relative z-10 flex h-full flex-col justify-between p-1 sm:p-8 lg:p-10">
         <div>
-          <p className="hero-headline mb-1 max-w-md whitespace-nowrap text-2xl font-extrabold uppercase leading-none tracking-tight text-slate-900 sm:mb-3 sm:whitespace-normal sm:text-4xl lg:text-5xl dark:bg-none dark:bg-clip-border dark:text-white">
-            <span className="text-slate-900 dark:text-white">
+          <p className="hero-headline mb-1 max-w-md text-[1.35rem] font-extrabold uppercase leading-[1.1] tracking-tight text-slate-900 sm:mb-3 sm:text-4xl lg:text-5xl dark:bg-none dark:bg-clip-border dark:text-white">
+            <span className="block text-slate-900 sm:inline dark:text-white">
               {t('Call the scores.')}
             </span>{' '}
-            <span className="text-slate-900 dark:text-xactscore-accent">{t('Own the table.')}</span>
+            <span className="block text-slate-900 sm:inline dark:text-xactscore-accent">{t('Own the table.')}</span>
           </p>
           <p className="mb-2 max-w-md text-sm font-medium leading-snug text-slate-600 dark:text-orange-100 sm:mb-4 sm:leading-6">
             {t('Call every Premier League score. Compete in your league. Climb the table.')}
@@ -213,28 +221,32 @@ export default function HeroBanner({
           </p>
           {nextMatch ? (
             <>
-              <div className="mt-2 flex min-w-0 items-center gap-2">
-                {(nextMatch.homeCrest || getTeamLogo(nextMatch.homeTeam)) ? (
-                  <img
-                    src={nextMatch.homeCrest || getTeamLogo(nextMatch.homeTeam)}
-                    alt=""
-                    className="h-6 w-6 shrink-0 object-contain sm:h-7 sm:w-7"
-                  />
-                ) : null}
-                <span className="min-w-0 truncate text-base font-bold uppercase leading-tight tracking-tight text-zinc-900 dark:text-white sm:text-xl sm:font-black">
-                  {nextMatch.homeTeam}
+              <div className="mt-2 flex min-w-0 flex-col gap-1 sm:grid sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:items-center sm:gap-1.5">
+                <span className="flex min-w-0 items-center gap-1.5">
+                  {(nextMatch.homeCrest || getTeamLogo(nextMatch.homeTeam)) ? (
+                    <img
+                      src={nextMatch.homeCrest || getTeamLogo(nextMatch.homeTeam)}
+                      alt=""
+                      className="h-6 w-6 shrink-0 object-contain sm:h-7 sm:w-7"
+                    />
+                  ) : null}
+                  <span className="min-w-0 text-[13px] font-bold uppercase leading-tight tracking-tight text-zinc-900 dark:text-white sm:truncate sm:text-xl sm:font-black">
+                    {nextMatch.homeTeam}
+                  </span>
                 </span>
-                <span className="shrink-0 text-xs font-black uppercase text-zinc-400 dark:text-xactscore-accent">vs</span>
-                <span className="min-w-0 truncate text-right text-base font-bold uppercase leading-tight tracking-tight text-zinc-900 dark:text-white sm:text-xl sm:font-black">
-                  {nextMatch.awayTeam}
+                <span className="pl-7 text-[10px] font-black uppercase text-zinc-400 sm:pl-0 sm:text-center dark:text-xactscore-accent">vs</span>
+                <span className="flex min-w-0 items-center gap-1.5 sm:justify-end">
+                  {(nextMatch.awayCrest || getTeamLogo(nextMatch.awayTeam)) ? (
+                    <img
+                      src={nextMatch.awayCrest || getTeamLogo(nextMatch.awayTeam)}
+                      alt=""
+                      className="h-6 w-6 shrink-0 object-contain sm:order-2 sm:h-7 sm:w-7"
+                    />
+                  ) : null}
+                  <span className="min-w-0 text-[13px] font-bold uppercase leading-tight tracking-tight text-zinc-900 sm:text-right dark:text-white sm:truncate sm:text-xl sm:font-black">
+                    {nextMatch.awayTeam}
+                  </span>
                 </span>
-                {(nextMatch.awayCrest || getTeamLogo(nextMatch.awayTeam)) ? (
-                  <img
-                    src={nextMatch.awayCrest || getTeamLogo(nextMatch.awayTeam)}
-                    alt=""
-                    className="h-6 w-6 shrink-0 object-contain sm:h-7 sm:w-7"
-                  />
-                ) : null}
               </div>
               {nextMatch.venue ? (
                 <p className="mt-1 flex min-w-0 items-center gap-1 text-xs font-medium text-zinc-500 dark:font-semibold dark:text-orange-200/90">
@@ -277,23 +289,23 @@ export default function HeroBanner({
       <div className="relative z-0 -mt-8 h-[196px] w-full overflow-hidden bg-white sm:-mt-10 sm:h-[240px] lg:mt-0 lg:-ml-10 lg:h-auto lg:min-h-[360px] lg:w-1/2 dark:bg-transparent">
         {recentScores.length > 0 ? (
           <div className="scores-crossfade absolute inset-0 overflow-hidden">
-            <div className="animate-marquee-y flex min-h-full w-full flex-col gap-2 p-3 pt-6 sm:gap-2.5 sm:p-5 sm:pt-8 lg:pt-6">
+            <div className="animate-marquee-y flex min-h-full w-full flex-col gap-2 p-2 pt-5 sm:gap-2.5 sm:p-5 sm:pt-8 lg:pt-6">
             {[...recentScores, ...recentScores].map((match, idx) => (
               <div
                 key={`${match.id}-${idx}`}
-                className="hero-match-row mb-2.5 flex min-h-[52px] items-center justify-between gap-2 rounded-2xl border border-slate-200 bg-white p-3.5 shadow-sm dark:mb-0 dark:rounded-lg dark:border-white/10 dark:bg-white/[0.06] dark:shadow-lg dark:shadow-black/20 sm:px-3.5 sm:py-3"
+                className="hero-match-row mb-2.5 flex min-h-[44px] items-center gap-1.5 rounded-2xl border border-slate-200 bg-white px-2.5 py-2 shadow-sm dark:mb-0 dark:rounded-lg dark:border-white/10 dark:bg-white/[0.06] dark:shadow-lg dark:shadow-black/20 sm:min-h-[52px] sm:justify-between sm:gap-2 sm:px-3.5 sm:py-3"
               >
-                <span className="hero-match-status w-8 shrink-0 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:font-bold dark:text-orange-300">
+                <span className="hero-match-status w-7 shrink-0 text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:font-bold dark:text-orange-300 sm:w-8 sm:text-xs">
                   {match.status}
                 </span>
                 {(match.homeCrest || getTeamLogo(match.homeTeam)) ? (
                   <img src={match.homeCrest || getTeamLogo(match.homeTeam)} alt="" className="h-5 w-5 shrink-0 object-contain" />
                 ) : null}
-                <span className="min-w-0 flex-1 truncate text-sm font-bold text-slate-900 dark:text-zinc-100">{match.homeTeam}</span>
-                <span className="shrink-0 font-mono text-sm font-bold text-slate-900 dark:text-white">
+                <span className="min-w-0 flex-1 text-[11px] font-bold leading-tight text-slate-900 dark:text-zinc-100 sm:truncate sm:text-sm">{compactClubName(match.homeTeam)}</span>
+                <span className="shrink-0 font-mono text-xs font-bold text-slate-900 dark:text-white sm:text-sm">
                   {match.homeScore ?? '-'}–{match.awayScore ?? '-'}
                 </span>
-                <span className="min-w-0 flex-1 truncate text-right text-sm font-bold text-slate-900 dark:text-zinc-100">{match.awayTeam}</span>
+                <span className="min-w-0 flex-1 text-right text-[11px] font-bold leading-tight text-slate-900 dark:text-zinc-100 sm:truncate sm:text-sm">{compactClubName(match.awayTeam)}</span>
                 {(match.awayCrest || getTeamLogo(match.awayTeam)) ? (
                   <img src={match.awayCrest || getTeamLogo(match.awayTeam)} alt="" className="h-5 w-5 shrink-0 object-contain" />
                 ) : null}

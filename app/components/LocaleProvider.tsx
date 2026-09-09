@@ -14,7 +14,11 @@ export function LocaleProvider({ initialLocale, children }: { initialLocale: Loc
   const router = useRouter()
 
   useLayoutEffect(() => {
-    document.documentElement.classList.toggle('android', /Android/i.test(navigator.userAgent))
+    const ua = navigator.userAgent || ''
+    const ios =
+      /iP(hone|ad|od)/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+    document.documentElement.classList.toggle('android', /Android/i.test(ua))
+    document.documentElement.classList.toggle('ios', ios)
   }, [])
 
   useEffect(() => {

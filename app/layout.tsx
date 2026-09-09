@@ -80,8 +80,8 @@ export default function RootLayout({
   return (
     <html lang={locale} className={inter.variable} suppressHydrationWarning>
       <body className="flex min-h-screen flex-col bg-xactscore-bg text-xactscore-text transition-colors duration-300">
-        <Script id="android-class" strategy="beforeInteractive">
-          {`document.documentElement.classList.toggle("android",/Android/i.test(navigator.userAgent))`}
+        <Script id="device-class" strategy="beforeInteractive">
+          {`(function(){var ua=navigator.userAgent||"";var ios=/iP(hone|ad|od)/.test(ua)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);document.documentElement.classList.toggle("android",/Android/i.test(ua));document.documentElement.classList.toggle("ios",ios)})()`}
         </Script>
         <Script id="theme-init" strategy="beforeInteractive">
           {`(function(){try{var stored=localStorage.getItem("xactscore-theme");var theme=stored||"dark";if(theme==="system"){theme=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}if(theme==="dark"){document.documentElement.classList.add("dark")}else{document.documentElement.classList.remove("dark")}}catch(e){document.documentElement.classList.add("dark")}})();`}
@@ -89,7 +89,7 @@ export default function RootLayout({
         <ThemeProvider>
           <LocaleProvider initialLocale={locale}>
             <Navbar />
-            <main className="mx-auto w-full flex-grow px-3 py-5 pb-24 sm:px-5 sm:py-6 lg:px-8 lg:py-8 lg:pb-8 xl:px-10">
+            <main className="mx-auto w-full flex-grow px-3 py-5 pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] sm:px-5 sm:py-6 lg:px-8 lg:py-8 lg:pb-8 xl:px-10">
               {children}
             </main>
             <div className="hidden lg:block">

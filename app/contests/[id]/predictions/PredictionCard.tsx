@@ -84,7 +84,7 @@ function ScoreStepper({
   canInc: boolean
 }) {
   const btn =
-    'inline-flex h-11 w-11 items-center justify-center rounded-md transition-colors duration-300 active:scale-90 disabled:opacity-25 sm:h-5 sm:w-7'
+    'inline-flex h-11 w-11 touch-pan-y items-center justify-center rounded-md transition-colors duration-300 active:scale-90 disabled:opacity-25 sm:h-5 sm:w-7'
   return (
     <div className="flex flex-col items-center">
       <button
@@ -285,7 +285,7 @@ export default function PredictionCard({
   return (
     <div
       className={cn(
-        'prediction-fixture-content mb-2.5 overflow-hidden rounded-2xl border border-emerald-100 bg-emerald-500/5 px-2.5 py-2 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:mb-0 dark:border-white/10 dark:shadow-none',
+        'prediction-fixture-content mb-2.5 touch-pan-y overflow-clip rounded-2xl border border-emerald-100 bg-emerald-500/5 px-2.5 py-2 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:mb-0 dark:border-white/10 dark:shadow-none',
         isHurryUp && 'prediction-hurry border-red-400/35'
       )}
     >

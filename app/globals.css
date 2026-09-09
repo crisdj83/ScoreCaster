@@ -536,15 +536,29 @@
   .prediction-fixture-content {
     position: relative;
     isolation: isolate;
-    overflow: hidden;
+    overflow: clip;
     border-radius: 1.25rem;
     clip-path: inset(0 round 1.25rem);
-    transform: translateZ(0);
-    -webkit-mask-image: -webkit-radial-gradient(white, black);
+    touch-action: pan-y;
     background-color: rgb(16 185 129 / 0.05);
     border: 1px solid rgb(209 250 229);
     box-shadow: 0 8px 30px rgb(0 0 0 / 0.06);
     transition: background-color 300ms ease, border-color 300ms ease, box-shadow 300ms ease;
+  }
+
+  html:not(.android) .prediction-fixture-content {
+    transform: translateZ(0);
+    -webkit-mask-image: -webkit-radial-gradient(white, black);
+  }
+
+  html.android .prediction-fixture-content {
+    clip-path: none;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+
+  html.android .prediction-fixture-content button {
+    touch-action: pan-y;
   }
 
   html.dark .prediction-fixture-content {
@@ -707,6 +721,9 @@
   }
 
   .ios-tab-bar {
+    bottom: max(0.5rem, env(safe-area-inset-bottom, 0px));
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
     background-color: #ffffff;
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
@@ -716,6 +733,8 @@
   }
 
   html.dark .ios-tab-bar {
+    bottom: 0;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
     background-color: rgb(20 20 23 / 0.55);
     border: 0;
     border-top: 1px solid rgb(255 255 255 / 0.1);

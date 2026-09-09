@@ -66,7 +66,7 @@ export function Dialog({
   if (!open || !mounted) return null
 
   return createPortal(
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 pb-24 lg:pb-4">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 pb-[calc(6rem+env(safe-area-inset-bottom,0px))] lg:pb-4">
       <button
         type="button"
         aria-label="Close dialog"

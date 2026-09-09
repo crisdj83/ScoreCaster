@@ -20,4 +20,4 @@ export const segmentInactive =
 
 /** iOS-style bottom tab bar item (mobile floating nav) */
 export const iosTabItem =
-  'flex min-h-11 min-w-11 flex-1 flex-col items-center justify-center gap-0.5 rounded-full px-0.5 py-1.5 text-[9px] font-bold uppercase tracking-normal transition-all duration-300 active:scale-90'
+  'flex min-h-10 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-full px-0.5 py-1 text-[9px] font-bold uppercase leading-none tracking-normal transition-all duration-300 active:scale-90'

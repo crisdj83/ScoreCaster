@@ -163,7 +163,7 @@ export default async function PredictionsPage(props: {
         {t('Picks lock 60 minutes before kickoff.')}
       </p>
 
-      <div className="hide-scrollbar space-y-1.5 overflow-x-auto overflow-y-auto overscroll-contain pb-24 lg:pb-16">
+      <div className="space-y-1.5 pb-[calc(6rem+env(safe-area-inset-bottom,0px))] lg:pb-16">
         {matchdayFixtures.map((match) => {
           // Find if the user already made a prediction for this specific match
         const existingPrediction = myPredictions?.find(p => String(p.match_id) === String(match.id))

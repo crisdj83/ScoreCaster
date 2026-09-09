@@ -124,11 +124,11 @@ export default function MarketingLanding({
               <Trophy className="h-3.5 w-3.5 text-slate-500 dark:text-xactscore-accent" />
               {t('Premier League predictions')}
             </div>
-            <h1 className="max-w-xl text-2xl font-extrabold uppercase leading-[0.95] tracking-tight text-slate-900 sm:text-5xl dark:bg-none dark:bg-clip-border dark:text-white">
-              <span className="text-slate-900 dark:text-white">
+            <h1 className="max-w-xl text-[1.35rem] font-extrabold uppercase leading-[1.1] tracking-tight text-slate-900 sm:text-5xl dark:bg-none dark:bg-clip-border dark:text-white">
+              <span className="block text-slate-900 sm:inline dark:text-white">
                 {t('Call the scores.')}
               </span>{' '}
-              <span className="text-slate-900 dark:text-xactscore-accent">{t('Own the table.')}</span>
+              <span className="block text-slate-900 sm:inline dark:text-xactscore-accent">{t('Own the table.')}</span>
             </h1>
             <p className="mt-4 max-w-lg text-sm font-medium leading-6 text-zinc-500 dark:text-orange-50/90 sm:text-base">
               {t('Private Premier League leagues for friends, offices, and family.')}{' '}
