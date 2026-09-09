@@ -330,10 +330,28 @@
     font-size: 0.6rem;
   }
 
+  /* Keep the floating header pill from clipping theme / language / sign-out
+     on the right curve (Android Chrome often squeezes overflow). */
+  html.android header {
+    overflow: visible;
+  }
+
   html.android header .flex.w-full {
-    gap: 0.35rem;
-    padding-left: 0.65rem;
-    padding-right: 0.65rem;
+    gap: 0.45rem;
+    padding-left: 0.7rem;
+    padding-right: 0.85rem;
+    overflow: visible;
+  }
+
+  html.android header .ml-auto {
+    gap: 0.3rem;
+    margin-right: 0.05rem;
+  }
+
+  html.android header .ml-auto > form,
+  html.android header .ml-auto > button,
+  html.android header .ml-auto > label {
+    flex-shrink: 0;
   }
 
   button,

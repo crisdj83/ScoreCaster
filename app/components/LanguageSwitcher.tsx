@@ -11,7 +11,7 @@ export default function LanguageSwitcher() {
   const t = useTranslations()
 
   return (
-    <label className={cn(tabBase, tabActive, 'h-10 gap-1.5 px-2.5 sm:h-11 sm:px-3')}>
+    <label className={cn(tabBase, tabActive, 'h-9 shrink-0 gap-1 px-2 sm:h-11 sm:gap-1.5 sm:px-3')}>
       <Languages className="h-4 w-4 shrink-0" aria-hidden="true" />
       <span className="sr-only">{t('Language')}</span>
       <select
