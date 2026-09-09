@@ -49,8 +49,14 @@ export default async function PredictionsPage(props: {
   const seasonLength = normalizeSeasonLength(contest?.season_length)
 
   // 2. Fetch the live matches from football-data.org and enforce the contest season.
-  const data = (await getPLMatches()) as { matches?: PlMatch[] }
-  const seasonMatches = (data.matches || []).filter((match) => isMatchInContestSeason(match, seasonLength))
+  let seasonMatches: PlMatch[] = []
+  try {
+    const data = (await getPLMatches()) as { matches?: PlMatch[] }
+    seasonMatches = (data.matches || []).filter((match) => isMatchInContestSeason(match, seasonLength))
+  } catch (error) {
+    console.error('Predictions fixtures fetch failed:', error)
+    throw new Error('Unable to load Premier League fixtures. Please try again.')
+  }
   
   // 3. Figure out which matchday is currently active.
   // Ignore stale scheduled records and use the closest genuinely upcoming fixture.
@@ -104,6 +110,7 @@ export default async function PredictionsPage(props: {
   const revealableMatchIds = matchdayFixtures
     .filter((match: { utcDate: string }) => isPredictionRevealable(match.utcDate))
     .map((match: { id: number | string }) => Number(match.id))
+    .filter((id) => Number.isFinite(id))
   // Cross-member prediction aggregation is enforced via a SECURITY DEFINER
   // Postgres RPC (get_contest_predictions) that verifies contest membership
   // server-side, rather than a service-role client bypass.
@@ -114,7 +121,9 @@ export default async function PredictionsPage(props: {
       })
     : { data: [], error: null }
   if (revealedPredictionsError) {
-    throw new Error(`Unable to load revealed predictions: ${revealedPredictionsError.message}`)
+    // Reveal counts are decorative on this page — don't hard-fail the whole
+    // predictions UI if the RPC is missing or type-mismatched in production.
+    console.error('Unable to load revealed predictions:', revealedPredictionsError.message)
   }
   const revealedPredictions = ((revealedPredictionsRaw || []) as RevealedPrediction[]).map((prediction) => ({
     ...prediction,
