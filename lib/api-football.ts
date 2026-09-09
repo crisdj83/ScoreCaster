@@ -259,20 +259,71 @@ function findAfFixture(fixtures: AfFixture[], match: FootballMatchRef) {
 }
 
 function isGoalEvent(event: AfEvent) {
-  if (event.detail === 'Missed Penalty') return false
-  return String(event.type || '').toLowerCase() === 'goal'
+  const detail = String(event.detail || '')
+  if (/missed penalty/i.test(detail)) return false
+  const type = String(event.type || '').toLowerCase()
+  if (type === 'goal') return true
+  return /\b(normal goal|own goal|penalty)\b/i.test(detail) || /(^|[^a-z])goal([^a-z]|$)/i.test(detail)
 }
 
-function scorerLines(events: AfEvent[] | undefined, teamName: string) {
+function asRecord(value: unknown): Record<string, unknown> | null {
+  return value && typeof value === 'object' ? (value as Record<string, unknown>) : null
+}
+
+function normalizeEvent(raw: unknown): AfEvent | null {
+  const rec = asRecord(raw)
+  if (!rec) return null
+  const timeRec = asRecord(rec.time)
+  const teamRec = asRecord(rec.team)
+  const playerRec = asRecord(rec.player)
+  const elapsed = Number(timeRec?.elapsed ?? rec.elapsed)
+  const extra = Number(timeRec?.extra ?? rec.elapsed_plus)
+  const teamId = Number(teamRec?.id ?? rec.team_id)
+  const playerId = Number(playerRec?.id ?? rec.player_id)
+  const teamName = String(teamRec?.name || rec.teamName || rec.team_name || '')
+  const playerName = String(
+    playerRec?.name || (typeof rec.player === 'string' ? rec.player : '') || ''
+  )
+  return {
+    time: {
+      elapsed: Number.isFinite(elapsed) ? elapsed : null,
+      extra: Number.isFinite(extra) && extra > 0 ? extra : null,
+    },
+    team: {
+      id: Number.isFinite(teamId) ? teamId : undefined,
+      name: teamName,
+    },
+    player: {
+      id: Number.isFinite(playerId) ? playerId : undefined,
+      name: playerName,
+    },
+    type: String(rec.type || ''),
+    detail: String(rec.detail || ''),
+  }
+}
+
+function scorerLines(
+  events: AfEvent[] | undefined,
+  team: { id?: number; name: string }
+) {
   const order: string[] = []
   const byPlayer = new Map<string, { name: string; bits: string[] }>()
   for (const event of events || []) {
     if (!isGoalEvent(event)) continue
-    if (!namesMatch(event.team?.name, teamName)) continue
+    const eventTeamId = event.team?.id
+    const sameTeam =
+      team.id != null && eventTeamId != null
+        ? Number(team.id) === Number(eventTeamId)
+        : namesMatch(event.team?.name, team.name)
+    if (!sameTeam) continue
     const minute = Number(event.time?.elapsed) || 0
     const extra = Number(event.time?.extra) || 0
     const clock = extra > 0 ? `${minute}+${extra}'` : `${minute}'`
-    const suffix = event.detail === 'Own Goal' ? ' og' : event.detail === 'Penalty' ? ' pen' : ''
+    const suffix = /own goal/i.test(event.detail || '')
+      ? ' og'
+      : /penalty/i.test(event.detail || '')
+        ? ' pen'
+        : ''
     const playerName = lastName(event.player?.name || 'Goal')
     const key = String(event.player?.id ?? event.player?.name ?? clock)
     let entry = byPlayer.get(key)
@@ -291,7 +342,7 @@ function scorerLines(events: AfEvent[] | undefined, teamName: string) {
 
 async function getFixtureEvents(fixtureId: number, revalidateSeconds: number): Promise<AfEvent[]> {
   const data = await apiFootballGet(`/fixtures/events?fixture=${fixtureId}`, revalidateSeconds)
-  return asList<AfEvent>(data?.response)
+  return asList<unknown>(data?.response).map(normalizeEvent).filter((event): event is AfEvent => !!event)
 }
 
 export async function getMatchVenues(matches: FootballMatchRef[]): Promise<Map<string, string>> {
@@ -341,7 +392,10 @@ export async function getLiveGoalScorers(matches: FootballMatchRef[]): Promise<M
     revalidate
   )
   const byId = new Map(detailed.map((fixture) => [fixture.fixture.id, fixture]))
-  const missing = mapped.filter(({ fixture }) => !asList<AfEvent>(byId.get(fixture.fixture.id)?.events).length)
+  const missing = mapped.filter(({ fixture }) => {
+    const events = asList<unknown>(byId.get(fixture.fixture.id)?.events).map(normalizeEvent)
+    return !events.some((event) => event && isGoalEvent(event))
+  })
   const extraEvents = await Promise.all(
     missing.map(({ fixture }) => getFixtureEvents(fixture.fixture.id, revalidate))
   )
@@ -349,12 +403,18 @@ export async function getLiveGoalScorers(matches: FootballMatchRef[]): Promise<M
 
   for (const { match, fixture } of mapped) {
     const rich = byId.get(fixture.fixture.id) || fixture
-    const events = asList<AfEvent>(rich.events).length
-      ? asList<AfEvent>(rich.events)
-      : extraById.get(fixture.fixture.id) || []
+    const fromIds = asList<unknown>(rich.events).map(normalizeEvent).filter((event): event is AfEvent => !!event)
+    const events = fromIds.some(isGoalEvent) ? fromIds : extraById.get(fixture.fixture.id) || []
+    const home = scorerLines(events, rich.teams.home)
+    const away = scorerLines(events, rich.teams.away)
+    if (!home.length && !away.length && events.length) {
+      console.warn(
+        `API-Football: ${events.length} events for ${match.homeTeam.name} vs ${match.awayTeam.name} but no parsed scorers`
+      )
+    }
     scorers.set(String(match.id), {
-      home: scorerLines(events, rich.teams.home.name),
-      away: scorerLines(events, rich.teams.away.name),
+      home,
+      away,
       elapsed: elapsedFrom(rich, events),
     })
   }

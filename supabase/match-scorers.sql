@@ -21,3 +21,8 @@ create policy "Authenticated can read match scorers"
   for select
   to authenticated
   using (true);
+
+grant select on public.match_scorers to authenticated;
+grant all on public.match_scorers to service_role;
+
+notify pgrst, 'reload schema';

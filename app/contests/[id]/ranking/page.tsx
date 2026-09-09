@@ -4,7 +4,7 @@ import { getTranslations } from '../../../../lib/i18n'
 import { getServerLocale } from '../../../../lib/i18n-server'
 import { getPLMatches, getPLStandings } from '../../../../lib/football'
 import { getLiveGoalScorers } from '../../../../lib/api-football'
-import { loadStoredScorers } from '../../../../lib/match-scorers'
+import { loadStoredScorers, persistMatchScorers } from '../../../../lib/match-scorers'
 import {
   getSeasonLengthLabelKey,
   isMatchInContestSeason,
@@ -332,8 +332,13 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
     if (!started) return false
     return Number(match.matchday) === displayMatchday || liveNow.includes(match)
   })
-  const storedScorersPromise = loadStoredScorers(supabase, allowedMatchIds)
-  const liveScorersPromise = getLiveGoalScorers(scorerMatches)
+  const storedScorers = await loadStoredScorers(supabase, allowedMatchIds)
+  const needApiScorers = scorerMatches.filter((match) => {
+    if (['IN_PLAY', 'PAUSED'].includes(match.status || '')) return true
+    const stored = storedScorers.get(String(match.id))
+    return !stored || !(stored.home.length || stored.away.length)
+  })
+  const liveScorersPromise = getLiveGoalScorers(needApiScorers)
 
   const { data: membersRaw, error: membersError } = await supabase
     .from('contest_members')
@@ -345,7 +350,18 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
   }
   const members = membersRaw as ContestMember[]
 
-  const storedScorers = await storedScorersPromise
+  const liveScorers = await liveScorersPromise
+  await persistMatchScorers(
+    Array.from(liveScorers.entries())
+      .filter(([, item]) => item.home.length || item.away.length)
+      .map(([matchId, item]) => ({
+        matchId,
+        home: item.home,
+        away: item.away,
+        elapsed: item.elapsed ?? null,
+        status: scorerMatches.find((match) => String(match.id) === matchId)?.status,
+      }))
+  )
 
   // Cross-member prediction aggregation is enforced via a SECURITY DEFINER
   // Postgres RPC (get_contest_predictions) that verifies contest membership
@@ -522,16 +538,15 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
       .sort((a, b) => (b.points ?? -1) - (a.points ?? -1) || a.name.localeCompare(b.name))
     return [String(match.id), scoredPlayers]
   }))
-  const liveScorers = await liveScorersPromise
   const currentGameweekFixtures = matches.map(match => {
     const live = liveScorers.get(String(match.id))
     const stored = storedScorers.get(String(match.id))
     const fdHome = scorersForTeam(match.goals, match.homeTeam)
     const fdAway = scorersForTeam(match.goals, match.awayTeam)
     const inPlay = ['IN_PLAY', 'PAUSED'].includes(match.status || '')
-    const pick = inPlay
-      ? (live?.home.length || live?.away.length ? live : stored)
-      : (stored || (live?.home.length || live?.away.length ? live : null))
+    const picked =
+      (live && (live.home.length || live.away.length) ? live : null) ||
+      (stored && (stored.home.length || stored.away.length) ? stored : null)
     return {
       id: String(match.id),
       matchday: Number(match.matchday),
@@ -546,8 +561,8 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
       score: match.score?.fullTime?.home !== null && match.score?.fullTime?.home !== undefined && match.score?.fullTime?.away !== null && match.score?.fullTime?.away !== undefined
         ? `${match.score.fullTime.home} : ${match.score.fullTime.away}`
         : null,
-      homeScorers: pick?.home?.length || pick?.away?.length ? pick!.home : fdHome,
-      awayScorers: pick?.home?.length || pick?.away?.length ? pick!.away : fdAway,
+      homeScorers: picked?.home?.length || picked?.away?.length ? picked.home : fdHome,
+      awayScorers: picked?.home?.length || picked?.away?.length ? picked.away : fdAway,
     }
   })
   const trends = matches.map(match => {
