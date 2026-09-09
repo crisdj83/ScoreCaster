@@ -131,7 +131,7 @@ export default async function ContestLayout(props: {
 
       <ContestNav contestId={contest.id} isAdmin={isAdmin} />
 
-      <div className="min-h-[400px] min-w-0 overflow-hidden rounded-3xl bg-white p-3 shadow-xl shadow-slate-200/50 dark:bg-[var(--glass-bg)] dark:shadow-[var(--glass-shadow)] sm:p-6 md:p-8">
+      <div className="contest-shell min-h-[400px] min-w-0 overflow-x-clip overflow-y-visible rounded-3xl bg-white p-2.5 shadow-xl shadow-slate-200/50 dark:bg-[var(--glass-bg)] dark:shadow-[var(--glass-shadow)] sm:overflow-hidden sm:p-6 md:p-8">
         {props.children}
       </div>
     </div>

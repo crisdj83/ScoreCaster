@@ -84,9 +84,9 @@ function ScoreStepper({
   canInc: boolean
 }) {
   const btn =
-    'inline-flex h-10 w-10 touch-manipulation items-center justify-center rounded-full transition-colors duration-200 active:scale-90 disabled:opacity-25 sm:h-7 sm:w-7 sm:rounded-md'
+    'prediction-stepper-btn inline-flex h-9 w-9 touch-manipulation items-center justify-center rounded-full transition-colors duration-200 active:scale-90 disabled:opacity-25 sm:h-7 sm:w-7 sm:rounded-md'
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center gap-0.5 sm:gap-1">
       <button
         type="button"
         disabled={disabled || !canDec}
@@ -96,7 +96,7 @@ function ScoreStepper({
       >
         <Minus className="h-3.5 w-3.5" strokeWidth={3} />
       </button>
-      <span className="flex h-9 w-9 items-center justify-center rounded-xl border-0 bg-white text-lg font-black tabular-nums text-slate-900 shadow-[0_4px_14px_rgb(0,0,0,0.05)] dark:border dark:border-white/15 dark:bg-black/35 dark:text-white dark:shadow-none sm:h-8 sm:w-8">
+      <span className="prediction-score-box flex h-8 w-8 items-center justify-center rounded-xl border-0 bg-white text-base font-black tabular-nums text-slate-900 shadow-[0_4px_14px_rgb(0,0,0,0.05)] dark:border dark:border-white/15 dark:bg-black/35 dark:text-white dark:shadow-none sm:h-8 sm:w-8 sm:text-lg">
         {score === null ? <span className="text-slate-400 dark:text-zinc-500">—</span> : score}
       </span>
       <button
@@ -283,14 +283,14 @@ export default function PredictionCard({
   return (
     <div
       className={cn(
-        'prediction-fixture-content mb-2 touch-manipulation overflow-hidden rounded-2xl border border-emerald-100/90 bg-emerald-500/[0.04] px-3 py-2.5 shadow-[0_4px_16px_rgb(0,0,0,0.03)] dark:mb-0 dark:border-white/10 dark:bg-transparent dark:shadow-none sm:mb-2.5 sm:px-3.5 sm:py-2.5',
+        'prediction-fixture-content mb-2 touch-manipulation overflow-hidden rounded-2xl border border-emerald-100/90 bg-emerald-500/[0.04] px-2.5 py-2.5 shadow-[0_4px_16px_rgb(0,0,0,0.03)] dark:mb-0 dark:border-white/10 dark:bg-transparent dark:shadow-none sm:mb-2.5 sm:px-3.5 sm:py-2.5',
         isHurryUp && 'prediction-hurry border-red-400/35'
       )}
     >
-      <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 sm:gap-2.5">
+      <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-1.5 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:gap-2.5">
         <TeamBlock team={match.homeTeam} displayName={homeName} dimmed={isLocked} align="end" />
 
-        <div className="flex items-center justify-center gap-1 sm:gap-1.5">
+        <div className="flex min-w-0 items-center justify-center gap-0.5 sm:gap-1.5">
           <ScoreStepper
             label={homeName}
             score={homeScore}
@@ -376,7 +376,7 @@ function TeamBlock({
   return (
     <div
       className={cn(
-        'flex min-w-0 items-center gap-2',
+        'flex min-w-0 shrink-0 items-center gap-1.5 sm:gap-2',
         align === 'end' ? 'justify-end' : 'justify-start',
         align === 'end' ? 'flex-row' : 'flex-row-reverse'
       )}
@@ -384,15 +384,15 @@ function TeamBlock({
       <TeamCrest src={team.crest} name={displayName} dimmed={dimmed} />
       <span
         className={cn(
-          'min-w-0 truncate text-[11px] font-bold uppercase tracking-wide text-slate-900 dark:text-xactscore-text',
+          'hidden min-w-0 truncate text-[11px] font-bold uppercase tracking-wide text-slate-900 dark:text-xactscore-text sm:inline',
           align === 'end' ? 'text-right' : 'text-left',
           dimmed && 'opacity-60'
         )}
         title={team.name}
       >
-        <span className="sm:hidden">{teamCode(team)}</span>
-        <span className="hidden sm:inline">{displayName}</span>
+        {displayName}
       </span>
+      <span className="sr-only">{teamCode(team)}</span>
     </div>
   )
 }

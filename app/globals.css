@@ -266,6 +266,76 @@
     font-family: var(--font-inter), ui-sans-serif, sans-serif;
   }
 
+  /* Android Chrome often reports 0 safe-area; keep chrome clear of gesture bars
+     and avoid subpixel overflow clipping match crests / tab labels. */
+  html.android main {
+    padding-left: 0.875rem;
+    padding-right: 0.875rem;
+    padding-bottom: calc(6.25rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  html.android .contest-shell {
+    overflow: visible;
+    padding: 0.65rem;
+  }
+
+  html.android .prediction-fixture-content {
+    overflow: visible;
+    padding-left: 0.65rem;
+    padding-right: 0.65rem;
+  }
+
+  html.android .prediction-stepper-btn {
+    height: 2.15rem;
+    width: 2.15rem;
+  }
+
+  html.android .prediction-score-box {
+    height: 1.95rem;
+    width: 1.95rem;
+    font-size: 0.95rem;
+  }
+
+  html.ios .prediction-stepper-btn {
+    height: 2.5rem;
+    width: 2.5rem;
+  }
+
+  html.ios .prediction-score-box {
+    height: 2.25rem;
+    width: 2.25rem;
+    font-size: 1.125rem;
+  }
+
+  html.android .ios-tab-bar {
+    bottom: max(0.7rem, env(safe-area-inset-bottom, 0px));
+    padding-top: 0.4rem;
+    padding-bottom: 0.45rem;
+    overflow: visible;
+  }
+
+  html.android .ios-tab-bar a {
+    min-height: 2.75rem;
+    padding-top: 0.3rem;
+    padding-bottom: 0.3rem;
+    overflow: visible;
+  }
+
+  html.android .ios-tab-bar a > span:last-child {
+    line-height: 1.2;
+    overflow: visible;
+    text-overflow: clip;
+    white-space: nowrap;
+    max-width: 100%;
+    font-size: 0.6rem;
+  }
+
+  html.android header .flex.w-full {
+    gap: 0.35rem;
+    padding-left: 0.65rem;
+    padding-right: 0.65rem;
+  }
+
   button,
   input,
   select,
@@ -736,8 +806,9 @@
 
   .ios-tab-bar {
     bottom: max(0.5rem, env(safe-area-inset-bottom, 0px));
-    padding-top: 0.25rem;
-    padding-bottom: 0.25rem;
+    padding-top: 0.35rem;
+    padding-bottom: 0.35rem;
+    overflow: visible;
     background-color: #ffffff;
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
