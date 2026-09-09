@@ -20,11 +20,11 @@ import {
 } from '../../../../lib/scoring'
 import { Target, Activity, CheckCircle2, Gauge, ArrowUp, ArrowDown } from 'lucide-react'
 import Image from 'next/image'
-import Link from 'next/link'
 import RankingInsights from './RankingInsights'
 import CurrentGameweek from './CurrentGameweek'
 import LiveRefresh from '../../../components/LiveRefresh'
 import { RankTable, type RankColumn } from '@/components/ui/rank-table'
+import { MemberLink } from '@/components/ui/member-link'
 import { ScoreBadge } from '@/components/ui/badge'
 import { PageHeader } from '@/components/ui/page-header'
 import { isUnoptimizedAvatar } from '../../../../lib/soccer-avatar'
@@ -681,14 +681,14 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
       mobilePrimary: true,
       cell: (player) => (
         <div className="flex min-w-0 items-center gap-2.5">
-          <Link
+          <MemberLink
             href={`/contests/${params.id}/members/${player.id}`}
-            className="flex min-w-0 flex-1 items-center gap-2.5 outline-none transition-opacity hover:opacity-80"
+            className="flex min-w-0 flex-1 items-center gap-2.5 no-underline hover:underline"
           >
             <PlayerAvatar src={player.avatar} name={player.username} />
             <div className="min-w-0">
               <div className="flex min-w-0 items-center gap-1.5">
-                <span className="break-words font-bold text-zinc-100 underline-offset-2 [overflow-wrap:anywhere] hover:underline">
+                <span className="break-words font-bold [overflow-wrap:anywhere]">
                   {player.username}
                 </span>
                 <RankMovement
@@ -705,7 +705,7 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
                 </div>
               ) : null}
             </div>
-          </Link>
+          </MemberLink>
         </div>
       ),
     },
@@ -815,17 +815,17 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
         getRowKey={(player) => player.id}
         emptyMessage={t('No players found in this contest.')}
         mobileSingleLine
+        getRowHref={(player) => `/contests/${params.id}/members/${player.id}`}
         mobileRank={(player) => (
           <span className="text-[13px] font-bold tabular-nums text-zinc-400">{player.rank}.</span>
         )}
         mobileTitle={(player) => (
-          <Link
-            href={`/contests/${params.id}/members/${player.id}`}
-            className="flex min-w-0 items-center gap-1.5 outline-none transition-opacity hover:opacity-80"
+          <span
+            className="flex min-w-0 items-center gap-1.5"
             title={player.motto ? `"${player.motto}"` : undefined}
           >
             <PlayerAvatar src={player.avatar} name={player.username} />
-            <span className="min-w-0 flex-1 break-words font-semibold leading-snug [overflow-wrap:anywhere] underline-offset-2 hover:underline">
+            <span className="min-w-0 flex-1 break-words font-semibold leading-snug text-indigo-700 [overflow-wrap:anywhere] dark:text-xactscore-accent">
               {player.username}
             </span>
             <RankMovement
@@ -835,7 +835,7 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
               downLabel={t('Rank down')}
               sameLabel={t('Rank unchanged')}
             />
-          </Link>
+          </span>
         )}
         mobileStats={(player) => (
           <span className="inline-flex items-center">
