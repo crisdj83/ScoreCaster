@@ -204,10 +204,11 @@ export default function CurrentGameweek({
   const canReveal = selectedFixture && now !== null
     ? now >= new Date(selectedFixture.kickoff).getTime() - 30 * 60 * 1000
     : false
-  const showSelectedScore =
-    canReveal && selectedFixture
-      ? selectedFixture.isLive || selectedFixture.status === 'FINISHED'
-      : false
+  const showSelectedScore = Boolean(
+    selectedFixture &&
+      (selectedFixture.isLive || selectedFixture.status === 'FINISHED') &&
+      (selectedFixture.status === 'FINISHED' || canReveal)
+  )
 
   return (
     <section className="mb-5 rounded-xl border border-orange-500/40 bg-zinc-900 p-3 shadow-lg sm:p-5 md:p-6">

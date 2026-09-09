@@ -2,7 +2,7 @@ import { createClient } from '../../../../lib/supabase/server'
 import { notFound } from 'next/navigation'
 import { getTranslations } from '../../../../lib/i18n'
 import { getServerLocale } from '../../../../lib/i18n-server'
-import { getPLMatches, getPLStandings } from '../../../../lib/football'
+import { getPLMatches, getPLStandings, getPLMatchGoals } from '../../../../lib/football'
 import { getLiveGoalScorers } from '../../../../lib/api-football'
 import { loadStoredScorers, persistMatchScorers } from '../../../../lib/match-scorers'
 import {
@@ -351,6 +351,23 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
   const members = membersRaw as ContestMember[]
 
   const liveScorers = await liveScorersPromise
+  const stillNeedGoals = scorerMatches.filter((match) => {
+    const live = liveScorers.get(String(match.id))
+    const stored = storedScorers.get(String(match.id))
+    return !((live && (live.home.length || live.away.length)) || (stored && (stored.home.length || stored.away.length)))
+  })
+  if (stillNeedGoals.length) {
+    const footballGoals = await getPLMatchGoals(stillNeedGoals.slice(0, 8).map((match) => match.id))
+    for (const match of stillNeedGoals) {
+      const goals = footballGoals.get(String(match.id))
+      if (!goals?.length) continue
+      const home = scorersForTeam(goals, match.homeTeam)
+      const away = scorersForTeam(goals, match.awayTeam)
+      if (home.length || away.length) {
+        liveScorers.set(String(match.id), { home, away, elapsed: null })
+      }
+    }
+  }
   await persistMatchScorers(
     Array.from(liveScorers.entries())
       .filter(([, item]) => item.home.length || item.away.length)
@@ -749,7 +766,11 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
 
   return (
     <div className="p-0">
-      <LiveRefresh refreshAfter={matches.map((match) => match.utcDate)} always pingUrl="/api/scorers" />
+      <LiveRefresh
+        refreshAfter={liveNow.map((match) => match.utcDate)}
+        always={liveNow.length > 0}
+        pingUrl={liveNow.length > 0 ? '/api/scorers' : undefined}
+      />
       <PageHeader
         title={t('League table')}
         description={`${t('Tiered Scoring')}: ${t('Exact Score')} (${ptsExact}pts) • ${t('Close Prediction')} (${ptsClose}pts) • ${t('Correct Result')} (${ptsResult}pts)`}

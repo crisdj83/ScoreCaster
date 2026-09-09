@@ -182,7 +182,11 @@ type ApiFootballPayload = {
   response?: unknown
 }
 
-async function apiFootballGet(path: string, revalidateSeconds: number): Promise<ApiFootballPayload | null> {
+async function apiFootballGet(
+  path: string,
+  revalidateSeconds: number,
+  cache: 'revalidate' | 'no-store' = 'revalidate'
+): Promise<ApiFootballPayload | null> {
   const apiKey = process.env.API_FOOTBALL_KEY?.trim()
   if (!apiKey) {
     console.warn('API-Football: API_FOOTBALL_KEY is missing on the server')
@@ -193,7 +197,9 @@ async function apiFootballGet(path: string, revalidateSeconds: number): Promise<
   try {
     const res = await fetch(url, {
       headers: { 'x-apisports-key': apiKey },
-      next: { revalidate: revalidateSeconds, tags: ['api-football'] },
+      ...(cache === 'no-store'
+        ? { cache: 'no-store' as const }
+        : { next: { revalidate: revalidateSeconds, tags: ['api-football'] } }),
     })
     if (!res.ok) {
       console.error(`API-Football request failed: ${res.status} ${path}`)
@@ -231,7 +237,7 @@ async function getFixturesByIds(ids: number[], revalidateSeconds: number): Promi
   const unique = Array.from(new Set(ids.filter((id) => Number.isFinite(id))))
   const fixtures: AfFixture[] = []
   for (const group of chunk(unique, 20)) {
-    const data = await apiFootballGet(`/fixtures?ids=${group.join('-')}&timezone=UTC`, revalidateSeconds)
+    const data = await apiFootballGet(`/fixtures?ids=${group.join('-')}&timezone=UTC`, revalidateSeconds, 'no-store')
     fixtures.push(...asList<AfFixture>(data?.response))
   }
   return fixtures
@@ -341,7 +347,7 @@ function scorerLines(
 }
 
 async function getFixtureEvents(fixtureId: number, revalidateSeconds: number): Promise<AfEvent[]> {
-  const data = await apiFootballGet(`/fixtures/events?fixture=${fixtureId}`, revalidateSeconds)
+  const data = await apiFootballGet(`/fixtures/events?fixture=${fixtureId}`, revalidateSeconds, 'no-store')
   return asList<unknown>(data?.response).map(normalizeEvent).filter((event): event is AfEvent => !!event)
 }
 
@@ -396,10 +402,12 @@ export async function getLiveGoalScorers(matches: FootballMatchRef[]): Promise<M
     const events = asList<unknown>(byId.get(fixture.fixture.id)?.events).map(normalizeEvent)
     return !events.some((event) => event && isGoalEvent(event))
   })
-  const extraEvents = await Promise.all(
-    missing.map(({ fixture }) => getFixtureEvents(fixture.fixture.id, revalidate))
-  )
-  const extraById = new Map(missing.map(({ fixture }, index) => [fixture.fixture.id, extraEvents[index] || []]))
+  // Free plan allows 10 requests/minute. Season fixtures are cached, ids is 1 call.
+  // Never fan-out all remaining fixtures in parallel or we 429 and cache empty scorers.
+  const extraById = new Map<number, AfEvent[]>()
+  for (const { fixture } of missing.slice(0, 6)) {
+    extraById.set(fixture.fixture.id, await getFixtureEvents(fixture.fixture.id, revalidate))
+  }
 
   for (const { match, fixture } of mapped) {
     const rich = byId.get(fixture.fixture.id) || fixture
