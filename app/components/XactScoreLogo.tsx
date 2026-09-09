@@ -7,7 +7,7 @@ export default function XactScoreLogo({ compact = false }: { compact?: boolean }
         <Activity className={compact ? 'h-5 w-5' : 'h-8 w-8'} strokeWidth={3} />
         <CircleDot className={`absolute ${compact ? 'right-1 top-1 h-2.5 w-2.5' : 'right-1.5 top-1.5 h-3.5 w-3.5'}`} fill="currentColor" strokeWidth={2.5} />
       </div>
-      <span className={`brand-wordmark whitespace-nowrap font-black leading-none tracking-[-0.06em] text-xactscore-text ${compact ? 'text-[1.65rem] sm:text-3xl' : 'text-4xl md:text-5xl'}`}>
+      <span className={`brand-wordmark whitespace-nowrap font-black leading-none tracking-[-0.06em] text-xactscore-text ${compact ? 'text-[1.45rem] sm:text-3xl' : 'text-4xl md:text-5xl'}`}>
         XactScore
       </span>
     </div>
