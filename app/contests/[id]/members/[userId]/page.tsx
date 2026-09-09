@@ -113,7 +113,7 @@ function ranksAfterFinishedMatches(
         a.id.localeCompare(b.id)
     )
   const ranks = new Map<string, number>()
-  ranked.forEach((player, index) => {
+  ranked.forEach((player) => {
     const firstEqual = ranked.findIndex(
       (item) =>
         item.points === player.points &&
