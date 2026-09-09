@@ -6,6 +6,7 @@ import { isMatchInContestSeason, normalizeSeasonLength } from '../../../../lib/c
 import { getActiveMatchday, isOpenForPrediction, isPredictionLocked, isPredictionRevealable } from '../../../../lib/scoring'
 import PredictionCard from './PredictionCard'
 import SuperLuckyButton from './SuperLuckyButton'
+import MatchdayNav from './MatchdayNav'
 import { getTranslations } from '../../../../lib/i18n'
 import { getServerLocale } from '../../../../lib/i18n-server'
 import LiveRefresh from '../../../components/LiveRefresh'
@@ -27,8 +28,12 @@ type RevealedPrediction = {
   predicted_away_score?: number | null
 }
 
-export default async function PredictionsPage(props: { params: Promise<{ id: string }> }) {
-  const params = await props.params;
+export default async function PredictionsPage(props: {
+  params: Promise<{ id: string }>
+  searchParams: Promise<{ md?: string }>
+}) {
+  const params = await props.params
+  const searchParams = await props.searchParams
   const t = getTranslations(getServerLocale())
   const supabase = await createClient()
 
@@ -50,11 +55,24 @@ export default async function PredictionsPage(props: { params: Promise<{ id: str
   // 3. Figure out which matchday is currently active.
   // Ignore stale scheduled records and use the closest genuinely upcoming fixture.
   const now = Date.now()
-  const currentMatchday = getActiveMatchday(seasonMatches, now)
+  const activeMatchday = getActiveMatchday(seasonMatches, now)
+  const matchdays = Array.from(
+    new Set(
+      seasonMatches
+        .map((match) => Number(match.matchday))
+        .filter((matchday) => Number.isFinite(matchday) && matchday > 0)
+    )
+  ).sort((a, b) => a - b)
+  const requestedMatchday = Number(searchParams.md)
+  const selectedMatchday = matchdays.includes(requestedMatchday)
+    ? requestedMatchday
+    : activeMatchday && matchdays.includes(activeMatchday)
+      ? activeMatchday
+      : matchdays[matchdays.length - 1] || null
 
-  const matchdayFixtures = currentMatchday
+  const matchdayFixtures = selectedMatchday
     ? seasonMatches
-        .filter((m) => Number(m.matchday) === currentMatchday)
+        .filter((m) => Number(m.matchday) === selectedMatchday)
         .sort((a, b) => {
           const rank = (match: PlMatch) => {
             const status = String(match.status || '')
@@ -118,26 +136,31 @@ export default async function PredictionsPage(props: { params: Promise<{ id: str
   return (
     <div className="mx-auto max-w-xl p-0 sm:p-2 md:p-4">
       <LiveRefresh refreshAfter={matchdayFixtures.map((match) => match.utcDate)} />
-      <div className="mb-3 flex items-center justify-between gap-3">
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <h2 className="text-base font-bold text-zinc-100 sm:text-xl">{t('Matchday')} {currentMatchday}</h2>
-            {picksLeft > 0 ? (
-              <span className="rounded-full bg-xactscore-accent px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-xactscore-bg">
-                {picksLeft} {picksLeft === 1 ? t('pick left') : t('picks left')}
-              </span>
-            ) : openThisWeek.length > 0 ? (
-              <span className="rounded-full border border-white/15 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-zinc-400">
-                {t('All picks in')}
-              </span>
-            ) : null}
-          </div>
-        </div>
-        <SuperLuckyButton
+      {selectedMatchday ? (
+        <MatchdayNav
           contestId={params.id}
-          matchIds={openThisWeek.map((match) => String(match.id))}
+          matchdays={matchdays}
+          selected={selectedMatchday}
+          active={activeMatchday}
         />
-      </div>
+      ) : null}
+      {openThisWeek.length > 0 ? (
+        <div className="mb-3 flex items-center justify-between gap-3">
+          {picksLeft > 0 ? (
+            <span className="rounded-full bg-xactscore-accent px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-xactscore-bg">
+              {picksLeft} {picksLeft === 1 ? t('pick left') : t('picks left')}
+            </span>
+          ) : (
+            <span className="rounded-full border border-white/15 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-zinc-400">
+              {t('All picks in')}
+            </span>
+          )}
+          <SuperLuckyButton
+            contestId={params.id}
+            matchIds={openThisWeek.map((match) => String(match.id))}
+          />
+        </div>
+      ) : null}
       <p className="mb-3 text-[10px] font-medium leading-snug text-zinc-500">
         {t('Picks lock 60 minutes before kickoff.')}
       </p>
