@@ -49,7 +49,7 @@ export default function BottomNav({ isAdmin, isLoggedIn, unreadMessageCount }: B
   return (
     <nav
       aria-label="Primary"
-      className="ios-tab-bar fixed inset-x-0 bottom-0 z-40 pb-[env(safe-area-inset-bottom)] lg:hidden"
+      className="ios-tab-bar fixed inset-x-3 bottom-3 z-40 pb-[env(safe-area-inset-bottom)] dark:inset-x-0 dark:bottom-0 lg:hidden"
     >
       <div className="mx-auto flex max-w-2xl items-stretch gap-0.5 px-1 py-2 sm:gap-1 sm:px-2">
         {items.map(({ href, label, short, icon: Icon, badge }) => {
@@ -61,7 +61,7 @@ export default function BottomNav({ isAdmin, isLoggedIn, unreadMessageCount }: B
               aria-label={label}
               className={cn(
                 iosTabItem,
-                active ? 'ios-tab-item-active text-orange-200' : 'text-zinc-400 hover:text-zinc-100'
+                active ? 'ios-tab-item-active text-indigo-600 dark:text-orange-200' : 'text-xactscore-muted hover:text-xactscore-text'
               )}
             >
               <span className="relative">

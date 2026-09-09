@@ -52,7 +52,7 @@ export function RankTable<T>({
 }: RankTableProps<T>) {
   if (rows.length === 0) {
     return (
-      <div className="glass-row px-4 py-10 text-center text-sm text-zinc-500">
+      <div className="glass-row px-4 py-10 text-center text-sm text-xactscore-muted">
         {emptyMessage}
       </div>
     )
@@ -73,7 +73,7 @@ export function RankTable<T>({
               mobileSingleLine && mobileSubtitle ? mobileSubtitle(row, index) : null
             const details =
               expandableColumns.length > 0 ? (
-                <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4">
+                <div className="grid grid-cols-3 gap-1">
                   {subtitle ? (
                     <div className="col-span-full truncate text-[11px] italic text-xactscore-accent">
                       {subtitle}
@@ -82,12 +82,12 @@ export function RankTable<T>({
                   {expandableColumns.map((col) => (
                     <div
                       key={col.key}
-                      className="min-w-0 rounded-lg border border-white/[0.06] bg-black/20 px-2 py-1.5"
+                      className="min-w-0 rounded-md border border-white/[0.06] bg-black/20 px-1.5 py-1 text-center"
                     >
-                      <div className="truncate text-[9px] font-bold uppercase tracking-wider text-zinc-500">
+                      <div className="truncate text-[8px] font-bold uppercase tracking-wider text-zinc-500">
                         {col.mobileHeader ?? col.header}
                       </div>
-                      <div className="truncate text-xs font-bold tabular-nums text-zinc-100">
+                      <div className="truncate text-[11px] font-bold tabular-nums text-zinc-100">
                         {col.cell(row, index)}
                       </div>
                     </div>

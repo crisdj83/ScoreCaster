@@ -176,7 +176,7 @@ export default async function Home(props: { searchParams: Promise<{ success?: st
   return (
     <div className="space-y-3 pb-4 sm:space-y-6 sm:pb-8">
       {searchParams?.success && (
-        <div className="rounded-xl border border-orange-500/50 bg-orange-500/15 px-4 py-3 text-sm font-bold text-orange-200">
+        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-800 dark:border-orange-500/50 dark:bg-orange-500/15 dark:text-orange-200">
           {t(searchParams.success)}
         </div>
       )}
@@ -185,14 +185,14 @@ export default async function Home(props: { searchParams: Promise<{ success?: st
 
       <HeroBanner nextMatch={nextMatch} recentScores={recentScores} predictHref={predictHref} />
 
-      <div className="flex items-center gap-2.5 rounded-2xl border border-zinc-800 bg-gradient-to-br from-orange-600 via-zinc-900 to-zinc-950 px-3 py-2.5 shadow-lg shadow-black/30 sm:gap-4 sm:px-5 sm:py-4">
+      <div className="flex items-center gap-2.5 rounded-3xl border border-slate-200 bg-white px-3 py-2.5 shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:border-zinc-800 dark:bg-gradient-to-br dark:from-orange-600 dark:via-zinc-900 dark:to-zinc-950 dark:shadow-lg dark:shadow-black/30 sm:gap-4 sm:px-5 sm:py-4">
         {profile?.avatar_url ? (
           <Image
             src={profile.avatar_url}
             alt=""
             width={48}
             height={48}
-            className="h-10 w-10 shrink-0 rounded-full border border-zinc-700 bg-zinc-800 object-cover sm:h-12 sm:w-12"
+            className="h-10 w-10 shrink-0 rounded-full border border-slate-200 bg-white object-cover dark:border-zinc-700 dark:bg-zinc-800 sm:h-12 sm:w-12"
             unoptimized
           />
         ) : (
@@ -201,7 +201,7 @@ export default async function Home(props: { searchParams: Promise<{ success?: st
           </div>
         )}
         <div className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden sm:gap-3">
-          <p className="min-w-0 max-w-[7.5rem] truncate text-sm font-semibold text-zinc-100 sm:max-w-none sm:text-base">
+          <p className="min-w-0 max-w-[7.5rem] truncate text-sm font-semibold text-zinc-900 dark:text-zinc-100 sm:max-w-none sm:text-base">
             {profile?.username || t('No username set')}
           </p>
           {profile?.is_global_admin && (
@@ -211,7 +211,7 @@ export default async function Home(props: { searchParams: Promise<{ success?: st
           )}
           <span className="hidden h-3 w-px shrink-0 bg-white/20 sm:block" aria-hidden />
           <span
-            className="inline-flex min-w-0 items-center gap-1 text-sm text-zinc-200"
+            className="inline-flex min-w-0 items-center gap-1 text-sm font-medium text-zinc-500 dark:text-zinc-200"
             title={t('Favorite Team:')}
           >
             {selectedTeamData ? (
@@ -228,17 +228,17 @@ export default async function Home(props: { searchParams: Promise<{ success?: st
             </span>
           </span>
           <span className="h-3 w-px shrink-0 bg-white/20" aria-hidden />
-          <span className="shrink-0 text-sm text-zinc-300" title={t('Best league ranking:')}>
-            <span className="font-medium text-zinc-400">{t('Best rank')}</span>
+          <span className="shrink-0 text-sm text-zinc-500 dark:text-zinc-300" title={t('Best league ranking:')}>
+            <span className="font-medium text-zinc-500 dark:text-zinc-400">{t('Best rank')}</span>
             {' '}
-            <span className="font-semibold tabular-nums text-zinc-100">
+            <span className="font-semibold tabular-nums text-zinc-900 dark:text-zinc-100">
               {bestRanking ? `#${bestRanking.rank}` : '—'}
             </span>
           </span>
         </div>
         <Link
           href="/profile"
-          className="shrink-0 rounded-full border border-white/25 bg-white/10 px-2.5 py-1 text-xs font-bold text-orange-100 backdrop-blur-sm transition hover:border-white/40 hover:bg-white/20 sm:px-3 sm:py-1.5"
+          className="shrink-0 rounded-full border border-slate-200 bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-700 backdrop-blur-sm transition hover:border-slate-300 hover:bg-slate-200 sm:px-3 sm:py-1.5 dark:border-white/25 dark:bg-white/10 dark:text-orange-100 dark:hover:border-white/40 dark:hover:bg-white/20"
         >
           {t('Edit')}
         </Link>

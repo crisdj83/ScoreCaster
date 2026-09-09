@@ -3,8 +3,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { ChevronLeft, ChevronRight, Clock, Calendar, Sparkles, MapPin } from 'lucide-react'
+import { Clock, Sparkles, MapPin } from 'lucide-react'
 import { useTranslations } from '../../../components/LocaleProvider'
+import MatchdayStrip from '../../../components/MatchdayStrip'
 import { ScoreBadge } from '@/components/ui/badge'
 
 export type Match = {
@@ -67,10 +68,6 @@ export default function FixturesCalendar({
     setSelectedMatchday(currentMatchday)
   }, [currentMatchday])
 
-  const currentIndex = matchdays.indexOf(selectedMatchday)
-  const canGoPrev = currentIndex > 0
-  const canGoNext = currentIndex >= 0 && currentIndex < matchdays.length - 1
-
   const selectedFixtures = useMemo(() => {
     return matches.filter((m) => Number(m.matchday) === selectedMatchday)
   }, [matches, selectedMatchday])
@@ -83,70 +80,32 @@ export default function FixturesCalendar({
 
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border border-white/10 bg-zinc-950/70 p-1.5 shadow-lg backdrop-blur-md">
-        <div className="flex items-center justify-between gap-2">
+      <MatchdayStrip
+        matchdays={matchdays}
+        selected={selectedMatchday}
+        onSelect={setSelectedMatchday}
+      />
+      <div className="-mt-3 mb-1 flex justify-center">
+        {isCurrentGameweekSelected ? (
+          <span className="rounded-full border border-xactscore-accent/40 bg-xactscore-accent/20 px-2 py-0.5 text-[10px] font-black uppercase tracking-widest text-orange-300">
+            {t('Current Gameweek')}
+          </span>
+        ) : (
           <button
             type="button"
-            onClick={() => {
-              if (canGoPrev) setSelectedMatchday(matchdays[currentIndex - 1])
-            }}
-            disabled={!canGoPrev}
-            aria-label={t('Previous')}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-zinc-300 transition-all hover:bg-white/10 active:scale-95 disabled:pointer-events-none disabled:opacity-30"
+            onClick={() => setSelectedMatchday(currentMatchday)}
+            className="inline-flex items-center gap-1 rounded-full border border-orange-500/30 bg-orange-500/10 px-2.5 py-0.5 text-[10px] font-bold text-orange-300 transition-colors hover:bg-orange-500/20 active:scale-95"
           >
-            <ChevronLeft className="h-5 w-5" />
+            <Sparkles className="h-3 w-3" />
+            <span>
+              {t('GW')} {currentMatchday}
+            </span>
           </button>
-
-          <div className="flex min-w-0 flex-1 flex-col items-center gap-0.5 sm:flex-row sm:justify-center sm:gap-2">
-            <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-xactscore-accent" />
-              <h3 className="font-black uppercase tracking-wider text-zinc-100">
-                {t('GW')} {selectedMatchday}
-              </h3>
-            </div>
-            {isCurrentGameweekSelected ? (
-              <span className="rounded-full border border-xactscore-accent/40 bg-xactscore-accent/20 px-2 py-0.5 text-[10px] font-black uppercase tracking-widest text-orange-300">
-                {t('Current Gameweek')}
-              </span>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setSelectedMatchday(currentMatchday)}
-                className="inline-flex items-center gap-1 rounded-full border border-orange-500/30 bg-orange-500/10 px-2.5 py-0.5 text-[10px] font-bold text-orange-300 transition-colors hover:bg-orange-500/20 active:scale-95"
-              >
-                <Sparkles className="h-3 w-3" />
-                <span>
-                  {t('GW')} {currentMatchday}
-                </span>
-              </button>
-            )}
-          </div>
-
-          <button
-            type="button"
-            onClick={() => {
-              if (canGoNext) setSelectedMatchday(matchdays[currentIndex + 1])
-            }}
-            disabled={!canGoNext}
-            aria-label={t('Next')}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-zinc-300 transition-all hover:bg-white/10 active:scale-95 disabled:pointer-events-none disabled:opacity-30"
-          >
-            <ChevronRight className="h-5 w-5" />
-          </button>
-        </div>
+        )}
       </div>
 
-      <section className="overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900/60 shadow-lg">
-        <div className="flex items-center justify-between bg-zinc-950 px-4 py-3 text-zinc-100 sm:px-5">
-          <span className="text-xs font-black uppercase tracking-wider text-zinc-400">
-            {t('Matchday')} {selectedMatchday}
-          </span>
-          <span className="text-xs font-bold text-zinc-500">
-            {selectedFixtures.length} {t('fixtures')}
-          </span>
-        </div>
-
-        <div className="divide-y divide-zinc-800">
+      <section className="space-y-2 dark:space-y-0 dark:overflow-hidden dark:rounded-xl dark:border dark:border-zinc-800 dark:bg-zinc-900/60 dark:shadow-lg">
+        <div className="space-y-2 dark:space-y-0 dark:divide-y dark:divide-zinc-800">
           {selectedFixtures.map((match) => {
             const score = match.score?.fullTime
             const hasScore =
@@ -161,9 +120,9 @@ export default function FixturesCalendar({
               <Link
                 key={match.id}
                 href={`/contests/${contestId}/predictions/${match.id}`}
-                className="fixture-calendar-game flex min-h-[72px] flex-col gap-3 px-4 py-4 transition-colors hover:bg-zinc-800/50 sm:grid sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:items-center sm:gap-4 sm:px-5"
+                className="prediction-fixture-content fixture-calendar-game mb-2.5 flex min-h-[52px] items-center justify-between gap-3 overflow-hidden rounded-2xl border border-emerald-100 bg-emerald-500/5 p-3.5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-200 dark:mb-0 dark:min-h-[72px] dark:flex-col dark:gap-3 dark:rounded-none dark:border-0 dark:bg-transparent dark:px-4 dark:py-4 dark:shadow-none dark:hover:bg-zinc-800/50 dark:hover:shadow-none sm:grid sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:items-center sm:gap-4 sm:px-5"
               >
-                <span className="flex items-center gap-2 font-bold text-zinc-100 sm:justify-end sm:text-right">
+                <span className="flex min-w-0 items-center gap-2 font-bold text-slate-900 dark:font-bold dark:text-zinc-100 sm:justify-end sm:text-right">
                   {match.homeTeam.crest ? (
                     <Image
                       src={match.homeTeam.crest}
@@ -182,9 +141,9 @@ export default function FixturesCalendar({
                       {score.home} : {score.away}
                     </ScoreBadge>
                   ) : (
-                    <span className="text-sm font-black text-xactscore-accent">vs</span>
+                    <span className="text-sm font-semibold text-slate-500 dark:font-black dark:text-xactscore-accent">vs</span>
                   )}
-                  <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-zinc-500">
+                  <span className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-slate-500">
                     <Clock className="h-3 w-3" />
                     {new Date(match.utcDate).toLocaleString(locale, {
                       day: '2-digit',
@@ -201,7 +160,7 @@ export default function FixturesCalendar({
                   ) : null}
                 </span>
 
-                <span className="flex items-center gap-2 font-bold text-zinc-100">
+                <span className="flex items-center gap-2 font-bold text-slate-900 dark:font-bold dark:text-zinc-100">
                   {match.awayTeam.crest ? (
                     <Image
                       src={match.awayTeam.crest}

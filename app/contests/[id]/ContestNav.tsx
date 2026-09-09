@@ -20,7 +20,7 @@ export default function ContestNav({ contestId, isAdmin }: { contestId: string; 
   const settingsHref = `/contests/${contestId}/edit`
 
   return (
-    <div className="sticky top-[57px] z-20 rounded-2xl border border-white/10 bg-zinc-950/70 p-1.5 shadow-lg backdrop-blur-md">
+    <div className="sticky top-[57px] z-20 rounded-[28px] border border-slate-200 bg-white p-1.5 shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:border-white/10 dark:bg-zinc-950/70 dark:shadow-lg">
       <div className="flex items-center gap-1 md:hidden">
         {tabs.map(({ href, label, icon: Icon }) => {
           const active = pathname === href

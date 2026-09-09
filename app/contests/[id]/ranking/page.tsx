@@ -522,7 +522,13 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
         return {
           id: prediction.user_id,
           name: memberNames.get(prediction.user_id) || 'Player',
-          prediction: `${prediction.predicted_home_score} : ${prediction.predicted_away_score}`,
+          prediction:
+            prediction.predicted_home_score === null ||
+            prediction.predicted_home_score === undefined ||
+            prediction.predicted_away_score === null ||
+            prediction.predicted_away_score === undefined
+              ? '—'
+              : `${prediction.predicted_home_score} : ${prediction.predicted_away_score}`,
           points,
           outcome: (points === ptsExact ? 'exact' : points === ptsClose ? 'close' : points === ptsResult ? 'result' : 'zero') as 'zero' | 'close' | 'exact' | 'result',
           avatar: (() => {
@@ -687,7 +693,7 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
               />
             </div>
             {player.motto ? (
-              <div className="mt-0.5 max-w-[18ch] truncate text-xs italic text-xactscore-accent">
+              <div className="mt-0.5 inline-block max-w-[18ch] truncate rounded-full bg-indigo-100 px-2 py-0.5 text-xs italic text-indigo-700 dark:bg-transparent dark:px-0 dark:py-0 dark:text-xactscore-accent">
                 &ldquo;{player.motto}&rdquo;
               </div>
             ) : null}

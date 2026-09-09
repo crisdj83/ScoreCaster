@@ -78,15 +78,15 @@ export function Dialog({
         aria-modal="true"
         aria-labelledby="dialog-title"
         className={cn(
-          "relative z-10 w-full max-w-md rounded-2xl border border-white/15 bg-zinc-900/90 p-5 shadow-2xl shadow-black/50 backdrop-blur-2xl animate-in fade-in zoom-in-95 duration-300 sm:p-6",
+          "glass-panel-strong relative z-10 w-full max-w-md p-5 animate-in fade-in zoom-in-95 duration-300 sm:p-6",
           className
         )}
       >
-        <h2 id="dialog-title" className={cn("text-lg font-bold tracking-tight text-white", titleClassName)}>
+        <h2 id="dialog-title" className={cn("text-lg font-bold tracking-tight text-xactscore-text", titleClassName)}>
           {title}
         </h2>
         {description ? (
-          <p className="mt-2 text-sm text-zinc-400">{description}</p>
+          <p className="mt-2 text-sm text-xactscore-muted">{description}</p>
         ) : null}
         {children ? <div className="mt-4">{children}</div> : null}
         <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">

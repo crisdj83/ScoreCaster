@@ -28,7 +28,7 @@ export function ExpandableRow({ trigger, content, className }: ExpandableRowProp
         aria-expanded={canExpand ? isExpanded : undefined}
         onClick={() => canExpand && setIsExpanded((prev) => !prev)}
         className={cn(
-          "flex min-h-10 w-full items-center gap-2 px-3 py-2 text-left transition-colors duration-200",
+          "flex min-h-9 w-full items-center gap-1.5 px-2.5 py-1.5 text-left transition-colors duration-200",
           canExpand && "cursor-pointer hover:bg-white/[0.04] active:bg-white/[0.06]"
         )}
       >
@@ -44,7 +44,7 @@ export function ExpandableRow({ trigger, content, className }: ExpandableRowProp
       </button>
 
       {canExpand && isExpanded ? (
-        <div className="border-t border-white/[0.06] bg-white/[0.03] px-3 py-2">
+        <div className="border-t border-white/[0.06] bg-white/[0.03] px-2.5 py-1.5">
           {content}
         </div>
       ) : null}

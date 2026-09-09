@@ -18,10 +18,10 @@ export default function LanguageSwitcher() {
         aria-label={t('Language')}
         value={locale}
         onChange={(event) => setLocale(event.target.value as Locale)}
-        className="cursor-pointer bg-transparent font-bold uppercase tracking-wider text-orange-100 outline-none"
+        className="cursor-pointer bg-transparent font-bold uppercase tracking-wider text-zinc-900 outline-none dark:text-orange-100"
       >
         {locales.map((item) => (
-          <option key={item} value={item} className="bg-zinc-900 text-white">
+            <option key={item} value={item} className="bg-white text-zinc-900 dark:bg-zinc-900 dark:text-white">
             {item.toUpperCase()}
           </option>
         ))}

@@ -18,11 +18,11 @@ export function PageHeader({ title, description, actions, className }: PageHeade
       )}
     >
       <div className="min-w-0">
-        <h1 className="text-gradient-accent pb-0.5 text-xl font-black leading-tight tracking-tight sm:text-3xl">
+        <h1 className="text-gradient-accent pb-0.5 text-xl font-bold leading-tight tracking-tight sm:text-3xl">
           {title}
         </h1>
         {description ? (
-          <p className="mt-1 hidden text-sm text-zinc-400 sm:block">{description}</p>
+          <p className="mt-1 hidden text-sm text-xactscore-muted sm:block">{description}</p>
         ) : null}
       </div>
       {actions ? <div className="shrink-0">{actions}</div> : null}
@@ -41,13 +41,13 @@ export function EmptyState({ title, description, action, className }: EmptyState
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center rounded-2xl border border-dashed border-white/15 bg-white/5 px-6 py-12 text-center backdrop-blur-xl",
+        "flex flex-col items-center justify-center rounded-2xl border border-dashed border-xactscore-border bg-xactscore-surface px-6 py-12 text-center backdrop-blur-xl",
         className
       )}
     >
-      <p className="text-base font-bold text-zinc-200">{title}</p>
+      <p className="text-base font-bold text-xactscore-text">{title}</p>
       {description ? (
-        <p className="mt-1 max-w-sm text-sm text-zinc-500">{description}</p>
+        <p className="mt-1 max-w-sm text-sm text-xactscore-muted">{description}</p>
       ) : null}
       {action ? <div className="mt-4">{action}</div> : null}
     </div>

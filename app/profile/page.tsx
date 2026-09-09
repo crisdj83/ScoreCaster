@@ -34,13 +34,13 @@ function FavoriteTeamGroup({
 }) {
   return (
     <>
-      <div className="sticky top-0 z-[1] border-y border-zinc-800 bg-zinc-900 px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider text-zinc-500">
+      <div className="sticky top-0 z-[1] border-y border-slate-100 bg-slate-100 px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:border-zinc-800 dark:bg-zinc-900">
         {label}
       </div>
       {teams.map((team) => (
         <div
           key={team.name}
-          className="flex cursor-pointer items-center gap-3 px-4 py-2 transition-colors hover:bg-zinc-800"
+          className="flex cursor-pointer items-center gap-3 px-4 py-2 transition-colors hover:bg-slate-100 dark:hover:bg-zinc-800"
           onClick={() => onSelect(team.name)}
         >
           <Image src={team.crest} alt="" width={24} height={24} className="h-6 w-6 object-contain" />
@@ -209,7 +209,7 @@ function ProfilePageInner() {
                 <ImageIcon className="h-5 w-5 text-xactscore-accent" /> {t('Profile Picture / Logo')}
               </h3>
 
-              <div className="flex flex-col items-start gap-6 md:flex-row">
+              <div className="flex items-center gap-4">
                 <div className="relative flex-shrink-0">
                   <div
                     className={`flex h-32 w-32 items-center justify-center overflow-hidden rounded-xl border-2 bg-zinc-950
@@ -237,28 +237,11 @@ function ProfilePageInner() {
                   )}
                 </div>
 
-                <div className="w-full flex-grow space-y-3">
-                  <div>
-                    <Label htmlFor="avatar_url">{t('Image URL')}</Label>
-                    <Input
-                      id="avatar_url"
-                      type="text"
-                      name="avatar_url"
-                      value={avatarUrl}
-                      onChange={(e) => {
-                        setAvatarUrl(e.target.value)
-                        setIsPending(false)
-                      }}
-                      placeholder="Paste a link to an image..."
-                      inputMode="url"
-                      autoComplete="off"
-                    />
-                  </div>
+                <input type="hidden" name="avatar_url" value={avatarUrl} />
 
-                  <Button type="button" variant="secondary" onClick={generateRandomAvatar}>
-                    <RefreshCw className="h-4 w-4" /> {t('Auto-Generate Avatar')}
-                  </Button>
-                </div>
+                <Button type="button" variant="secondary" onClick={generateRandomAvatar}>
+                  <RefreshCw className="h-4 w-4" /> {t('Auto-Generate Avatar')}
+                </Button>
               </div>
             </div>
 
@@ -287,7 +270,7 @@ function ProfilePageInner() {
                 <button
                   type="button"
                   onClick={() => setShowDropdown(!showDropdown)}
-                  className="focus-frost flex h-11 w-full items-center justify-between rounded-xl border border-zinc-700 bg-zinc-900/80 px-4 py-2 text-left text-sm text-zinc-100 outline-none ring-0 transition-[border-color,box-shadow] focus:ring-0"
+                  className="focus-frost flex h-11 w-full items-center justify-between rounded-xl border-0 bg-slate-100 px-4 py-2 text-left text-sm text-slate-900 outline-none ring-0 transition-[border-color,box-shadow] focus:ring-0 dark:border dark:border-zinc-700 dark:bg-zinc-900/80 dark:text-zinc-100"
                 >
                   <div className="flex items-center gap-3">
                     {selectedTeamData ? (
@@ -314,15 +297,15 @@ function ProfilePageInner() {
                   <>
                     <div className="fixed inset-0 z-40" onClick={() => setShowDropdown(false)} />
 
-                    <div className="absolute bottom-full z-50 mb-1 max-h-[min(20rem,calc(100dvh-10rem))] w-full overflow-y-auto rounded-xl border border-zinc-700 bg-zinc-900 shadow-lg shadow-black/40">
+                    <div className="absolute bottom-full z-50 mb-1 max-h-[min(20rem,calc(100dvh-10rem))] w-full overflow-y-auto rounded-xl border-0 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:border dark:border-zinc-700 dark:bg-zinc-900 dark:shadow-lg dark:shadow-black/40">
                       <div
-                        className="flex cursor-pointer items-center gap-3 border-b border-zinc-800 px-4 py-3 text-zinc-500 hover:bg-zinc-800"
+                        className="flex cursor-pointer items-center gap-3 border-b border-slate-100 px-4 py-3 text-slate-500 hover:bg-slate-100 dark:border-zinc-800 dark:hover:bg-zinc-800"
                         onClick={() => {
                           setFavoriteTeam('')
                           setShowDropdown(false)
                         }}
                       >
-                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-zinc-800 text-[10px]">
+                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-100 text-[10px] dark:bg-zinc-800">
                           ⚽
                         </div>
                         {t('None')}

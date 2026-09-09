@@ -24,30 +24,6 @@ type StandingRow = {
   goalsAgainst: number
   goalDifference: number
   points: number
-  form?: string
-}
-
-function FormPills({ form }: { form?: string }) {
-  if (!form) return <span className="text-xs text-zinc-500">-</span>
-  return (
-    <div className="flex items-center justify-center gap-1">
-      {form.split(',').map((result: string, index: number) => {
-        let bgColor = 'bg-zinc-600'
-        if (result === 'W') bgColor = 'bg-emerald-600'
-        if (result === 'D') bgColor = 'bg-amber-500'
-        if (result === 'L') bgColor = 'bg-red-600'
-        return (
-          <div
-            key={index}
-            className={`flex h-6 w-6 items-center justify-center rounded-md text-[10px] font-black text-white ${bgColor}`}
-            title={result}
-          >
-            {result}
-          </div>
-        )
-      })}
-    </div>
-  )
 }
 
 function ScorerCard({
@@ -67,8 +43,8 @@ function ScorerCard({
     .slice(0, 5)
 
   return (
-    <section className="overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900">
-      <div className="bg-zinc-950 px-5 py-4 text-zinc-100">
+    <section className="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:rounded-xl dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-none">
+      <div className="border-b border-slate-200 bg-white px-5 py-4 text-zinc-900 dark:border-transparent dark:bg-zinc-950 dark:text-zinc-100">
         <h3 className="font-black uppercase tracking-wider">{title}</h3>
       </div>
       {sortedPlayers.length ? (
@@ -227,14 +203,6 @@ export default async function FixturesPage(props: { params: Promise<{ id: string
       className: 'text-center',
       cell: (row) => <ScoreBadge>{row.points}</ScoreBadge>,
     },
-    {
-      key: 'form',
-      header: t('Form'),
-      headerClassName: 'text-center',
-      className: 'text-center',
-      mobileExpandable: true,
-      cell: (row) => <FormPills form={row.form} />,
-    },
   ]
 
   return (
@@ -247,7 +215,7 @@ export default async function FixturesPage(props: { params: Promise<{ id: string
       <p className="text-xs text-zinc-500">{t('Click a fixture to view and manage predictions.')}</p>
 
       <section className="space-y-6 pt-6 border-t border-zinc-800">
-        <h2 className="text-xl font-black uppercase tracking-wider text-zinc-100">
+        <h2 className="text-base font-black uppercase tracking-wider text-zinc-100 sm:text-xl">
           {t('Premier League Standings')}
         </h2>
 
@@ -258,17 +226,27 @@ export default async function FixturesPage(props: { params: Promise<{ id: string
           emptyMessage={t('No fixtures available for this season.')}
           mobileSingleLine
           mobileRank={(row) => (
-            <span className="text-[13px] font-bold tabular-nums text-zinc-400">{row.position}</span>
-          )}
-          mobileTitle={(row) => (
-            <span className="inline-flex min-w-0 items-center gap-2">
-              {row.team.crest ? (
-                <Image src={row.team.crest} alt="" width={18} height={18} className="h-[18px] w-[18px] shrink-0 object-contain" />
-              ) : null}
-              <span className="truncate">{row.team.shortName || row.team.name}</span>
+            <span className="w-4 text-center text-[11px] font-bold tabular-nums text-zinc-400">
+              {row.position}
             </span>
           )}
-          mobileEnd={(row) => row.points}
+          mobileTitle={(row) => (
+            <span className="inline-flex min-w-0 items-center gap-1.5">
+              {row.team.crest ? (
+                <Image
+                  src={row.team.crest}
+                  alt=""
+                  width={16}
+                  height={16}
+                  className="h-4 w-4 shrink-0 object-contain"
+                />
+              ) : null}
+              <span className="truncate text-[12px]">{row.team.shortName || row.team.name}</span>
+            </span>
+          )}
+          mobileEnd={(row) => (
+            <span className="text-[12px] font-black tabular-nums">{row.points}</span>
+          )}
         />
 
         <div className="grid gap-6 md:grid-cols-2">

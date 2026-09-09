@@ -211,9 +211,9 @@ export default function CurrentGameweek({
   )
 
   return (
-    <section className="mb-5 rounded-xl border border-orange-500/40 bg-zinc-900 p-3 shadow-lg sm:p-5 md:p-6">
+    <section className="mb-5 rounded-[28px] border border-slate-200 bg-white p-3 shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:rounded-xl dark:border-orange-500/40 dark:bg-zinc-900 dark:shadow-lg sm:p-5 md:p-6">
       <div className="flex items-center justify-between gap-2">
-        <h3 className="truncate text-sm font-black uppercase tracking-wider text-zinc-100 sm:text-base">
+        <h3 className="truncate text-sm font-semibold uppercase tracking-wider text-zinc-900 dark:font-black dark:text-zinc-100 sm:text-base">
           GW {selectedMatchday} · {t('Predictions')}
         </h3>
         {focusedIndex >= 0 ? (
@@ -225,11 +225,11 @@ export default function CurrentGameweek({
 
       <div className="mt-3">
         {selectedFixture ? (
-          <div className="rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-3 sm:px-4">
+          <div className="rounded-2xl border-0 bg-emerald-500/10 px-3 py-3 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:rounded-xl dark:border dark:border-zinc-800 dark:bg-zinc-950 dark:shadow-none sm:px-4">
             <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-start gap-2 sm:gap-4">
               <div className="flex min-w-0 flex-col items-center gap-1.5">
                 <Crest src={selectedFixture.homeCrest} name={selectedFixture.home} size={44} />
-                <p className="line-clamp-2 w-full text-center text-xs font-semibold leading-tight text-zinc-100 sm:text-sm">
+                <p className="line-clamp-2 w-full text-center text-xs font-bold leading-tight text-slate-900 dark:text-zinc-100 sm:text-sm">
                   {selectedFixture.home}
                 </p>
                 {showSelectedScore
@@ -251,7 +251,7 @@ export default function CurrentGameweek({
                   </span>
                 </div>
                 {!selectedFixture.isLive && selectedFixture.status === 'FINISHED' && showSelectedScore ? (
-                  <span className="mt-0.5 text-[9px] font-black uppercase tracking-wider text-zinc-500">FT</span>
+                  <span className="mt-0.5 text-[9px] font-semibold uppercase tracking-wider text-slate-500 dark:font-black">FT</span>
                 ) : selectedFixture.isLive && typeof selectedFixture.liveMinute === 'number' ? (
                   <span className="mt-0.5 text-[9px] font-black uppercase tracking-wider text-emerald-400">
                     {`${selectedFixture.liveMinute}'`}
@@ -261,7 +261,7 @@ export default function CurrentGameweek({
 
               <div className="flex min-w-0 flex-col items-center gap-1.5">
                 <Crest src={selectedFixture.awayCrest} name={selectedFixture.away} size={44} />
-                <p className="line-clamp-2 w-full text-center text-xs font-semibold leading-tight text-zinc-100 sm:text-sm">
+                <p className="line-clamp-2 w-full text-center text-xs font-bold leading-tight text-slate-900 dark:text-zinc-100 sm:text-sm">
                   {selectedFixture.away}
                 </p>
                 {showSelectedScore
@@ -310,8 +310,8 @@ export default function CurrentGameweek({
                     )
                   })}
                 </div>
-                <div className="pointer-events-none absolute inset-y-0 left-0 z-20 w-8 bg-gradient-to-r from-zinc-950 to-transparent" />
-                <div className="pointer-events-none absolute inset-y-0 right-0 z-20 w-8 bg-gradient-to-l from-zinc-950 to-transparent" />
+                <div className="pointer-events-none absolute inset-y-0 left-0 z-20 w-8 bg-gradient-to-r from-transparent to-transparent dark:from-zinc-950" />
+                <div className="pointer-events-none absolute inset-y-0 right-0 z-20 w-8 bg-gradient-to-l from-transparent to-transparent dark:from-zinc-950" />
               </div>
             ) : null}
           </div>
@@ -342,7 +342,7 @@ export default function CurrentGameweek({
               selectedPlayers.map((player, index) => (
                 <div
                   key={player.id}
-                  className="flex min-h-10 items-center gap-2 rounded-lg bg-zinc-950 px-3 py-1.5 text-sm sm:grid sm:grid-cols-[4rem_minmax(0,1fr)_7rem_5rem] sm:gap-2"
+                  className="mb-2.5 flex min-h-10 items-center justify-between gap-2 rounded-2xl border border-slate-200 bg-white p-3.5 text-sm shadow-sm dark:mb-0 dark:rounded-lg dark:border-transparent dark:bg-zinc-950 dark:p-1.5 dark:px-3 dark:shadow-none sm:grid sm:grid-cols-[4rem_minmax(0,1fr)_7rem_5rem] sm:gap-2"
                 >
                   <span className="w-6 shrink-0 font-mono text-xs font-black text-xactscore-accent sm:w-auto sm:text-sm">
                     {index + 1}
@@ -363,18 +363,18 @@ export default function CurrentGameweek({
                         <UserRound className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                       </span>
                     )}
-                    <span className="truncate font-semibold text-zinc-100">{player.name}</span>
+                    <span className="truncate font-bold text-slate-900 dark:text-zinc-100">{player.name}</span>
                   </div>
-                  <span className="shrink-0 rounded-md border border-zinc-700 px-1.5 py-0.5 font-mono text-xs font-bold text-zinc-200 sm:justify-self-start sm:px-2 sm:py-1 sm:text-sm">
+                  <span className="shrink-0 rounded-full border border-slate-200 bg-white px-2.5 py-1 font-mono text-xs font-bold text-slate-900 dark:rounded-md dark:border-zinc-700 dark:bg-transparent dark:px-1.5 dark:py-0.5 dark:text-zinc-200 sm:justify-self-start sm:px-2 sm:py-1 sm:text-sm">
                     {player.prediction}
                   </span>
                   <span
-                    className={`inline-flex shrink-0 items-center gap-1 rounded-md px-1.5 py-0.5 text-xs font-black sm:justify-self-start sm:px-2 sm:py-1 ${
+                    className={`inline-flex shrink-0 items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-bold sm:justify-self-start sm:px-2 sm:py-1 ${
                       player.outcome === 'exact'
-                        ? 'bg-amber-400/15 text-amber-300'
+                        ? 'border-amber-500/20 bg-amber-500/10 text-amber-600 dark:border-transparent dark:bg-amber-400/15 dark:text-amber-300 dark:font-black'
                         : player.outcome === 'zero'
-                          ? 'bg-red-400/15 text-red-300'
-                          : 'bg-emerald-400/15 text-emerald-300'
+                          ? 'border-red-500/20 bg-red-500/10 text-red-600 dark:border-transparent dark:bg-red-400/15 dark:text-red-300 dark:font-black'
+                          : 'border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:border-transparent dark:bg-emerald-400/15 dark:text-emerald-300 dark:font-black'
                     }`}
                   >
                     {player.outcome === 'exact' ? (

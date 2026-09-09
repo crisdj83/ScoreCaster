@@ -97,10 +97,12 @@ export default function HeroBanner({
 
   const unit = (label: string, value: string, accent = false) => (
     <div className="flex flex-col items-center">
-      <span className="mb-0.5 text-xs uppercase tracking-wider text-orange-200">{label}</span>
+      <span className="mb-1 text-xs font-medium uppercase tracking-wider text-zinc-500 dark:text-orange-200">{label}</span>
       <div
-        className={`flex w-8 items-center justify-center rounded border-2 bg-black/20 p-1 font-mono text-sm font-black sm:w-12 sm:p-2 sm:text-base ${
-          accent ? 'border-orange-400 text-orange-400' : 'border-white/80'
+        className={`flex min-w-10 items-center justify-center rounded-2xl border border-slate-200 bg-white p-3 font-mono text-sm font-bold text-slate-900 sm:min-w-12 sm:text-base ${
+          accent
+            ? 'dark:border-orange-400 dark:bg-black/20 dark:text-orange-400 dark:shadow-none'
+            : 'dark:border-white/80 dark:bg-black/20 dark:text-white dark:shadow-none'
         }`}
       >
         {value}
@@ -109,7 +111,7 @@ export default function HeroBanner({
   )
 
   return (
-    <div className="relative flex w-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-bl from-orange-600 via-zinc-900 to-zinc-950 shadow-2xl lg:flex-row">
+    <div className="hero-score-card relative flex w-full flex-col overflow-hidden rounded-3xl bg-white p-6 shadow-xl shadow-slate-200/50 dark:border-white/10 dark:bg-gradient-to-bl dark:from-orange-600 dark:via-zinc-900 dark:to-zinc-950 dark:p-0 dark:shadow-2xl dark:shadow-black/40 lg:flex-row">
       
       <style dangerouslySetInnerHTML={{__html: `
         @keyframes scroll-y {
@@ -190,21 +192,23 @@ export default function HeroBanner({
         }
       `}} />
 
-      <div className="relative z-10 w-full pb-6 text-white lg:w-1/2 lg:pb-0 lg:pr-6">
+      <div className="relative z-10 w-full pb-6 text-zinc-900 dark:text-white lg:w-1/2 lg:pb-0 lg:pr-6">
         <div
           aria-hidden
-          className="hero-glass-veil pointer-events-none absolute inset-0 bg-white/[0.08] backdrop-blur-xl"
+          className="hero-glass-veil pointer-events-none absolute inset-0 bg-transparent dark:bg-white/[0.08]"
         />
         <div className="relative z-10 flex h-full flex-col justify-between p-3 sm:p-8 lg:p-10">
         <div>
-          <p className="hero-headline mb-1 max-w-md whitespace-nowrap text-[clamp(0.95rem,4.6vw,1.25rem)] font-black uppercase leading-none tracking-tight text-white sm:mb-3 sm:whitespace-normal sm:text-4xl lg:text-5xl">
-            {t('Call the scores.')}{' '}
-            <span className="text-xactscore-accent">{t('Own the table.')}</span>
+          <p className="hero-headline mb-1 max-w-md whitespace-nowrap text-2xl font-extrabold uppercase leading-none tracking-tight text-slate-900 sm:mb-3 sm:whitespace-normal sm:text-4xl lg:text-5xl dark:bg-none dark:bg-clip-border dark:text-white">
+            <span className="text-slate-900 dark:text-white">
+              {t('Call the scores.')}
+            </span>{' '}
+            <span className="text-slate-900 dark:text-xactscore-accent">{t('Own the table.')}</span>
           </p>
-          <p className="mb-2 max-w-md text-sm leading-snug text-orange-100 sm:mb-4 sm:leading-6">
+          <p className="mb-2 max-w-md text-sm font-medium leading-snug text-slate-600 dark:text-orange-100 sm:mb-4 sm:leading-6">
             {t('Call every Premier League score. Compete in your league. Climb the table.')}
           </p>
-          <p className="text-xs font-extrabold uppercase tracking-widest text-orange-200">
+          <p className="text-xs font-extrabold uppercase tracking-widest text-zinc-500 dark:text-orange-200">
             {t('Upcoming Match')}
           </p>
           {nextMatch ? (
@@ -217,11 +221,11 @@ export default function HeroBanner({
                     className="h-6 w-6 shrink-0 object-contain sm:h-7 sm:w-7"
                   />
                 ) : null}
-                <span className="min-w-0 truncate text-base font-black uppercase leading-tight tracking-tight sm:text-xl">
+                <span className="min-w-0 truncate text-base font-bold uppercase leading-tight tracking-tight text-zinc-900 dark:text-white sm:text-xl sm:font-black">
                   {nextMatch.homeTeam}
                 </span>
-                <span className="shrink-0 text-xs font-black uppercase text-xactscore-accent">vs</span>
-                <span className="min-w-0 truncate text-right text-base font-black uppercase leading-tight tracking-tight sm:text-xl">
+                <span className="shrink-0 text-xs font-black uppercase text-zinc-400 dark:text-xactscore-accent">vs</span>
+                <span className="min-w-0 truncate text-right text-base font-bold uppercase leading-tight tracking-tight text-zinc-900 dark:text-white sm:text-xl sm:font-black">
                   {nextMatch.awayTeam}
                 </span>
                 {(nextMatch.awayCrest || getTeamLogo(nextMatch.awayTeam)) ? (
@@ -233,14 +237,14 @@ export default function HeroBanner({
                 ) : null}
               </div>
               {nextMatch.venue ? (
-                <p className="mt-1 flex min-w-0 items-center gap-1 text-xs font-semibold text-orange-200/90">
+                <p className="mt-1 flex min-w-0 items-center gap-1 text-xs font-medium text-zinc-500 dark:font-semibold dark:text-orange-200/90">
                   <MapPin className="h-3 w-3 shrink-0" aria-hidden />
                   <span className="truncate">{nextMatch.venue}</span>
                 </p>
               ) : null}
             </>
           ) : (
-            <h2 className="mt-2 text-base font-black uppercase leading-tight tracking-tight sm:text-xl">
+            <h2 className="mt-2 text-base font-semibold uppercase leading-tight tracking-tight text-zinc-900 dark:font-black dark:text-white sm:text-xl">
               {t('Season Ended / No Fixtures')}
             </h2>
           )}
@@ -260,8 +264,8 @@ export default function HeroBanner({
           <Link 
             href={predictHref} 
             className={cn(
-              buttonVariants({ variant: 'glass', size: 'sm' }),
-              'uppercase tracking-wider sm:h-11 sm:min-h-11 sm:px-5 sm:text-xs'
+              buttonVariants({ variant: 'default', size: 'sm' }),
+              'rounded-full bg-gradient-to-r from-indigo-600 to-blue-500 px-6 py-3.5 font-bold uppercase tracking-wide text-white shadow-lg shadow-indigo-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-indigo-500/40 active:scale-95 dark:bg-gradient-to-r dark:from-amber-500 dark:to-orange-600 dark:shadow-[0_10px_25px_rgba(245,158,11,0.35)] dark:hover:shadow-[0_10px_25px_rgba(245,158,11,0.35)] sm:h-auto sm:min-h-11 sm:px-6 sm:text-xs'
             )}
           >
             {t('Make Predictions')}
@@ -270,26 +274,26 @@ export default function HeroBanner({
         </div>
       </div>
 
-      <div className="relative z-0 -mt-8 h-[196px] w-full overflow-hidden bg-transparent sm:-mt-10 sm:h-[240px] lg:mt-0 lg:-ml-10 lg:h-auto lg:min-h-[360px] lg:w-1/2">
+      <div className="relative z-0 -mt-8 h-[196px] w-full overflow-hidden bg-white sm:-mt-10 sm:h-[240px] lg:mt-0 lg:-ml-10 lg:h-auto lg:min-h-[360px] lg:w-1/2 dark:bg-transparent">
         {recentScores.length > 0 ? (
           <div className="scores-crossfade absolute inset-0 overflow-hidden">
             <div className="animate-marquee-y flex min-h-full w-full flex-col gap-2 p-3 pt-6 sm:gap-2.5 sm:p-5 sm:pt-8 lg:pt-6">
             {[...recentScores, ...recentScores].map((match, idx) => (
               <div
                 key={`${match.id}-${idx}`}
-                className="flex min-h-[52px] items-center gap-2 rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2.5 shadow-lg shadow-black/20 backdrop-blur-md sm:px-3.5 sm:py-3"
+                className="hero-match-row mb-2.5 flex min-h-[52px] items-center justify-between gap-2 rounded-2xl border border-slate-200 bg-white p-3.5 shadow-sm dark:mb-0 dark:rounded-lg dark:border-white/10 dark:bg-white/[0.06] dark:shadow-lg dark:shadow-black/20 sm:px-3.5 sm:py-3"
               >
-                <span className="w-8 shrink-0 text-xs font-bold uppercase tracking-wider text-orange-300">
+                <span className="hero-match-status w-8 shrink-0 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:font-bold dark:text-orange-300">
                   {match.status}
                 </span>
                 {(match.homeCrest || getTeamLogo(match.homeTeam)) ? (
                   <img src={match.homeCrest || getTeamLogo(match.homeTeam)} alt="" className="h-5 w-5 shrink-0 object-contain" />
                 ) : null}
-                <span className="min-w-0 flex-1 truncate text-sm font-semibold text-zinc-100">{match.homeTeam}</span>
-                <span className="shrink-0 font-mono text-sm font-black text-white">
+                <span className="min-w-0 flex-1 truncate text-sm font-bold text-slate-900 dark:text-zinc-100">{match.homeTeam}</span>
+                <span className="shrink-0 font-mono text-sm font-bold text-slate-900 dark:text-white">
                   {match.homeScore ?? '-'}–{match.awayScore ?? '-'}
                 </span>
-                <span className="min-w-0 flex-1 truncate text-right text-sm font-semibold text-zinc-100">{match.awayTeam}</span>
+                <span className="min-w-0 flex-1 truncate text-right text-sm font-bold text-slate-900 dark:text-zinc-100">{match.awayTeam}</span>
                 {(match.awayCrest || getTeamLogo(match.awayTeam)) ? (
                   <img src={match.awayCrest || getTeamLogo(match.awayTeam)} alt="" className="h-5 w-5 shrink-0 object-contain" />
                 ) : null}

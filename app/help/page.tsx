@@ -41,7 +41,7 @@ export default function HelpPage() {
   return (
     <div className="mx-auto max-w-3xl space-y-6 pb-12 pt-2">
       <div className="flex items-center gap-3">
-        <div className="rounded-xl bg-zinc-950 p-2.5 text-xactscore-accent">
+        <div className="rounded-xl border border-slate-200 bg-slate-100 p-2.5 text-slate-600 dark:border-transparent dark:bg-zinc-950 dark:text-xactscore-accent">
           <CircleHelp className="h-6 w-6" />
         </div>
         <PageHeader
@@ -55,18 +55,18 @@ export default function HelpPage() {
         {sections.map((section) => (
           <details
             key={section.title}
-            className="group rounded-xl border border-zinc-800 bg-zinc-900 shadow-lg shadow-black/20"
+            className="group rounded-3xl border border-slate-200 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:rounded-xl dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-lg dark:shadow-black/20"
           >
-            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 font-black text-zinc-100 marker:hidden">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 font-semibold text-zinc-900 marker:hidden dark:font-black dark:text-zinc-100">
               <span>{t(section.title)}</span>
-              <ChevronDown className="h-5 w-5 shrink-0 text-xactscore-accent transition-transform group-open:rotate-180" />
+              <ChevronDown className="h-5 w-5 shrink-0 text-slate-400 transition-transform group-open:rotate-180 dark:text-xactscore-accent" />
             </summary>
             <div className="space-y-3 border-t border-zinc-800 px-5 pb-5 pt-4">
               <p className="text-sm leading-6 text-zinc-400">{t(section.body)}</p>
               {section.title === 'Install the app' ? (
                 <Link
                   href="/help/install"
-                  className="inline-flex text-sm font-bold text-orange-300 hover:text-orange-200"
+                  className="inline-flex text-sm font-bold text-indigo-600 hover:text-indigo-700 dark:text-orange-300 dark:hover:text-orange-200"
                 >
                   {t('Open the full install guide')}
                 </Link>

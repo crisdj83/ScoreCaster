@@ -132,7 +132,11 @@ export default async function MatchPredictionsPage({ params }: PageProps) {
                   canReveal ? 'text-orange-100' : 'text-zinc-500'
                 }`}
               >
-                {canReveal && player.homeScore !== undefined
+                {canReveal &&
+                player.homeScore !== undefined &&
+                player.homeScore !== null &&
+                player.awayScore !== undefined &&
+                player.awayScore !== null
                   ? `${player.homeScore} : ${player.awayScore}`
                   : '— : —'}
                 {match.status === 'FINISHED' &&

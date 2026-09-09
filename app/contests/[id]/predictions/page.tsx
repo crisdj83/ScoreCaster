@@ -123,7 +123,7 @@ export default async function PredictionsPage(props: {
 
   const venues = await getMatchVenues(matchdayFixtures)
   const openThisWeek = matchdayFixtures.filter((match) => isOpenForPrediction(match, now))
-  const picksLeft = openThisWeek.filter(
+  const unmadeMatches = openThisWeek.filter(
     (match) =>
       !myPredictions?.some(
         (prediction) =>
@@ -131,10 +131,12 @@ export default async function PredictionsPage(props: {
           prediction.predicted_home_score !== null &&
           prediction.predicted_home_score !== undefined
       )
-  ).length
+  )
+  const picksLeft = unmadeMatches.length
 
   return (
-    <div className="mx-auto max-w-xl p-0 sm:p-2 md:p-4">
+    <>
+    <div className="min-w-0 bg-white p-3 shadow-xl shadow-slate-200/50 dark:border-0 dark:bg-transparent dark:p-0 dark:shadow-none sm:p-4">
       <LiveRefresh refreshAfter={matchdayFixtures.map((match) => match.utcDate)} />
       {selectedMatchday ? (
         <MatchdayNav
@@ -145,7 +147,7 @@ export default async function PredictionsPage(props: {
         />
       ) : null}
       {openThisWeek.length > 0 ? (
-        <div className="mb-3 flex items-center justify-between gap-3">
+        <div className="mb-3 flex items-center gap-3">
           {picksLeft > 0 ? (
             <span className="rounded-full bg-xactscore-accent px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-xactscore-bg">
               {picksLeft} {picksLeft === 1 ? t('pick left') : t('picks left')}
@@ -155,17 +157,13 @@ export default async function PredictionsPage(props: {
               {t('All picks in')}
             </span>
           )}
-          <SuperLuckyButton
-            contestId={params.id}
-            matchIds={openThisWeek.map((match) => String(match.id))}
-          />
         </div>
       ) : null}
-      <p className="mb-3 text-[10px] font-medium leading-snug text-zinc-500">
+      <p className="mb-3 text-[10px] font-medium leading-snug text-slate-500">
         {t('Picks lock 60 minutes before kickoff.')}
       </p>
 
-      <div className="space-y-1.5">
+      <div className="hide-scrollbar space-y-1.5 overflow-x-auto overflow-y-auto overscroll-contain pb-24 lg:pb-16">
         {matchdayFixtures.map((match) => {
           // Find if the user already made a prediction for this specific match
         const existingPrediction = myPredictions?.find(p => String(p.match_id) === String(match.id))
@@ -183,5 +181,12 @@ export default async function PredictionsPage(props: {
         })}
       </div>
     </div>
+    {picksLeft > 0 ? (
+      <SuperLuckyButton
+        contestId={params.id}
+        matchIds={unmadeMatches.map((match) => String(match.id))}
+      />
+    ) : null}
+    </>
   )
 }

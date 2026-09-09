@@ -52,7 +52,7 @@ export default function ContestHub({ myContests, messages }: any) {
         </div>
       )}
 
-      <div className="flex gap-1 rounded-xl border border-white/10 bg-zinc-950/70 p-1.5 shadow-md backdrop-blur-md">
+      <div className="flex gap-1 rounded-[28px] border border-slate-200 bg-white p-1.5 shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:rounded-xl dark:border-white/10 dark:bg-zinc-950/70 dark:shadow-md">
         <button type="button" onClick={() => setActiveTab('my_contests')} className={tabClass('my_contests')}>
           <Trophy className="h-4 w-4 shrink-0" />
           <span className="hidden xs:inline sm:inline">{t('My Contests')}</span>
@@ -74,7 +74,7 @@ export default function ContestHub({ myContests, messages }: any) {
         <CardContent className="p-5 md:p-8">
           {activeTab === 'my_contests' && (
             <div className="space-y-4">
-              <h2 className="mb-4 text-lg font-extrabold uppercase tracking-tight text-zinc-100">
+              <h2 className="mb-4 text-lg font-extrabold uppercase tracking-tight text-zinc-900 dark:text-zinc-100">
                 {t('Your Active Contests')}
               </h2>
 
@@ -96,13 +96,13 @@ export default function ContestHub({ myContests, messages }: any) {
                     <Link
                       key={membership.contest_id}
                       href={`/contests/${membership.contest_id}`}
-                      className="group flex min-h-[120px] cursor-pointer flex-col rounded-xl border border-zinc-800 bg-zinc-950/50 p-5 transition-all hover:border-xactscore-accent hover:shadow-lg"
+                      className="group flex min-h-[120px] cursor-pointer flex-col rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-all hover:border-slate-200 hover:shadow-md dark:rounded-xl dark:border-zinc-800 dark:bg-zinc-950/50 dark:shadow-none dark:hover:border-xactscore-accent dark:hover:shadow-lg"
                     >
                       <div className="mb-2 flex items-start justify-between gap-2">
                         <div className="flex min-w-0 items-start gap-3">
                           <ContestIcon contestId={membership.contest_id} size="sm" />
                           <div className="min-w-0">
-                            <h3 className="truncate text-lg font-extrabold text-zinc-100 transition-colors group-hover:text-xactscore-accent">
+                            <h3 className="truncate text-lg font-bold text-slate-900 transition-colors group-hover:text-indigo-600 dark:text-zinc-100 dark:group-hover:text-xactscore-accent">
                               {membership.contests.name}
                             </h3>
                             <p className="mt-1 text-xs font-bold uppercase tracking-wider text-zinc-500">
@@ -117,12 +117,12 @@ export default function ContestHub({ myContests, messages }: any) {
                       </div>
                       <div className="mt-auto flex items-center justify-between border-t border-zinc-800 pt-4 text-sm">
                         {membership.contests.is_public ? (
-                          <span className="inline-flex items-center gap-1 rounded bg-zinc-900 px-2 py-1 text-xs font-bold uppercase tracking-wider text-orange-200">
+                          <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-100 px-2.5 py-1 text-xs font-bold uppercase tracking-wider text-slate-600 dark:rounded dark:border-transparent dark:bg-zinc-900 dark:text-orange-200">
                             <Globe className="h-3 w-3" />
                             {t('Public')}
                           </span>
                         ) : (
-                          <span className="rounded bg-zinc-900 px-2 py-1 text-xs text-zinc-400">
+                          <span className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-zinc-500 dark:rounded dark:border-transparent dark:bg-zinc-900 dark:text-zinc-400">
                             {t('Key:')}{' '}
                             <span className="font-mono font-bold text-zinc-200">
                               {membership.contests.contest_key}
@@ -143,8 +143,8 @@ export default function ContestHub({ myContests, messages }: any) {
           {activeTab === 'join' && (
             <div className="mx-auto max-w-md space-y-8 py-4">
               <div className="text-center">
-                <Globe className="mx-auto mb-3 h-10 w-10 text-xactscore-accent" />
-                <h2 className="text-xl font-extrabold uppercase tracking-tight text-zinc-100">
+                <Globe className="mx-auto mb-3 h-10 w-10 text-slate-400 dark:text-xactscore-accent" />
+                <h2 className="text-xl font-extrabold uppercase tracking-tight text-zinc-900 dark:text-zinc-100">
                   {t('Join Public')}
                 </h2>
                 <p className="mt-1 text-sm text-zinc-400">
@@ -163,15 +163,15 @@ export default function ContestHub({ myContests, messages }: any) {
                   <div className="w-full border-t border-zinc-800" />
                 </div>
                 <div className="relative flex justify-center">
-                  <span className="bg-zinc-900 px-3 text-[10px] font-black uppercase tracking-widest text-zinc-500">
+                  <span className="rounded-full border border-slate-200 bg-white px-3 text-[10px] font-black uppercase tracking-widest text-zinc-500 dark:rounded-none dark:border-transparent dark:bg-zinc-900">
                     {t('or')}
                   </span>
                 </div>
               </div>
 
               <div className="text-center">
-                <Lock className="mx-auto mb-3 h-10 w-10 text-xactscore-accent" />
-                <h2 className="text-xl font-extrabold uppercase tracking-tight text-zinc-100">
+                <Lock className="mx-auto mb-3 h-10 w-10 text-slate-400 dark:text-xactscore-accent" />
+                <h2 className="text-xl font-extrabold uppercase tracking-tight text-zinc-900 dark:text-zinc-100">
                   {t('Join a Private Contest')}
                 </h2>
                 <p className="mt-1 text-sm text-zinc-400">
@@ -201,8 +201,8 @@ export default function ContestHub({ myContests, messages }: any) {
           {activeTab === 'create' && (
             <div className="mx-auto max-w-md py-4">
               <div className="mb-6 text-center">
-                <Plus className="mx-auto mb-3 h-10 w-10 text-xactscore-accent" />
-                <h2 className="text-xl font-extrabold uppercase tracking-tight text-zinc-100">
+                <Plus className="mx-auto mb-3 h-10 w-10 text-slate-400 dark:text-xactscore-accent" />
+                <h2 className="text-xl font-extrabold uppercase tracking-tight text-zinc-900 dark:text-zinc-100">
                   {t('Create a New Contest')}
                 </h2>
                 <p className="mt-1 text-sm text-zinc-400">
@@ -238,8 +238,8 @@ export default function ContestHub({ myContests, messages }: any) {
                         className={cn(
                           'cursor-pointer rounded-xl border px-3 py-3 text-left transition',
                           seasonLength === option.value
-                            ? 'border-orange-400/50 bg-orange-500/15'
-                            : 'border-zinc-800 bg-zinc-950/60 hover:border-zinc-600'
+                            ? 'border-0 bg-indigo-100 text-indigo-700 dark:border dark:border-orange-400/50 dark:bg-orange-500/15'
+                            : 'border-slate-200 bg-white hover:border-slate-300 dark:border-zinc-800 dark:bg-zinc-950/60 dark:hover:border-zinc-600'
                         )}
                       >
                         <input
@@ -250,7 +250,7 @@ export default function ContestHub({ myContests, messages }: any) {
                           onChange={() => setSeasonLength(option.value)}
                           className="sr-only"
                         />
-                        <p className="text-xs font-black uppercase tracking-wider text-zinc-100">{option.title}</p>
+                        <p className="text-xs font-black uppercase tracking-wider text-zinc-900 dark:text-zinc-100">{option.title}</p>
                         <p className="mt-1 text-[11px] leading-snug text-zinc-500">{option.detail}</p>
                       </label>
                     ))}
@@ -263,12 +263,12 @@ export default function ContestHub({ myContests, messages }: any) {
                     className={cn(
                       'rounded-xl border px-3 py-3 text-left transition',
                       visibility === 'public'
-                        ? 'border-orange-400/50 bg-orange-500/15'
-                        : 'border-zinc-800 bg-zinc-950/60 hover:border-zinc-600'
+                        ? 'border-0 bg-indigo-100 text-indigo-700 dark:border dark:border-orange-400/50 dark:bg-orange-500/15'
+                        : 'border-slate-200 bg-white hover:border-slate-300 dark:border-zinc-800 dark:bg-zinc-950/60 dark:hover:border-zinc-600'
                     )}
                   >
-                    <Globe className="mb-1.5 h-4 w-4 text-xactscore-accent" />
-                    <p className="text-xs font-black uppercase tracking-wider text-zinc-100">{t('Public')}</p>
+                    <Globe className="mb-1.5 h-4 w-4 text-slate-500 dark:text-xactscore-accent" />
+                    <p className="text-xs font-black uppercase tracking-wider text-zinc-900 dark:text-zinc-100">{t('Public')}</p>
                     <p className="mt-1 text-[11px] leading-snug text-zinc-500">
                       {t('Anyone can join this league. No invite key needed.')}
                     </p>
@@ -279,12 +279,12 @@ export default function ContestHub({ myContests, messages }: any) {
                     className={cn(
                       'rounded-xl border px-3 py-3 text-left transition',
                       visibility === 'private'
-                        ? 'border-orange-400/50 bg-orange-500/15'
-                        : 'border-zinc-800 bg-zinc-950/60 hover:border-zinc-600'
+                        ? 'border-0 bg-indigo-100 text-indigo-700 dark:border dark:border-orange-400/50 dark:bg-orange-500/15'
+                        : 'border-slate-200 bg-white hover:border-slate-300 dark:border-zinc-800 dark:bg-zinc-950/60 dark:hover:border-zinc-600'
                     )}
                   >
-                    <Lock className="mb-1.5 h-4 w-4 text-xactscore-accent" />
-                    <p className="text-xs font-black uppercase tracking-wider text-zinc-100">{t('Private')}</p>
+                    <Lock className="mb-1.5 h-4 w-4 text-slate-500 dark:text-xactscore-accent" />
+                    <p className="text-xs font-black uppercase tracking-wider text-zinc-900 dark:text-zinc-100">{t('Private')}</p>
                     <p className="mt-1 text-[11px] leading-snug text-zinc-500">
                       {t('Only people with the invite key can join.')}
                     </p>

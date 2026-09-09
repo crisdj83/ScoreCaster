@@ -50,7 +50,7 @@ export default function CompareSection({
   return (
     <section id="compare" className="scroll-mt-28 space-y-5">
       <div className="max-w-2xl">
-        <h2 className="text-xl font-black uppercase tracking-tight text-zinc-100 sm:text-2xl">
+        <h2 className="text-xl font-semibold uppercase tracking-tight text-zinc-900 dark:font-black dark:text-zinc-100 sm:text-2xl">
           {t('How XactScore compares')}
         </h2>
         <p className="mt-2 text-sm leading-6 text-zinc-400">
@@ -58,22 +58,22 @@ export default function CompareSection({
         </p>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04]">
-        <div className="hidden grid-cols-4 gap-0 border-b border-white/10 bg-white/[0.04] text-[11px] font-black uppercase tracking-wider text-zinc-400 sm:grid">
+      <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:border-white/10 dark:bg-white/[0.04] dark:shadow-none">
+        <div className="hidden grid-cols-4 gap-0 border-b border-slate-200 bg-white text-[11px] font-black uppercase tracking-wider text-zinc-500 dark:border-white/10 dark:bg-white/[0.04] dark:text-zinc-400 sm:grid">
           <div className="px-4 py-3" />
-          <div className="px-4 py-3 text-xactscore-accent">XactScore</div>
+          <div className="px-4 py-3 text-zinc-900 dark:text-xactscore-accent">XactScore</div>
           <div className="px-4 py-3">Superbru</div>
           <div className="px-4 py-3">PronoContest</div>
         </div>
         {rows.map((row) => (
           <div
             key={row.label}
-            className="grid gap-2 border-b border-white/10 px-4 py-4 last:border-b-0 sm:grid-cols-4 sm:items-center sm:gap-0 sm:py-0"
+            className="grid gap-2 border-b border-zinc-200/50 px-4 py-4 last:border-b-0 dark:border-white/10 sm:grid-cols-4 sm:items-center sm:gap-0 sm:py-0"
           >
             <p className="text-[11px] font-black uppercase tracking-wider text-zinc-500 sm:px-0 sm:py-4">
               {t(row.label)}
             </p>
-            <p className="flex items-start gap-2 text-sm font-semibold text-zinc-100 sm:px-4 sm:py-4">
+            <p className="flex items-start gap-2 text-sm font-semibold text-zinc-900 dark:text-zinc-100 sm:px-4 sm:py-4">
               <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />
               <span>
                 <span className="sm:hidden">XactScore · </span>

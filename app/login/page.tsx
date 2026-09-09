@@ -23,10 +23,10 @@ export default async function LoginPage(props: {
       <Card>
         <CardContent className="p-6 md:p-8">
           <div className="mb-8 flex flex-col items-center">
-            <div className="mb-3 rounded-xl bg-zinc-950 p-3">
-              <Trophy className="h-8 w-8 text-xactscore-accent" />
+            <div className="mb-3 rounded-xl border border-slate-200 bg-slate-100 p-3 dark:border-transparent dark:bg-zinc-950">
+              <Trophy className="h-8 w-8 text-slate-600 dark:text-xactscore-accent" />
             </div>
-            <h1 className="text-2xl font-black uppercase tracking-tight text-zinc-100">
+            <h1 className="text-2xl font-black uppercase tracking-tight text-zinc-900 dark:text-zinc-100">
               {t('Welcome to XactScore')}
             </h1>
             <p className="mt-1 text-center text-sm text-zinc-400">
@@ -83,7 +83,7 @@ export default async function LoginPage(props: {
                 formAction={signup}
                 className={cn(
                   buttonVariants({ variant: 'outline' }),
-                  'w-full border-xactscore-accent text-xactscore-accent uppercase tracking-wider hover:bg-xactscore-accent/10'
+                  'w-full uppercase tracking-wider'
                 )}
               >
                 {t('Sign Up')}
@@ -93,7 +93,7 @@ export default async function LoginPage(props: {
             <div className="mt-2 text-center">
               <Link
                 href="/forgot-password"
-                className="inline-flex min-h-11 items-center justify-center text-sm text-zinc-500 underline transition-colors hover:text-xactscore-accent"
+                className="inline-flex min-h-11 items-center justify-center text-sm text-slate-500 underline transition-colors hover:text-indigo-600 dark:hover:text-xactscore-accent"
               >
                 {t('Forgot Password?')}
               </Link>

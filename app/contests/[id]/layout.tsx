@@ -5,7 +5,6 @@ import ContestIcon from '../../components/ContestIcon'
 import { getTranslations } from '../../../lib/i18n'
 import { getServerLocale } from '../../../lib/i18n-server'
 import { Globe } from 'lucide-react'
-import { Surface } from '@/components/ui/card'
 import CopyInviteButton from '../../components/CopyInviteButton'
 import { inviteUrl } from '../../../lib/urls'
 
@@ -55,11 +54,11 @@ export default async function ContestLayout(props: {
       {/* Mobile: name + invite. Home/Leagues live in the bottom bar. */}
       <div className="flex items-center gap-2 md:hidden">
         <ContestIcon contestId={contest.id} size="sm" />
-        <h1 className="min-w-0 flex-1 truncate text-base font-black tracking-tight text-white">
+        <h1 className="min-w-0 flex-1 truncate text-base font-black tracking-tight text-zinc-900 dark:text-white">
           {contest.name}
         </h1>
         {contest.is_public ? (
-          <div className="shrink-0 rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-center">
+          <div className="shrink-0 rounded-lg border border-slate-200 bg-white px-2 py-1 text-center shadow-sm dark:border-white/10 dark:bg-white/5 dark:shadow-none">
             <p className="text-[8px] font-black uppercase tracking-widest text-zinc-500">
               {t('Public')}
             </p>
@@ -69,11 +68,11 @@ export default async function ContestLayout(props: {
             </p>
           </div>
         ) : (
-          <div className="shrink-0 rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-center">
+          <div className="shrink-0 rounded-lg border border-slate-200 bg-white px-2 py-1 text-center shadow-sm dark:border-white/10 dark:bg-white/5 dark:shadow-none">
             <p className="text-[8px] font-black uppercase tracking-widest text-zinc-500">
               {t('Invite Code')}
             </p>
-            <p className="bg-gradient-to-r from-amber-400 to-orange-600 bg-clip-text font-mono text-[11px] font-black tracking-wider text-transparent">
+            <p className="bg-clip-text font-mono text-[11px] font-black tracking-wider text-zinc-900 dark:bg-gradient-to-r dark:from-amber-400 dark:to-orange-600 dark:text-transparent">
               {contest.contest_key}
             </p>
             <CopyInviteButton url={inviteUrl(contest.contest_key)} className="mt-1 min-h-8 w-full px-2 text-[9px]" />
@@ -82,22 +81,22 @@ export default async function ContestLayout(props: {
       </div>
 
       {/* Desktop: full contest identity */}
-      <div className="relative hidden items-center justify-between gap-6 overflow-hidden rounded-2xl border border-white/10 bg-white/5 px-6 py-5 shadow-2xl shadow-black/40 backdrop-blur-xl md:flex md:px-8 md:py-6">
-        <div className="pointer-events-none absolute right-0 top-0 h-64 w-64 translate-x-8 -translate-y-8 rounded-full bg-orange-500/10 blur-3xl" />
-        <div className="pointer-events-none absolute -left-10 bottom-0 h-48 w-48 rounded-full bg-amber-400/5 blur-3xl" />
+      <div className="relative hidden items-center justify-between gap-6 overflow-hidden rounded-[28px] border border-slate-200 bg-white px-6 py-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:border-white/10 dark:bg-white/5 dark:shadow-2xl dark:shadow-black/40 md:flex md:px-8 md:py-6">
+        <div className="pointer-events-none absolute right-0 top-0 h-64 w-64 translate-x-8 -translate-y-8 rounded-full bg-slate-200/50 blur-3xl dark:bg-orange-500/10" />
+        <div className="pointer-events-none absolute -left-10 bottom-0 h-48 w-48 rounded-full bg-slate-100/80 blur-3xl dark:bg-amber-400/5" />
 
         <div className="z-10 min-w-0">
           <p className="mb-1.5 text-[11px] font-black uppercase tracking-widest text-zinc-500">
             {t('Official Prediction League')}
           </p>
-          <h1 className="flex items-center gap-3 text-3xl font-black tracking-tight text-white md:text-4xl">
+          <h1 className="flex items-center gap-3 text-3xl font-black tracking-tight text-zinc-900 dark:text-white md:text-4xl">
             <ContestIcon contestId={contest.id} />
             <span className="truncate">{contest.name}</span>
           </h1>
         </div>
 
         {contest.is_public ? (
-          <div className="z-10 shrink-0 rounded-xl border border-white/10 bg-white/5 px-5 py-3 text-center shadow-inner backdrop-blur-md">
+          <div className="z-10 shrink-0 rounded-xl border border-slate-200 bg-white px-5 py-3 text-center shadow-sm dark:border-white/10 dark:bg-white/5 dark:shadow-inner">
             <p className="mb-1 text-[10px] font-black uppercase tracking-widest text-zinc-500">
               {t('Public')}
             </p>
@@ -107,11 +106,11 @@ export default async function ContestLayout(props: {
             </p>
           </div>
         ) : (
-          <div className="z-10 shrink-0 rounded-xl border border-white/10 bg-white/5 px-5 py-3 text-center shadow-inner backdrop-blur-md">
+          <div className="z-10 shrink-0 rounded-xl border border-slate-200 bg-white px-5 py-3 text-center shadow-sm dark:border-white/10 dark:bg-white/5 dark:shadow-inner">
             <p className="mb-1 text-[10px] font-black uppercase tracking-widest text-zinc-500">
               {t('Invite Code')}
             </p>
-            <p className="bg-gradient-to-r from-amber-400 to-orange-600 bg-clip-text font-mono text-2xl font-black tracking-widest text-transparent">
+            <p className="bg-clip-text font-mono text-2xl font-black tracking-widest text-zinc-900 dark:bg-gradient-to-r dark:from-amber-400 dark:to-orange-600 dark:text-transparent">
               {contest.contest_key}
             </p>
             <CopyInviteButton url={inviteUrl(contest.contest_key)} className="mt-3 w-full" />
@@ -121,9 +120,9 @@ export default async function ContestLayout(props: {
 
       <ContestNav contestId={contest.id} isAdmin={isAdmin} />
 
-      <Surface className="min-h-[400px] overflow-hidden p-3 sm:p-6 md:p-8">
+      <div className="min-h-[400px] min-w-0 overflow-x-clip rounded-3xl bg-white p-3 shadow-xl shadow-slate-200/50 dark:bg-[var(--glass-bg)] dark:shadow-[var(--glass-shadow)] sm:p-6 md:p-8">
         {props.children}
-      </Surface>
+      </div>
     </div>
   )
 }

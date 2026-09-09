@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useEffect, useState, useTransition } from 'react'
+import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
 import { Dices } from 'lucide-react'
 import { Dialog } from '@/components/ui/dialog'
@@ -26,9 +27,14 @@ export default function SuperLuckyButton({
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [rolling, setRolling] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const [, startTransition] = useTransition()
 
-  if (matchIds.length === 0) return null
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (matchIds.length === 0 || !mounted) return null
 
   const fillGameweek = async () => {
     setRolling(true)
@@ -49,21 +55,19 @@ export default function SuperLuckyButton({
     }
   }
 
-  return (
+  return createPortal(
     <>
-      <span className="inline-flex shrink-0 overflow-hidden rounded-xl bg-[rgb(255_138_43_/_0.6)] p-[1.5px]">
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
-          className="prediction-fixture-content prediction-lucky-pill inline-flex items-center gap-1.5 px-2.5 py-1.5 text-orange-200 drop-shadow-[0_1px_2px_rgb(0_0_0/0.75)] transition hover:brightness-110 active:scale-95 sm:gap-2 sm:px-3 sm:py-2"
-          aria-label={t("I'm lucky")}
-        >
-          <Dices className={cn('h-4 w-4 sm:h-5 sm:w-5', rolling && 'animate-spin')} />
-          <span className="text-[10px] font-black uppercase leading-none tracking-wider sm:text-xs">
-            {t("I'm lucky")}
-          </span>
-        </button>
-      </span>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="fixed bottom-24 left-1/2 z-50 flex -translate-x-1/2 transform items-center gap-2 rounded-full bg-indigo-600 px-6 py-3 font-bold text-white shadow-[0_8px_30px_rgba(79,70,229,0.4)] transition-all duration-200 hover:bg-indigo-700 active:scale-95 dark:bg-gradient-to-r dark:from-amber-500 dark:to-orange-600 dark:shadow-[0_8px_30px_rgba(245,158,11,0.4)] dark:hover:bg-transparent dark:hover:brightness-110 lg:bottom-8"
+        aria-label={t("I'm lucky")}
+      >
+        <Dices className={cn('h-5 w-5 text-white', rolling && 'animate-spin')} />
+        <span className="text-sm font-bold uppercase tracking-wide">
+          {t("I'm lucky")}
+        </span>
+      </button>
       <Dialog
         open={open}
         onOpenChange={setOpen}
@@ -76,6 +80,7 @@ export default function SuperLuckyButton({
         cancelLabel={t('No')}
         onConfirm={fillGameweek}
       />
-    </>
+    </>,
+    document.body
   )
 }

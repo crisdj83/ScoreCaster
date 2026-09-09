@@ -30,6 +30,15 @@ function clampScore(value: number) {
   return Math.min(SCORE_MAX, Math.max(0, value))
 }
 
+function savedScore(value: number | null | undefined): number | null {
+  return value === null || value === undefined ? null : value
+}
+
+function nextScore(current: number | null, change: number) {
+  if (current === null) return change > 0 ? 1 : 0
+  return clampScore(current + change)
+}
+
 function teamCode(team: MatchTeam) {
   if (team.tla) return team.tla
   const short = (team.shortName || team.name).replace(/[^A-Za-z]/g, '')
@@ -67,7 +76,7 @@ function ScoreStepper({
   canInc,
 }: {
   label: string
-  score: number
+  score: number | null
   disabled?: boolean
   onDec: () => void
   onInc: () => void
@@ -75,7 +84,7 @@ function ScoreStepper({
   canInc: boolean
 }) {
   const btn =
-    'inline-flex h-5 w-7 items-center justify-center rounded-md transition active:scale-90 disabled:opacity-25'
+    'inline-flex h-11 w-11 items-center justify-center rounded-md transition-colors duration-300 active:scale-90 disabled:opacity-25 sm:h-5 sm:w-7'
   return (
     <div className="flex flex-col items-center">
       <button
@@ -87,8 +96,12 @@ function ScoreStepper({
       >
         <Plus className="h-3.5 w-3.5" strokeWidth={3} />
       </button>
-      <span className="flex h-8 w-8 items-center justify-center rounded-md border border-white/15 bg-black/35 text-lg font-black tabular-nums text-white">
-        {score}
+      <span className="flex h-8 w-8 items-center justify-center rounded-md border-0 bg-white text-lg font-black tabular-nums text-slate-900 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:border dark:border-white/15 dark:bg-black/35 dark:text-white dark:shadow-none">
+        {score === null ? (
+          <span className="text-slate-400 dark:text-zinc-500">—</span>
+        ) : (
+          score
+        )}
       </span>
       <button
         type="button"
@@ -122,10 +135,10 @@ export default function PredictionCard({
   revealedPredictions?: RevealedPrediction[]
   venue?: string
 }) {
-  const initialHome = existingPrediction?.predicted_home_score ?? 0
-  const initialAway = existingPrediction?.predicted_away_score ?? 0
-  const [homeScore, setHomeScore] = useState(initialHome)
-  const [awayScore, setAwayScore] = useState(initialAway)
+  const initialHome = savedScore(existingPrediction?.predicted_home_score)
+  const initialAway = savedScore(existingPrediction?.predicted_away_score)
+  const [homeScore, setHomeScore] = useState<number | null>(initialHome)
+  const [awayScore, setAwayScore] = useState<number | null>(initialAway)
   const [isPending, startTransition] = useTransition()
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saved'>('idle')
   const [saveError, setSaveError] = useState('')
@@ -146,8 +159,8 @@ export default function PredictionCard({
 
   useEffect(() => {
     if (saveTimerRef.current) return
-    const home = existingPrediction?.predicted_home_score ?? 0
-    const away = existingPrediction?.predicted_away_score ?? 0
+    const home = savedScore(existingPrediction?.predicted_home_score)
+    const away = savedScore(existingPrediction?.predicted_away_score)
     homeScoreRef.current = home
     awayScoreRef.current = away
     lastSavedRef.current = { home, away }
@@ -158,6 +171,7 @@ export default function PredictionCard({
   const saveLatest = async () => {
     const home = homeScoreRef.current
     const away = awayScoreRef.current
+    if (home === null || away === null) return
     if (home === lastSavedRef.current.home && away === lastSavedRef.current.away) return
     try {
       await savePrediction(contestId, String(match.id), home, away)
@@ -182,7 +196,11 @@ export default function PredictionCard({
       }
       const home = homeScoreRef.current
       const away = awayScoreRef.current
-      if (home !== lastSavedRef.current.home || away !== lastSavedRef.current.away) {
+      if (
+        home !== null &&
+        away !== null &&
+        (home !== lastSavedRef.current.home || away !== lastSavedRef.current.away)
+      ) {
         void savePrediction(contestId, String(match.id), home, away)
       }
     }
@@ -217,15 +235,16 @@ export default function PredictionCard({
     minute: '2-digit',
   }).format(kickoffTime)
 
-  const persistScores = (newHome: number, newAway: number) => {
-    const home = clampScore(newHome)
-    const away = clampScore(newAway)
+  const persistScores = (newHome: number | null, newAway: number | null) => {
+    const home = newHome === null ? null : clampScore(newHome)
+    const away = newAway === null ? null : clampScore(newAway)
     homeScoreRef.current = home
     awayScoreRef.current = away
     setHomeScore(home)
     setAwayScore(away)
     setSaveStatus('idle')
     setSaveError('')
+    if (home === null || away === null) return
     if (saveTimerRef.current) window.clearTimeout(saveTimerRef.current)
     saveTimerRef.current = window.setTimeout(() => {
       saveTimerRef.current = null
@@ -239,8 +258,8 @@ export default function PredictionCard({
     if (isLocked) return
     const currentHome = homeScoreRef.current
     const currentAway = awayScoreRef.current
-    const newHome = team === 'home' ? clampScore(currentHome + change) : currentHome
-    const newAway = team === 'away' ? clampScore(currentAway + change) : currentAway
+    const newHome = team === 'home' ? nextScore(currentHome, change) : currentHome
+    const newAway = team === 'away' ? nextScore(currentAway, change) : currentAway
     if (newHome === currentHome && newAway === currentAway) return
     persistScores(newHome, newAway)
   }
@@ -266,7 +285,7 @@ export default function PredictionCard({
   return (
     <div
       className={cn(
-        'prediction-fixture-content overflow-hidden rounded-2xl border px-2.5 py-2',
+        'prediction-fixture-content mb-2.5 overflow-hidden rounded-2xl border border-emerald-100 bg-emerald-500/5 px-2.5 py-2 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:mb-0 dark:border-white/10 dark:shadow-none',
         isHurryUp && 'prediction-hurry border-red-400/35'
       )}
     >
@@ -280,8 +299,8 @@ export default function PredictionCard({
             disabled={isLocked}
             onDec={() => handleScoreChange('home', -1)}
             onInc={() => handleScoreChange('home', 1)}
-            canDec={homeScore > 0}
-            canInc={homeScore < SCORE_MAX}
+            canDec={homeScore === null || homeScore > 0}
+            canInc={homeScore === null || homeScore < SCORE_MAX}
           />
           <span className="pb-px text-sm font-black text-zinc-500">–</span>
           <ScoreStepper
@@ -290,8 +309,8 @@ export default function PredictionCard({
             disabled={isLocked}
             onDec={() => handleScoreChange('away', -1)}
             onInc={() => handleScoreChange('away', 1)}
-            canDec={awayScore > 0}
-            canInc={awayScore < SCORE_MAX}
+            canDec={awayScore === null || awayScore > 0}
+            canInc={awayScore === null || awayScore < SCORE_MAX}
           />
         </div>
 
@@ -299,7 +318,7 @@ export default function PredictionCard({
       </div>
 
       <div className="relative mt-1 min-h-[1.15rem] px-8">
-        <p className="truncate text-center text-[10px] font-semibold leading-tight text-zinc-400">
+        <p className="truncate text-center text-[10px] font-semibold leading-tight text-slate-500">
           <span className="tabular-nums">{dateCompact}</span>
           {venue ? (
             <>
@@ -366,8 +385,8 @@ function TeamBlock({
     >
       <TeamCrest src={team.crest} name={displayName} dimmed={dimmed} />
       <span
-        className={cn(
-          'max-w-full truncate text-center text-[11px] font-black uppercase tracking-wide text-zinc-100',
+            className={cn(
+              'max-w-full truncate text-center text-[11px] font-bold uppercase tracking-wide text-slate-900 dark:text-xactscore-text',
           align === 'end' ? 'sm:text-right' : 'sm:text-left',
           dimmed && 'opacity-60'
         )}

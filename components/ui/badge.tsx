@@ -8,11 +8,11 @@ const badgeVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-white/[0.07] text-zinc-200 border border-white/10",
-        accent: "bg-xactscore-accent/15 text-orange-300 border border-xactscore-accent/30",
-        success: "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30",
-        danger: "bg-red-500/15 text-red-300 border border-red-500/30",
-        muted: "bg-white/[0.03] text-zinc-400 border border-white/[0.06]",
+        default: "border border-xactscore-border bg-xactscore-surface text-xactscore-text",
+        accent: "border-0 bg-indigo-100 text-indigo-700 dark:border dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-orange-300",
+        success: "border-0 bg-emerald-100 text-emerald-700 dark:border dark:border-emerald-500/30 dark:bg-emerald-500/15 dark:text-emerald-300",
+        danger: "border-0 bg-rose-100 text-rose-700 dark:border dark:border-red-500/30 dark:bg-red-500/15 dark:text-red-300",
+        muted: "border border-xactscore-border bg-xactscore-surface text-xactscore-muted",
       },
     },
     defaultVariants: {
@@ -37,7 +37,7 @@ function ScoreBadge({
   return (
     <span
       className={cn(
-        "inline-flex min-w-[2.5rem] items-center justify-center rounded-lg bg-gradient-to-b from-orange-400 to-orange-600 px-2.5 py-1 text-sm font-black text-white shadow-md shadow-orange-500/25",
+        "inline-flex min-w-[2.5rem] items-center justify-center rounded-2xl border border-slate-200 bg-white px-2.5 py-1 text-sm font-bold text-slate-900 shadow-sm dark:border-0 dark:bg-gradient-to-b dark:from-amber-400 dark:to-orange-600 dark:font-black dark:text-white dark:shadow-md dark:shadow-orange-500/25",
         className
       )}
       {...props}
@@ -56,15 +56,15 @@ function StatPill({
   return (
     <div
       className={cn(
-        "inline-flex flex-col items-center rounded-xl border border-white/10 bg-white/5 px-3 py-2 backdrop-blur-md",
+        "inline-flex flex-col items-center rounded-xl border border-xactscore-border bg-xactscore-surface px-3 py-2 backdrop-blur-md",
         className
       )}
       {...props}
     >
-      <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
+      <span className="text-[10px] font-bold uppercase tracking-wider text-xactscore-muted">
         {label}
       </span>
-      <span className="text-sm font-black text-zinc-100">{value}</span>
+      <span className="text-sm font-black text-xactscore-text">{value}</span>
     </div>
   )
 }

@@ -22,7 +22,7 @@ type MatchRowProps = {
 function Crest({ src, name }: { src?: string | null; name: string }) {
   if (!src) {
     return (
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-[10px] font-bold text-zinc-400 backdrop-blur-md">
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-[10px] font-bold text-slate-500 shadow-sm dark:border-white/10 dark:bg-white/5 dark:text-zinc-400 dark:shadow-none">
         {name.slice(0, 2).toUpperCase()}
       </div>
     )
@@ -51,28 +51,28 @@ export function MatchRow({
   return (
     <div
       className={cn(
-        "fixture-calendar-game rounded-2xl border border-white/10 bg-white/5 px-4 py-4 backdrop-blur-xl transition-all duration-300",
+        "fixture-calendar-game mb-2.5 flex flex-col rounded-2xl border border-slate-200 bg-white p-3.5 shadow-sm transition-all duration-200 dark:mb-0 dark:border-white/10 dark:bg-white/5 dark:p-4 dark:shadow-none dark:backdrop-blur-xl dark:hover:shadow-none",
         className
       )}
     >
       {meta || status ? (
-        <div className="mb-3 flex items-center justify-between gap-2 text-xs text-zinc-500">
+        <div className="mb-2 flex w-full items-center justify-between gap-2 text-xs font-semibold text-slate-500">
           <div>{meta}</div>
           <div>{status}</div>
         </div>
       ) : null}
 
-      <div className="flex flex-col gap-3 sm:grid sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:items-center sm:gap-4">
-        <div className="flex items-center gap-3 sm:justify-end">
+      <div className="flex w-full items-center gap-3 sm:grid sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:gap-4">
+        <div className="flex min-w-0 items-center gap-3 sm:justify-end">
           <Crest src={home.crest} name={home.name} />
-          <span className="truncate text-sm font-bold text-zinc-100 sm:text-right">
+          <span className="truncate text-sm font-bold text-slate-900 dark:font-bold dark:text-zinc-100 sm:text-right">
             {home.name}
           </span>
         </div>
 
         <div className="flex items-center justify-center">
           {score ?? (
-            <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
               vs
             </span>
           )}
@@ -80,7 +80,7 @@ export function MatchRow({
 
         <div className="flex items-center gap-3">
           <Crest src={away.crest} name={away.name} />
-          <span className="truncate text-sm font-bold text-zinc-100">{away.name}</span>
+          <span className="truncate text-sm font-bold text-slate-900 dark:font-bold dark:text-zinc-100">{away.name}</span>
         </div>
       </div>
 
@@ -97,7 +97,7 @@ export function MatchCard({
   return (
     <div
       className={cn(
-        "prediction-fixture-content overflow-hidden rounded-[1.25rem] border border-white/10 p-3 md:p-4",
+        "prediction-fixture-content overflow-hidden rounded-2xl border-0 p-3 shadow-[0_8px_30px_rgb(0,0,0,0.04)] md:p-4 dark:border-white/10 dark:shadow-none",
         className
       )}
       {...props}
