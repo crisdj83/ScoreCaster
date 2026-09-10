@@ -281,7 +281,7 @@
   html.android main {
     padding-left: 0.875rem;
     padding-right: 0.875rem;
-    padding-bottom: calc(8.5rem + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(8.5rem + max(2.25rem, env(safe-area-inset-bottom, 0px)));
   }
 
   html.android .contest-shell {
@@ -318,11 +318,11 @@
   }
 
   html.android .ios-tab-bar {
-    bottom: 0;
+    bottom: var(--android-vv-bottom, 0px);
     left: 0;
     width: 100%;
     padding-top: 0.4rem;
-    padding-bottom: env(safe-area-inset-bottom, 0px);
+    padding-bottom: max(2.25rem, env(safe-area-inset-bottom, 0px));
     overflow: visible;
     border-radius: 0;
   }

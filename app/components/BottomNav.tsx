@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
@@ -30,6 +31,29 @@ export default function BottomNav({ isAdmin, isLoggedIn, unreadMessageCount }: B
   const pathname = usePathname() || ''
   const t = useTranslations()
 
+  useEffect(() => {
+    const root = document.documentElement
+    if (!root.classList.contains('android')) return
+
+    const sync = () => {
+      const viewport = window.visualViewport
+      const inset = viewport
+        ? Math.max(0, window.innerHeight - (viewport.offsetTop + viewport.height))
+        : 0
+      root.style.setProperty('--android-vv-bottom', `${Math.round(inset)}px`)
+    }
+
+    sync()
+    window.visualViewport?.addEventListener('resize', sync)
+    window.visualViewport?.addEventListener('scroll', sync)
+    window.addEventListener('resize', sync)
+    return () => {
+      window.visualViewport?.removeEventListener('resize', sync)
+      window.visualViewport?.removeEventListener('scroll', sync)
+      window.removeEventListener('resize', sync)
+    }
+  }, [])
+
   const items = isLoggedIn
     ? [
         { href: '/', label: t('Dashboard'), short: t('Home'), icon: HomeIcon },
@@ -49,7 +73,7 @@ export default function BottomNav({ isAdmin, isLoggedIn, unreadMessageCount }: B
   return (
     <nav
       aria-label="Primary"
-      className="ios-tab-bar fixed bottom-0 left-0 z-50 w-full bg-white pb-[env(safe-area-inset-bottom)] dark:bg-zinc-900 lg:hidden"
+      className="ios-tab-bar fixed bottom-0 left-0 z-50 w-full bg-white pb-[max(0.5rem,env(safe-area-inset-bottom,0px))] dark:bg-zinc-900 lg:hidden"
     >
       <div className="mx-auto flex max-w-2xl items-center gap-0.5 overflow-visible px-1 py-0.5 sm:gap-1 sm:px-2">
         {items.map(({ href, label, short, icon: Icon, badge }) => {

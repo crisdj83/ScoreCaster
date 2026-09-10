@@ -209,8 +209,8 @@ function ProfilePageInner() {
                 <ImageIcon className="h-5 w-5 text-xactscore-accent" /> {t('Profile Picture / Logo')}
               </h3>
 
-              <div className="flex items-center gap-4">
-                <div className="relative flex-shrink-0">
+              <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+                <div className="relative w-fit shrink-0">
                   <div
                     className={`flex h-32 w-32 items-center justify-center overflow-hidden rounded-xl border-2 bg-zinc-950
                     ${isPending ? 'border-amber-400/60 opacity-75' : 'border-dashed border-zinc-700'}
@@ -239,8 +239,14 @@ function ProfilePageInner() {
 
                 <input type="hidden" name="avatar_url" value={avatarUrl} />
 
-                <Button type="button" variant="secondary" onClick={generateRandomAvatar}>
-                  <RefreshCw className="h-4 w-4" /> {t('Auto-Generate Avatar')}
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={generateRandomAvatar}
+                  className="h-auto min-h-11 w-full max-w-full whitespace-normal px-3 text-left leading-snug sm:w-auto"
+                >
+                  <RefreshCw className="h-4 w-4 shrink-0" />
+                  <span className="min-w-0 text-wrap">{t('Auto-Generate Avatar')}</span>
                 </Button>
               </div>
             </div>
