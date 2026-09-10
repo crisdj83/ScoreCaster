@@ -52,7 +52,7 @@ function Crest({
       {src ? (
         <Image src={src} alt="" width={inner} height={inner} draggable={false} className="pointer-events-none object-contain" />
       ) : (
-        <span className="px-0.5 text-center text-[9px] font-black leading-none text-zinc-700">
+        <span className="px-0.5 text-center text-[9px] font-semibold leading-none text-zinc-700 dark:font-black">
           {name.slice(0, 3).toUpperCase()}
         </span>
       )}
@@ -220,11 +220,11 @@ export default function CurrentGameweek({
   return (
     <section className="mb-5 rounded-[28px] border border-slate-200 bg-white p-3 shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:rounded-xl dark:border-orange-500/40 dark:bg-zinc-900 dark:shadow-lg sm:p-5 md:p-6">
       <div className="flex items-center justify-between gap-2">
-        <h3 className="truncate text-sm font-semibold uppercase tracking-wider text-zinc-900 dark:font-black dark:text-zinc-100 sm:text-base">
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:truncate dark:text-sm dark:font-black dark:tracking-wider dark:text-zinc-100 sm:dark:text-base">
           GW {selectedMatchday} · {t('Predictions')}
         </h3>
         {focusedIndex >= 0 ? (
-          <span className="shrink-0 text-[10px] font-bold tabular-nums text-zinc-500">
+          <span className="shrink-0 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-[10px] dark:font-bold dark:normal-case dark:tracking-normal dark:tabular-nums dark:text-zinc-500">
             {focusedIndex + 1} / {gameweekFixtures.length}
           </span>
         ) : null}
@@ -236,12 +236,12 @@ export default function CurrentGameweek({
             <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-start gap-2 sm:gap-4">
               <div className="flex min-w-0 flex-col items-center gap-1.5">
                 <Crest src={selectedFixture.homeCrest} name={selectedFixture.home} size={44} />
-                <p className="line-clamp-2 w-full text-center text-xs font-bold leading-tight text-slate-900 dark:text-zinc-100 sm:text-sm">
+                <p className="w-full break-words text-center text-sm font-medium leading-tight text-slate-900 dark:text-xs dark:font-bold dark:text-zinc-100 sm:dark:text-sm">
                   {selectedFixture.home}
                 </p>
                 {showSelectedScore
                   ? (selectedFixture.homeScorers || []).map((scorer) => (
-                      <p key={scorer} className="w-full truncate text-center text-[10px] leading-tight text-zinc-500">
+                      <p key={scorer} className="w-full break-words text-center text-xs leading-tight text-slate-500 dark:text-[10px] dark:text-zinc-500">
                         {scorer}
                       </p>
                     ))
@@ -253,14 +253,14 @@ export default function CurrentGameweek({
                   {selectedFixture.isLive ? (
                     <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" title="Live" />
                   ) : null}
-                  <span className="font-mono text-lg font-black tabular-nums text-xactscore-accent sm:text-xl">
+                  <span className="font-mono text-base font-semibold tabular-nums text-xactscore-accent dark:text-lg dark:font-black sm:dark:text-xl">
                     {showSelectedScore ? selectedFixture.score || '0 : 0' : '— : —'}
                   </span>
                 </div>
                 {!selectedFixture.isLive && selectedFixture.status === 'FINISHED' && showSelectedScore ? (
                   <span className="mt-0.5 text-[9px] font-semibold uppercase tracking-wider text-slate-500 dark:font-black">FT</span>
                 ) : selectedFixture.isLive && typeof selectedFixture.liveMinute === 'number' ? (
-                  <span className="mt-0.5 text-[9px] font-black uppercase tracking-wider text-emerald-400">
+                  <span className="mt-0.5 text-[9px] font-semibold uppercase tracking-wider text-emerald-500 dark:font-black dark:text-emerald-400">
                     {`${selectedFixture.liveMinute}'`}
                   </span>
                 ) : null}
@@ -268,12 +268,12 @@ export default function CurrentGameweek({
 
               <div className="flex min-w-0 flex-col items-center gap-1.5">
                 <Crest src={selectedFixture.awayCrest} name={selectedFixture.away} size={44} />
-                <p className="line-clamp-2 w-full text-center text-xs font-bold leading-tight text-slate-900 dark:text-zinc-100 sm:text-sm">
+                <p className="w-full break-words text-center text-sm font-medium leading-tight text-slate-900 dark:text-xs dark:font-bold dark:text-zinc-100 sm:dark:text-sm">
                   {selectedFixture.away}
                 </p>
                 {showSelectedScore
                   ? (selectedFixture.awayScorers || []).map((scorer) => (
-                      <p key={scorer} className="w-full truncate text-center text-[10px] leading-tight text-zinc-500">
+                      <p key={scorer} className="w-full break-words text-center text-xs leading-tight text-slate-500 dark:text-[10px] dark:text-zinc-500">
                         {scorer}
                       </p>
                     ))
@@ -311,7 +311,7 @@ export default function CurrentGameweek({
                         )}
                       >
                         <Crest src={fixture.homeCrest} name={fixture.home} size={26} />
-                        <span className="text-[8px] font-black uppercase tracking-wider text-zinc-400">vs</span>
+                        <span className="text-[8px] font-semibold uppercase tracking-wide text-slate-500 dark:font-black dark:tracking-wider dark:text-zinc-400">vs</span>
                         <Crest src={fixture.awayCrest} name={fixture.away} size={26} />
                       </button>
                     )
@@ -329,7 +329,7 @@ export default function CurrentGameweek({
 
       {focusedIndex >= 0 && (
         <div className="mt-4 border-t border-zinc-800 pt-3">
-          <div className="mb-2 hidden items-center gap-2 px-3 text-[10px] font-black uppercase tracking-wider text-zinc-500 sm:grid sm:grid-cols-[4rem_minmax(0,1fr)_7rem_5rem]">
+          <div className="mb-2 hidden items-center gap-2 px-3 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-[10px] dark:font-black dark:tracking-wider dark:text-zinc-500 sm:grid sm:grid-cols-[4rem_minmax(0,1fr)_7rem_5rem]">
             <span className="flex items-center gap-1">
               <Gauge className="h-3.5 w-3.5" /> Rank
             </span>
@@ -351,7 +351,7 @@ export default function CurrentGameweek({
                   key={player.id}
                   className="mb-2.5 flex min-h-10 items-center gap-1.5 rounded-2xl border border-slate-200 bg-white px-2.5 py-2.5 text-sm shadow-sm dark:mb-0 dark:rounded-lg dark:border-transparent dark:bg-zinc-950 dark:p-1.5 dark:px-3 dark:shadow-none sm:grid sm:grid-cols-[4rem_minmax(0,1fr)_7rem_5rem] sm:gap-2 sm:p-3.5"
                 >
-                  <span className="w-7 shrink-0 font-mono text-xs font-black text-xactscore-accent sm:w-auto sm:text-sm">
+                  <span className="w-7 shrink-0 font-mono text-xs font-semibold text-xactscore-accent dark:font-black sm:w-auto sm:text-sm">
                     {index + 1}
                     {index === 0 ? 'st' : index === 1 ? 'nd' : index === 2 ? 'rd' : 'th'}
                   </span>
@@ -369,19 +369,19 @@ export default function CurrentGameweek({
                         unoptimized={isUnoptimizedAvatar(player.avatar)}
                       />
                     ) : (
-                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-orange-500/20 text-xs font-black text-orange-300 sm:h-7 sm:w-7">
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-orange-500/20 text-xs font-semibold text-orange-300 dark:font-black sm:h-7 sm:w-7">
                         <UserRound className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                       </span>
                     )}
-                    <span className="min-w-0 flex-1 break-words font-bold leading-snug [overflow-wrap:anywhere]">
+                    <span className="min-w-0 flex-1 break-words text-sm font-medium leading-snug [overflow-wrap:anywhere] dark:font-bold">
                       {player.name}
                     </span>
                   </MemberLink>
-                  <span className="shrink-0 rounded-full border border-slate-200 bg-white px-2 py-1 font-mono text-xs font-bold text-slate-900 dark:rounded-md dark:border-zinc-700 dark:bg-transparent dark:px-1.5 dark:py-0.5 dark:text-zinc-200 sm:justify-self-start sm:px-2 sm:py-1 sm:text-sm">
+                  <span className="shrink-0 rounded-full border border-slate-200 bg-white px-2 py-1 font-mono text-xs font-medium text-slate-900 dark:rounded-md dark:border-zinc-700 dark:bg-transparent dark:px-1.5 dark:py-0.5 dark:font-bold dark:text-zinc-200 sm:justify-self-start sm:px-2 sm:py-1 sm:text-sm">
                     {player.prediction}
                   </span>
                   <span
-                    className={`inline-flex shrink-0 items-center gap-0.5 rounded-full border px-2 py-1 text-xs font-bold sm:justify-self-start sm:gap-1 sm:px-2 sm:py-1 ${
+                    className={`inline-flex shrink-0 items-center gap-0.5 rounded-full border px-2 py-1 text-xs font-semibold sm:justify-self-start sm:gap-1 sm:px-2 sm:py-1 ${
                       player.outcome === 'exact'
                         ? 'border-amber-500/20 bg-amber-500/10 text-amber-600 dark:border-transparent dark:bg-amber-400/15 dark:text-amber-300 dark:font-black'
                         : player.outcome === 'zero'

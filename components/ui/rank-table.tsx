@@ -89,10 +89,10 @@ export function RankTable<T>({
                       key={col.key}
                       className="min-w-0 rounded-md border border-slate-200 bg-slate-50 px-1.5 py-1 text-center dark:border-white/[0.06] dark:bg-black/20"
                     >
-                      <div className="truncate text-[8px] font-bold uppercase tracking-wider text-zinc-500">
+                      <div className="truncate text-[8px] font-semibold uppercase tracking-wide text-slate-500 dark:font-bold dark:tracking-wider dark:text-zinc-500">
                         {col.mobileHeader ?? col.header}
                       </div>
-                      <div className="truncate text-[11px] font-bold tabular-nums text-slate-900 dark:text-zinc-100">
+                      <div className="truncate text-[11px] font-medium tabular-nums text-slate-900 dark:font-bold dark:text-zinc-100">
                         {col.cell(row, index)}
                       </div>
                     </div>
@@ -109,7 +109,7 @@ export function RankTable<T>({
                 ) : null}
 
                 <div className="flex min-w-0 flex-1 items-center">
-                  <div className="min-w-0 flex-1 text-[13px] font-semibold leading-snug tracking-tight text-slate-900 dark:text-zinc-100">
+                  <div className="min-w-0 flex-1 text-sm font-medium leading-snug tracking-tight text-slate-900 dark:text-[13px] dark:font-semibold dark:text-zinc-100">
                     {mobileTitle ? mobileTitle(row, index) : null}
                   </div>
                   {showInlineSubtitle ? (
@@ -126,7 +126,7 @@ export function RankTable<T>({
                 ) : null}
 
                 {mobileEnd ? (
-                  <div className="pointer-events-none min-w-[1.75rem] shrink-0 text-right font-black tabular-nums text-xactscore-accent">
+                  <div className="pointer-events-none min-w-[1.75rem] shrink-0 text-right text-sm font-semibold tabular-nums text-xactscore-accent dark:font-black">
                     {mobileEnd(row, index)}
                   </div>
                 ) : null}
@@ -173,7 +173,7 @@ export function RankTable<T>({
                 <div className="mb-3 flex items-start justify-between gap-3 border-b border-slate-100 pb-3 dark:border-white/10">
                   <div className="min-w-0">
                     {mobileTitle ? (
-                      <div className="break-words font-bold leading-snug text-slate-900 [overflow-wrap:anywhere] dark:text-zinc-100">
+                      <div className="break-words text-sm font-medium leading-snug text-slate-900 [overflow-wrap:anywhere] dark:font-bold dark:text-zinc-100">
                         {mobileTitle(row, index)}
                       </div>
                     ) : null}
@@ -188,7 +188,7 @@ export function RankTable<T>({
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                 {mobileColumns.map((col) => (
                   <div key={col.key} className={cn(col.mobilePrimary && "col-span-2 sm:col-span-1")}>
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
+                    <div className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-[10px] dark:font-bold dark:tracking-wider dark:text-zinc-500">
                       {col.header}
                     </div>
                     <div className="mt-0.5 text-sm font-semibold text-slate-900 dark:text-zinc-100">
@@ -204,7 +204,7 @@ export function RankTable<T>({
 
       <div className="glass-list hidden overflow-x-auto md:block">
         <table className="w-full text-left text-sm">
-          <thead className="bg-slate-50 text-[11px] font-black uppercase tracking-wider text-zinc-500 dark:bg-white/[0.04]">
+          <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:bg-white/[0.04] dark:text-[11px] dark:font-black dark:tracking-wider dark:text-zinc-500">
             <tr>
               {columns.map((col) => (
                 <th

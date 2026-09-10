@@ -35,7 +35,7 @@ export default function BottomNav({ isAdmin, isLoggedIn, unreadMessageCount }: B
         { href: '/', label: t('Dashboard'), short: t('Home'), icon: HomeIcon },
         { href: '/contests', label: t('Contests'), short: t('Leagues'), icon: Trophy },
         { href: '/profile', label: t('Profile'), short: t('Profile'), icon: UserIcon },
-        { href: '/news', label: t('Messages'), short: t('Messages'), icon: MessageSquare, badge: unreadMessageCount },
+        { href: '/messages', label: t('Messages'), short: t('Messages'), icon: MessageSquare, badge: unreadMessageCount },
         { href: '/help', label: t('Help'), short: t('Help'), icon: CircleHelp },
         ...(isAdmin ? [{ href: '/admin', label: t('Admin'), short: t('Admin'), icon: ShieldCheck }] : []),
       ]

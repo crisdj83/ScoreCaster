@@ -45,13 +45,13 @@ export async function notifyContestMembers(options: {
         ? {
             title: 'XactScore',
             body: `${name} replied in ${league}: ${clip(options.body)}`,
-            url: `${origin}/news`,
+            url: `${origin}/messages`,
             tag: 'xactscore-messages',
           }
         : {
             title: 'XactScore',
             body: `${name} in ${league}: ${clip(options.title)}`,
-            url: `${origin}/news`,
+            url: `${origin}/messages`,
             tag: 'xactscore-messages',
           }
 

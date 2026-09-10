@@ -284,7 +284,7 @@ function ScoringChip({
       aria-label={`${label}: ${value}`}
     >
       <Icon className={`h-3 w-3 shrink-0 ${iconClassName}`} aria-hidden />
-      <span className="min-w-[0.75rem] text-center text-[10px] font-bold tabular-nums text-zinc-200">{value}</span>
+      <span className="min-w-[0.75rem] text-center text-[10px] font-semibold tabular-nums text-slate-500 dark:font-bold dark:text-zinc-200">{value}</span>
     </span>
   )
 }
@@ -672,7 +672,7 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
       headerClassName: 'text-center w-16',
       className: 'text-center',
       cell: (player) => (
-        <span className="font-mono text-sm font-bold text-zinc-100">{player.rank}.</span>
+        <span className="font-mono text-sm font-medium text-slate-900 dark:font-bold dark:text-zinc-100">{player.rank}.</span>
       ),
     },
     {
@@ -688,7 +688,7 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
             <PlayerAvatar src={player.avatar} name={player.username} />
             <div className="min-w-0">
               <div className="flex min-w-0 items-center gap-1.5">
-                <span className="break-words font-bold [overflow-wrap:anywhere]">
+                <span className="break-words text-sm font-medium [overflow-wrap:anywhere] dark:font-bold">
                   {player.username}
                 </span>
                 <RankMovement
@@ -729,7 +729,7 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
         </span>
       ),
       headerClassName: 'text-center',
-      className: 'text-center font-bold text-zinc-200',
+      className: 'text-center font-semibold text-slate-500 dark:font-bold dark:text-zinc-200',
       cell: (player) => player.exactResults,
     },
     {
@@ -741,7 +741,7 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
         </span>
       ),
       headerClassName: 'text-center',
-      className: 'text-center font-bold text-zinc-200',
+      className: 'text-center font-semibold text-slate-500 dark:font-bold dark:text-zinc-200',
       cell: (player) => player.closeResults,
     },
     {
@@ -753,7 +753,7 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
         </span>
       ),
       headerClassName: 'text-center',
-      className: 'text-center font-bold text-zinc-200',
+      className: 'text-center font-semibold text-slate-500 dark:font-bold dark:text-zinc-200',
       cell: (player) => player.rightOutcome,
     },
   ]
@@ -772,10 +772,10 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
           <div className="flex items-center gap-1.5 text-xactscore-accent">
             <Gauge className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
             <span className="flex flex-col items-end leading-none">
-              <span className="text-[9px] font-black uppercase tracking-wide text-xactscore-accent/70">
+              <span className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-[9px] dark:font-black dark:tracking-wide dark:text-xactscore-accent/70">
                 {t('Season')}
               </span>
-              <span className="whitespace-nowrap text-[10px] font-black uppercase tracking-wide sm:text-xs">
+              <span className="whitespace-nowrap text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-[10px] dark:font-black dark:text-xactscore-accent sm:dark:text-xs">
                 {t(getSeasonLengthLabelKey(seasonLength))}
               </span>
             </span>
@@ -790,7 +790,7 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
       />
 
       <div className="mb-2 mt-6 sm:mb-4 sm:mt-8">
-        <h2 className="text-base font-black uppercase tracking-wider text-zinc-100 sm:text-xl">
+        <h2 className="text-xl font-semibold uppercase tracking-tight text-slate-900 dark:text-base dark:font-black dark:tracking-wider dark:text-zinc-100 sm:dark:text-xl">
           {t('Contest Leaderboard')}
         </h2>
         <p className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] font-semibold leading-none text-zinc-500 md:hidden">
@@ -817,7 +817,7 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
         mobileSingleLine
         getRowHref={(player) => `/contests/${params.id}/members/${player.id}`}
         mobileRank={(player) => (
-          <span className="text-[13px] font-bold tabular-nums text-zinc-400">{player.rank}.</span>
+          <span className="text-sm font-medium tabular-nums text-slate-500 dark:text-[13px] dark:font-bold dark:text-zinc-400">{player.rank}.</span>
         )}
         mobileTitle={(player) => (
           <span
@@ -825,7 +825,7 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
             title={player.motto ? `"${player.motto}"` : undefined}
           >
             <PlayerAvatar src={player.avatar} name={player.username} />
-            <span className="min-w-0 flex-1 break-words font-semibold leading-snug text-indigo-700 [overflow-wrap:anywhere] dark:text-xactscore-accent">
+            <span className="min-w-0 flex-1 break-words text-sm font-medium leading-snug text-indigo-700 [overflow-wrap:anywhere] dark:font-semibold dark:text-xactscore-accent">
               {player.username}
             </span>
             <RankMovement
@@ -860,7 +860,7 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
               />
             </span>
             <span
-              className="inline-flex shrink-0 items-center justify-end pl-1 text-[13px] font-black tabular-nums leading-none text-xactscore-accent"
+              className="inline-flex shrink-0 items-center justify-end pl-1 text-sm font-semibold tabular-nums leading-none text-xactscore-accent dark:text-[13px] dark:font-black"
               title={t('Total Points')}
             >
               {player.totalPoints.toFixed(1).replace('.0', '')}

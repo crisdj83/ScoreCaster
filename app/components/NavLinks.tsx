@@ -49,7 +49,7 @@ export default function NavLinks({ isAdmin, isLoggedIn, unreadMessageCount }: Na
           <Link href="/profile" className={linkClass('/profile')}>
             <UserIcon className="h-4 w-4" /> {t('Profile')}
           </Link>
-          <Link href="/news" className={linkClass('/news')}>
+          <Link href="/messages" className={linkClass('/messages')}>
             <span className="relative">
               <MessageSquare className="h-4 w-4" />
               {unreadMessageCount > 0 && (

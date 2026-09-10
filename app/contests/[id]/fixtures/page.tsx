@@ -45,7 +45,7 @@ function ScorerCard({
   return (
     <section className="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:rounded-xl dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-none">
       <div className="border-b border-slate-200 bg-white px-5 py-4 text-zinc-900 dark:border-transparent dark:bg-zinc-950 dark:text-zinc-100">
-        <h3 className="font-black uppercase tracking-wider">{title}</h3>
+        <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-900 dark:font-black dark:text-zinc-100">{title}</h3>
       </div>
       {sortedPlayers.length ? (
         sortedPlayers.map((player, index) => (
@@ -54,7 +54,7 @@ function ScorerCard({
             className="flex items-center justify-between border-b border-zinc-800 px-5 py-3 last:border-0"
           >
             <div className="flex min-w-0 items-center gap-3">
-              <span className="w-5 text-sm font-black text-xactscore-accent">{index + 1}</span>
+              <span className="w-5 text-sm font-semibold text-xactscore-accent dark:font-black">{index + 1}</span>
               {player.team?.crest ? (
                 <Image
                   src={player.team.crest}
@@ -64,13 +64,13 @@ function ScorerCard({
                   className="h-7 w-7 object-contain"
                 />
               ) : null}
-              <span className="truncate font-bold text-zinc-100">
+              <span className="min-w-0 break-words text-sm font-medium text-slate-900 dark:font-bold dark:text-zinc-100">
                 {player.player?.name || player.name}
               </span>
             </div>
-            <span className="ml-3 shrink-0 font-black text-xactscore-accent">
+            <span className="ml-3 shrink-0 font-semibold text-xactscore-accent dark:font-black">
               {player[statKey]}{' '}
-              <span className="text-xs font-bold text-zinc-500">{statLabel}</span>
+              <span className="text-xs font-semibold text-slate-500 dark:font-bold dark:text-zinc-500">{statLabel}</span>
             </span>
           </div>
         ))
@@ -124,7 +124,7 @@ export default async function FixturesPage(props: { params: Promise<{ id: string
       key: 'pos',
       header: '#',
       headerClassName: 'text-center w-14',
-      className: 'text-center font-extrabold text-zinc-100',
+      className: 'text-center font-semibold text-slate-900 dark:font-extrabold dark:text-zinc-100',
       cell: (row) => row.position,
     },
     {
@@ -132,7 +132,7 @@ export default async function FixturesPage(props: { params: Promise<{ id: string
       header: t('Club'),
       mobilePrimary: true,
       cell: (row) => (
-        <div className="flex items-center gap-3 font-bold text-zinc-100">
+        <div className="flex min-w-0 items-center gap-3 text-sm font-medium text-slate-900 dark:font-bold dark:text-zinc-100">
           {row.team.crest ? (
             <Image src={row.team.crest} alt="" width={24} height={24} className="h-6 w-6 object-contain" />
           ) : null}
@@ -144,7 +144,7 @@ export default async function FixturesPage(props: { params: Promise<{ id: string
       key: 'mp',
       header: 'MP',
       headerClassName: 'text-center',
-      className: 'text-center text-zinc-400',
+      className: 'text-center text-slate-500 dark:text-zinc-400',
       hideOnMobile: true,
       cell: (row) => row.playedGames,
     },
@@ -152,7 +152,7 @@ export default async function FixturesPage(props: { params: Promise<{ id: string
       key: 'w',
       header: 'W',
       headerClassName: 'text-center',
-      className: 'text-center text-zinc-300',
+      className: 'text-center text-slate-500 dark:text-zinc-300',
       mobileExpandable: true,
       cell: (row) => row.won,
     },
@@ -160,7 +160,7 @@ export default async function FixturesPage(props: { params: Promise<{ id: string
       key: 'd',
       header: 'D',
       headerClassName: 'text-center',
-      className: 'text-center text-zinc-300',
+      className: 'text-center text-slate-500 dark:text-zinc-300',
       mobileExpandable: true,
       cell: (row) => row.draw,
     },
@@ -168,7 +168,7 @@ export default async function FixturesPage(props: { params: Promise<{ id: string
       key: 'l',
       header: 'L',
       headerClassName: 'text-center',
-      className: 'text-center text-zinc-300',
+      className: 'text-center text-slate-500 dark:text-zinc-300',
       mobileExpandable: true,
       cell: (row) => row.lost,
     },
@@ -176,7 +176,7 @@ export default async function FixturesPage(props: { params: Promise<{ id: string
       key: 'gf',
       header: 'GF',
       headerClassName: 'text-center',
-      className: 'text-center text-zinc-300',
+      className: 'text-center text-slate-500 dark:text-zinc-300',
       mobileExpandable: true,
       cell: (row) => row.goalsFor,
     },
@@ -184,7 +184,7 @@ export default async function FixturesPage(props: { params: Promise<{ id: string
       key: 'ga',
       header: 'GA',
       headerClassName: 'text-center',
-      className: 'text-center text-zinc-300',
+      className: 'text-center text-slate-500 dark:text-zinc-300',
       mobileExpandable: true,
       cell: (row) => row.goalsAgainst,
     },
@@ -192,7 +192,7 @@ export default async function FixturesPage(props: { params: Promise<{ id: string
       key: 'gd',
       header: 'GD',
       headerClassName: 'text-center',
-      className: 'text-center font-bold text-zinc-200',
+      className: 'text-center font-semibold text-slate-500 dark:font-bold dark:text-zinc-200',
       mobileExpandable: true,
       cell: (row) => row.goalDifference,
     },
@@ -215,7 +215,7 @@ export default async function FixturesPage(props: { params: Promise<{ id: string
       <p className="text-xs text-zinc-500">{t('Click a fixture to view and manage predictions.')}</p>
 
       <section className="space-y-6 pt-6 border-t border-zinc-800">
-        <h2 className="text-base font-black uppercase tracking-wider text-zinc-100 sm:text-xl">
+        <h2 className="text-xl font-semibold uppercase tracking-tight text-slate-900 dark:text-base dark:font-black dark:tracking-wider dark:text-zinc-100 sm:dark:text-xl">
           {t('Premier League Standings')}
         </h2>
 
@@ -241,11 +241,11 @@ export default async function FixturesPage(props: { params: Promise<{ id: string
                   className="h-4 w-4 shrink-0 object-contain"
                 />
               ) : null}
-              <span className="truncate text-[12px]">{row.team.shortName || row.team.name}</span>
+              <span className="min-w-0 break-words text-sm font-medium [overflow-wrap:anywhere]">{row.team.shortName || row.team.name}</span>
             </span>
           )}
           mobileEnd={(row) => (
-            <span className="text-[12px] font-black tabular-nums">{row.points}</span>
+            <span className="text-sm font-semibold tabular-nums dark:text-[12px] dark:font-black">{row.points}</span>
           )}
         />
 

@@ -87,14 +87,14 @@ export default function FixturesCalendar({
       />
       <div className="-mt-3 mb-1 flex justify-center">
         {isCurrentGameweekSelected ? (
-          <span className="rounded-full border border-xactscore-accent/40 bg-xactscore-accent/20 px-2 py-0.5 text-[10px] font-black uppercase tracking-widest text-orange-300">
+          <span className="rounded-full border border-slate-200 bg-white px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:border-xactscore-accent/40 dark:bg-xactscore-accent/20 dark:text-[10px] dark:font-black dark:tracking-widest dark:text-orange-300">
             {t('Current Gameweek')}
           </span>
         ) : (
           <button
             type="button"
             onClick={() => setSelectedMatchday(currentMatchday)}
-            className="inline-flex items-center gap-1 rounded-full border border-orange-500/30 bg-orange-500/10 px-2.5 py-0.5 text-[10px] font-bold text-orange-300 transition-colors hover:bg-orange-500/20 active:scale-95"
+            className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide text-slate-500 transition-colors hover:bg-slate-50 active:scale-95 dark:border-orange-500/30 dark:bg-orange-500/10 dark:text-[10px] dark:font-bold dark:normal-case dark:tracking-normal dark:text-orange-300 dark:hover:bg-orange-500/20"
           >
             <Sparkles className="h-3 w-3" />
             <span>
@@ -122,17 +122,17 @@ export default function FixturesCalendar({
                 href={`/contests/${contestId}/predictions/${match.id}`}
                 className="prediction-fixture-content fixture-calendar-game mb-2.5 flex min-h-[52px] items-center justify-between gap-3 overflow-hidden rounded-2xl border border-emerald-100 bg-emerald-500/5 p-3.5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-200 dark:mb-0 dark:min-h-[72px] dark:flex-col dark:gap-3 dark:rounded-none dark:border-0 dark:bg-transparent dark:px-4 dark:py-4 dark:shadow-none dark:hover:bg-zinc-800/50 dark:hover:shadow-none sm:grid sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:items-center sm:gap-4 sm:px-5"
               >
-                <span className="flex min-w-0 items-center gap-2 font-bold text-slate-900 dark:font-bold dark:text-zinc-100 sm:justify-end sm:text-right">
+                <span className="flex min-w-0 items-center gap-2 text-sm font-medium text-slate-900 dark:font-bold dark:text-zinc-100 sm:justify-end sm:text-right">
                   {match.homeTeam.crest ? (
                     <Image
                       src={match.homeTeam.crest}
                       alt=""
                       width={28}
                       height={28}
-                      className="h-7 w-7 object-contain sm:order-2"
+                      className="h-7 w-7 shrink-0 object-contain sm:order-2"
                     />
                   ) : null}
-                  <span className="truncate sm:order-1">{homeName}</span>
+                  <span className="min-w-0 break-words sm:order-1">{homeName}</span>
                 </span>
 
                 <span className="flex min-w-24 flex-col items-center gap-1 self-center">
@@ -143,7 +143,7 @@ export default function FixturesCalendar({
                   ) : (
                     <span className="text-sm font-semibold text-slate-500 dark:font-black dark:text-xactscore-accent">vs</span>
                   )}
-                  <span className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+                  <span className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
                     <Clock className="h-3 w-3" />
                     {new Date(match.utcDate).toLocaleString(locale, {
                       day: '2-digit',
@@ -153,24 +153,24 @@ export default function FixturesCalendar({
                     })}
                   </span>
                   {match.venue ? (
-                    <span className="flex max-w-[11rem] items-center gap-1 text-[10px] font-semibold normal-case tracking-normal text-zinc-500">
+                    <span className="flex max-w-[11rem] items-center gap-1 text-xs font-medium normal-case tracking-normal text-slate-500">
                       <MapPin className="h-3 w-3 shrink-0" />
-                      <span className="truncate">{match.venue}</span>
+                      <span className="min-w-0 break-words">{match.venue}</span>
                     </span>
                   ) : null}
                 </span>
 
-                <span className="flex items-center gap-2 font-bold text-slate-900 dark:font-bold dark:text-zinc-100">
+                <span className="flex min-w-0 items-center gap-2 text-sm font-medium text-slate-900 dark:font-bold dark:text-zinc-100">
                   {match.awayTeam.crest ? (
                     <Image
                       src={match.awayTeam.crest}
                       alt=""
                       width={28}
                       height={28}
-                      className="h-7 w-7 object-contain"
+                      className="h-7 w-7 shrink-0 object-contain"
                     />
                   ) : null}
-                  <span className="truncate">{awayName}</span>
+                  <span className="min-w-0 break-words">{awayName}</span>
                 </span>
               </Link>
             )

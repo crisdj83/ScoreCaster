@@ -25,6 +25,11 @@ const nextConfig = {
   experimental: {
     optimizePackageImports: ['lucide-react'],
   },
+  async redirects() {
+    return [
+      { source: '/news', destination: '/messages', permanent: true },
+    ]
+  },
 }
 
 export default nextConfig

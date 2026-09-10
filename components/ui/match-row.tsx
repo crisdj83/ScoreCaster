@@ -65,7 +65,7 @@ export function MatchRow({
       <div className="flex w-full items-center gap-3 sm:grid sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:gap-4">
         <div className="flex min-w-0 items-center gap-3 sm:justify-end">
           <Crest src={home.crest} name={home.name} />
-          <span className="truncate text-sm font-bold text-slate-900 dark:font-bold dark:text-zinc-100 sm:text-right">
+          <span className="min-w-0 break-words text-sm font-medium text-slate-900 dark:font-bold dark:text-zinc-100 sm:text-right">
             {home.name}
           </span>
         </div>
@@ -78,9 +78,9 @@ export function MatchRow({
           )}
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex min-w-0 items-center gap-3">
           <Crest src={away.crest} name={away.name} />
-          <span className="truncate text-sm font-bold text-slate-900 dark:font-bold dark:text-zinc-100">{away.name}</span>
+          <span className="min-w-0 break-words text-sm font-medium text-slate-900 dark:font-bold dark:text-zinc-100">{away.name}</span>
         </div>
       </div>
 

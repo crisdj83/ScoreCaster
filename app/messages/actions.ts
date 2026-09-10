@@ -47,9 +47,9 @@ export async function createMessage(formData: FormData) {
   const contestId = String(formData.get('contest_id') || '')
   const title = String(formData.get('title') || '').trim()
   const body = String(formData.get('body') || '').trim()
-  if (!contestId || !title || !body) redirect('/news?error=Message title and text are required.')
+  if (!contestId || !title || !body) redirect('/messages?error=Message title and text are required.')
   if (!(await requireMessageMember(contestId, user.id))) {
-    redirect('/news?error=You can only post messages in contests you belong to.')
+    redirect('/messages?error=You can only post messages in contests you belong to.')
   }
   const { error } = await getServiceDb().from('messages').insert({
     contest_id: contestId,
@@ -57,7 +57,7 @@ export async function createMessage(formData: FormData) {
     title,
     body,
   })
-  if (error) redirect(`/news?error=${encodeURIComponent(error.message)}`)
+  if (error) redirect(`/messages?error=${encodeURIComponent(error.message)}`)
   await notifyContestMembers({
     contestId,
     authorId: user.id,
@@ -65,8 +65,8 @@ export async function createMessage(formData: FormData) {
     body,
     kind: 'message',
   })
-  revalidatePath('/news')
-  redirect('/news')
+  revalidatePath('/messages')
+  redirect('/messages')
 }
 
 export async function updateMessage(formData: FormData) {
@@ -74,46 +74,46 @@ export async function updateMessage(formData: FormData) {
   const messageId = String(formData.get('message_id') || '')
   const title = String(formData.get('title') || '').trim()
   const body = String(formData.get('body') || '').trim()
-  if (!messageId || !title || !body) redirect('/news?error=Message title and text are required.')
+  if (!messageId || !title || !body) redirect('/messages?error=Message title and text are required.')
   const access = await getMessageAccess(messageId, user.id)
   if (!access.message || !access.isMember || access.message.author_id !== user.id) {
-    redirect('/news?error=You can only edit your own messages.')
+    redirect('/messages?error=You can only edit your own messages.')
   }
   const { error } = await getServiceDb().from('messages').update({ title, body }).eq('id', messageId)
-  if (error) redirect(`/news?error=${encodeURIComponent(error.message)}`)
-  revalidatePath('/news')
-  redirect('/news')
+  if (error) redirect(`/messages?error=${encodeURIComponent(error.message)}`)
+  revalidatePath('/messages')
+  redirect('/messages')
 }
 
 export async function deleteMessage(formData: FormData) {
   const { user, isAdmin } = await getUserAndAdmin()
   const messageId = String(formData.get('message_id') || '')
-  if (!messageId) redirect('/news?error=Message not found.')
+  if (!messageId) redirect('/messages?error=Message not found.')
   const access = await getMessageAccess(messageId, user.id)
   if (!access.message || !access.isMember || (!isAdmin && !access.isContestAdmin && access.message.author_id !== user.id)) {
-    redirect('/news?error=You can only delete messages in your contests.')
+    redirect('/messages?error=You can only delete messages in your contests.')
   }
   const { error } = await getServiceDb().from('messages').delete().eq('id', messageId)
-  if (error) redirect(`/news?error=${encodeURIComponent(error.message)}`)
-  revalidatePath('/news')
-  redirect('/news')
+  if (error) redirect(`/messages?error=${encodeURIComponent(error.message)}`)
+  revalidatePath('/messages')
+  redirect('/messages')
 }
 
 export async function createMessageReply(formData: FormData) {
   const { user } = await getUserAndAdmin()
   const messageId = String(formData.get('message_id') || '')
   const body = String(formData.get('body') || '').trim()
-  if (!messageId || !body) redirect('/news?error=Reply text is required.')
+  if (!messageId || !body) redirect('/messages?error=Reply text is required.')
   const access = await getMessageAccess(messageId, user.id)
   if (!access.message || !access.isMember) {
-    redirect('/news?error=You can only reply in contests you belong to.')
+    redirect('/messages?error=You can only reply in contests you belong to.')
   }
   const { error } = await getServiceDb().from('message_replies').insert({
     message_id: messageId,
     author_id: user.id,
     body,
   })
-  if (error) redirect(`/news?error=${encodeURIComponent(error.message)}`)
+  if (error) redirect(`/messages?error=${encodeURIComponent(error.message)}`)
   await notifyContestMembers({
     contestId: access.message.contest_id,
     authorId: user.id,
@@ -121,15 +121,15 @@ export async function createMessageReply(formData: FormData) {
     body,
     kind: 'reply',
   })
-  revalidatePath('/news')
-  redirect('/news')
+  revalidatePath('/messages')
+  redirect('/messages')
 }
 
 export async function updateMessageReply(formData: FormData) {
   const { user } = await getUserAndAdmin()
   const replyId = String(formData.get('reply_id') || '')
   const body = String(formData.get('body') || '').trim()
-  if (!replyId || !body) redirect('/news?error=Reply text is required.')
+  if (!replyId || !body) redirect('/messages?error=Reply text is required.')
   const { data: reply } = await getServiceDb()
     .from('message_replies')
     .select('message_id, author_id')
@@ -137,12 +137,12 @@ export async function updateMessageReply(formData: FormData) {
     .maybeSingle()
   const access = reply ? await getMessageAccess(reply.message_id, user.id) : null
   if (!reply || !access?.isMember || reply.author_id !== user.id) {
-    redirect('/news?error=You can only edit your own replies.')
+    redirect('/messages?error=You can only edit your own replies.')
   }
   const { error } = await getServiceDb().from('message_replies').update({ body }).eq('id', replyId)
-  if (error) redirect(`/news?error=${encodeURIComponent(error.message)}`)
-  revalidatePath('/news')
-  redirect('/news')
+  if (error) redirect(`/messages?error=${encodeURIComponent(error.message)}`)
+  revalidatePath('/messages')
+  redirect('/messages')
 }
 
 export async function deleteMessageReply(formData: FormData) {
@@ -155,12 +155,12 @@ export async function deleteMessageReply(formData: FormData) {
     .maybeSingle()
   const access = reply ? await getMessageAccess(reply.message_id, user.id) : null
   if (!reply || !access?.isMember || (!isAdmin && !access.isContestAdmin && reply.author_id !== user.id)) {
-    redirect('/news?error=You can only delete replies in your contests.')
+    redirect('/messages?error=You can only delete replies in your contests.')
   }
   const { error } = await getServiceDb().from('message_replies').delete().eq('id', replyId)
-  if (error) redirect(`/news?error=${encodeURIComponent(error.message)}`)
-  revalidatePath('/news')
-  redirect('/news')
+  if (error) redirect(`/messages?error=${encodeURIComponent(error.message)}`)
+  revalidatePath('/messages')
+  redirect('/messages')
 }
 
 export async function markMessagesRead() {
@@ -175,7 +175,7 @@ export async function markMessagesRead() {
       console.warn('markMessagesRead skipped:', error.message)
       return
     }
-    revalidatePath('/news')
+    revalidatePath('/messages')
     revalidatePath('/')
   } catch (error) {
     console.warn('markMessagesRead failed:', error)

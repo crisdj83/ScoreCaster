@@ -34,7 +34,7 @@ function FavoriteTeamGroup({
 }) {
   return (
     <>
-      <div className="sticky top-0 z-[1] border-y border-slate-100 bg-slate-100 px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:border-zinc-800 dark:bg-zinc-900">
+      <div className="sticky top-0 z-[1] border-y border-slate-100 bg-slate-100 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:border-zinc-800 dark:bg-zinc-900 dark:text-[10px] dark:font-bold dark:tracking-wider">
         {label}
       </div>
       {teams.map((team) => (
@@ -44,7 +44,7 @@ function FavoriteTeamGroup({
           onClick={() => onSelect(team.name)}
         >
           <Image src={team.crest} alt="" width={24} height={24} className="h-6 w-6 object-contain" />
-          <span className="text-zinc-200">{team.name}</span>
+          <span className="text-sm font-medium text-slate-900 dark:text-zinc-200">{team.name}</span>
         </div>
       ))}
     </>
@@ -190,8 +190,8 @@ function ProfilePageInner() {
       <div className="mb-8 flex items-center justify-between">
         <div>
           <Breadcrumb items={[{ label: t('Your Profile') }]} className="mb-2 hidden md:flex" />
-          <h1 className="flex items-center gap-3 text-3xl font-black uppercase tracking-tight text-zinc-100 md:text-4xl">
-            <User className="h-8 w-8 text-xactscore-accent" />
+          <h1 className="flex items-center gap-3 text-xl font-semibold uppercase tracking-tight text-slate-900 md:text-2xl dark:text-3xl dark:font-black dark:text-zinc-100 md:dark:text-4xl">
+            <User className="h-6 w-6 text-xactscore-accent md:h-7 md:w-7" />
             {t('Your Profile')}
           </h1>
         </div>
@@ -205,7 +205,7 @@ function ProfilePageInner() {
         <CardContent className="overflow-visible p-6 md:p-8">
           <form action={updateProfile} className="space-y-8">
             <div>
-              <h3 className="mb-4 flex items-center gap-2 text-lg font-bold text-zinc-100">
+              <h3 className="mb-4 flex items-center gap-2 text-base font-semibold text-slate-900 dark:text-lg dark:font-bold dark:text-zinc-100">
                 <ImageIcon className="h-5 w-5 text-xactscore-accent" /> {t('Profile Picture / Logo')}
               </h3>
 
@@ -270,7 +270,7 @@ function ProfilePageInner() {
                 <button
                   type="button"
                   onClick={() => setShowDropdown(!showDropdown)}
-                  className="focus-frost flex h-11 w-full items-center justify-between rounded-xl border-0 bg-slate-100 px-4 py-2 text-left text-sm text-slate-900 outline-none ring-0 transition-[border-color,box-shadow] focus:ring-0 dark:border dark:border-zinc-700 dark:bg-zinc-900/80 dark:text-zinc-100"
+                  className="focus-frost flex h-11 w-full items-center justify-between rounded-xl border-0 bg-slate-100 px-4 py-2 text-left text-base text-slate-900 outline-none ring-0 transition-[border-color,box-shadow] focus:ring-0 dark:border dark:border-zinc-700 dark:bg-zinc-900/80 dark:text-zinc-100"
                 >
                   <div className="flex items-center gap-3">
                     {selectedTeamData ? (
@@ -359,7 +359,7 @@ function ProfilePageInner() {
                     {t('Generate motto')}
                   </Button>
                 </div>
-                <p className="text-xs text-zinc-500">{motto.length}/18</p>
+                <p className="text-xs font-semibold tracking-wide text-slate-500">{motto.length}/18</p>
               </div>
             </div>
 
@@ -378,10 +378,10 @@ function ProfilePageInner() {
         <CardContent className="p-6 md:p-8">
           <form action={changePassword} className="space-y-6">
             <div>
-              <h3 className="mb-1 flex items-center gap-2 text-lg font-bold text-zinc-100">
+              <h3 className="mb-1 flex items-center gap-2 text-base font-semibold text-slate-900 dark:text-lg dark:font-bold dark:text-zinc-100">
                 <Lock className="h-5 w-5 text-xactscore-accent" /> {t('Settings')}
               </h3>
-              <p className="text-sm text-zinc-400">{t('Change Password')}</p>
+              <p className="text-sm text-slate-500 dark:text-zinc-400">{t('Change Password')}</p>
             </div>
 
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">

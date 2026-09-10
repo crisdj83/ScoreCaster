@@ -37,7 +37,7 @@ function ScoreBadge({
   return (
     <span
       className={cn(
-        "inline-flex min-w-[2.5rem] items-center justify-center rounded-2xl border border-slate-200 bg-white px-2.5 py-1 text-sm font-bold text-slate-900 shadow-sm dark:border-0 dark:bg-gradient-to-b dark:from-amber-400 dark:to-orange-600 dark:font-black dark:text-white dark:shadow-md dark:shadow-orange-500/25",
+        "inline-flex min-w-[2.5rem] items-center justify-center rounded-2xl border border-slate-200 bg-white px-2.5 py-1 text-sm font-semibold text-slate-900 shadow-sm dark:border-0 dark:bg-gradient-to-b dark:from-amber-400 dark:to-orange-600 dark:font-black dark:text-white dark:shadow-md dark:shadow-orange-500/25",
         className
       )}
       {...props}
