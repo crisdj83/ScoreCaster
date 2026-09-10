@@ -280,7 +280,6 @@ export default async function FixturesPage(props: { params: Promise<{ id: string
             <span className="text-sm font-semibold tabular-nums dark:text-[12px] dark:font-black">{row.points}</span>
           )}
         />
-        </div>
 
         <div className="grid gap-6 md:grid-cols-2">
           <ScorerCard
