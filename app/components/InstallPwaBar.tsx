@@ -23,7 +23,7 @@ export default function InstallPwaBar() {
     setStandalone(isStandaloneDisplay())
   }, [])
 
-  if (standalone || pathname.startsWith('/help/install')) return null
+  if (standalone || (pathname || '').startsWith('/help/install')) return null
 
   return (
     <div className="install-pwa-bar flex gap-2 border-t border-zinc-200/50 px-3 py-2 dark:border-white/10 sm:px-5 lg:px-8 xl:px-10">

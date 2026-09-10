@@ -27,7 +27,7 @@ type BottomNavProps = {
  * viewports (hidden at the `lg` breakpoint where the top nav takes over).
  */
 export default function BottomNav({ isAdmin, isLoggedIn, unreadMessageCount }: BottomNavProps) {
-  const pathname = usePathname()
+  const pathname = usePathname() || ''
   const t = useTranslations()
 
   const items = isLoggedIn

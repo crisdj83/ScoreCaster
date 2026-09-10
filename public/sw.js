@@ -1,4 +1,4 @@
-const CACHE_NAME = 'xactscore-shell-v4'
+const CACHE_NAME = 'xactscore-shell-v5'
 const PRECACHE_URLS = ['/offline.html', '/icons/icon-192.png', '/icons/icon-512.png', '/apple-touch-icon.png']
 
 self.addEventListener('install', (event) => {
@@ -22,6 +22,9 @@ self.addEventListener('activate', (event) => {
 function shouldBypass(request, url) {
   if (request.method !== 'GET') return true
   if (url.origin !== self.location.origin) return true
+  if (request.mode === 'navigate') return true
+  if (request.destination === 'document') return true
+  if (request.destination === 'script' || request.destination === 'style' || request.destination === 'worker') return true
   if (request.headers.get('RSC') === '1') return true
   if (request.headers.has('Next-Router-State-Tree')) return true
   if (request.headers.has('Next-Router-Prefetch')) return true
@@ -29,7 +32,7 @@ function shouldBypass(request, url) {
   if (url.searchParams.has('_rsc')) return true
   if (url.pathname.startsWith('/api/')) return true
   if (url.pathname.startsWith('/auth/')) return true
-  if (url.pathname.startsWith('/_next/') && !url.pathname.startsWith('/_next/static/')) return true
+  if (url.pathname.startsWith('/_next/')) return true
   return false
 }
 
@@ -38,21 +41,8 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url)
   if (shouldBypass(request, url)) return
 
-  // Never cache Next.js build assets. Hashed chunks change every deploy; a
-  // stale cacheFirst entry (especially on iOS Home Screen PWAs) causes
-  // ChunkLoadError when navigating to routes like /predictions.
-  if (url.pathname.startsWith('/_next/')) {
-    event.respondWith(fetch(request))
-    return
-  }
-
   if (url.pathname.startsWith('/icons/')) {
     event.respondWith(cacheFirst(request))
-    return
-  }
-
-  if (request.mode === 'navigate') {
-    event.respondWith(networkFirstNavigate(request))
   }
 })
 
@@ -66,16 +56,6 @@ async function cacheFirst(request) {
     cache.put(request, response.clone())
   }
   return response
-}
-
-async function networkFirstNavigate(request) {
-  try {
-    return await fetch(request)
-  } catch {
-    const offline = await caches.match('/offline.html')
-    if (offline) return offline
-    throw new Error('offline')
-  }
 }
 
 self.addEventListener('push', (event) => {

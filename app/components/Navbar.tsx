@@ -7,14 +7,19 @@ import BottomNav from './BottomNav'
 import LanguageSwitcher from './LanguageSwitcher'
 import ThemeToggle from './ThemeToggle'
 import InstallPwaBar from './InstallPwaBar'
-import { getTranslations } from '../../lib/i18n'
+import { getTranslations, defaultLocale } from '../../lib/i18n'
 import { getServerLocale } from '../../lib/i18n-server'
 import { loginPath } from '../../lib/urls'
 import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
 export default async function Navbar() {
-  const t = getTranslations(getServerLocale())
+  let t = getTranslations(defaultLocale)
+  try {
+    t = getTranslations(getServerLocale())
+  } catch {
+    /* keep default locale */
+  }
   let user: { id: string } | null = null
   let unreadMessageCount = 0
   let isAdmin = false

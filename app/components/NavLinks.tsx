@@ -22,7 +22,7 @@ type NavLinksProps = {
 }
 
 export default function NavLinks({ isAdmin, isLoggedIn, unreadMessageCount }: NavLinksProps) {
-  const pathname = usePathname()
+  const pathname = usePathname() || ''
   const t = useTranslations()
 
   const linkClass = (path: string) =>

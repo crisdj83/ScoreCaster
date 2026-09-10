@@ -15,6 +15,17 @@ function isChunkLoadError(error: unknown) {
   )
 }
 
+async function clearAppCaches() {
+  if ('serviceWorker' in navigator) {
+    const registrations = await navigator.serviceWorker.getRegistrations()
+    await Promise.all(registrations.map((registration) => registration.unregister()))
+  }
+  if ('caches' in window) {
+    const keys = await caches.keys()
+    await Promise.all(keys.map((key) => caches.delete(key)))
+  }
+}
+
 export default function ServiceWorkerRegister() {
   useEffect(() => {
     if (process.env.NODE_ENV !== 'production') return
@@ -28,7 +39,9 @@ export default function ServiceWorkerRegister() {
       } catch {
         /* private mode */
       }
-      window.location.reload()
+      void clearAppCaches().finally(() => {
+        window.location.reload()
+      })
     }
 
     const onError = (event: ErrorEvent) => {
@@ -49,14 +62,9 @@ export default function ServiceWorkerRegister() {
       .register('/sw.js', { updateViaCache: 'none' })
       .then((registration) => {
         void registration.update()
-        // Clear any legacy cached Next chunks from older SW versions.
         if ('caches' in window) {
           void caches.keys().then((keys) =>
-            Promise.all(
-              keys
-                .filter((key) => key.startsWith('xactscore-shell-') && key !== 'xactscore-shell-v4')
-                .map((key) => caches.delete(key))
-            )
+            Promise.all(keys.filter((key) => key !== 'xactscore-shell-v5').map((key) => caches.delete(key)))
           )
         }
       })
@@ -66,6 +74,7 @@ export default function ServiceWorkerRegister() {
 
     try {
       sessionStorage.removeItem('xactscore-chunk-reload')
+      sessionStorage.removeItem('xactscore-global-error-reload')
     } catch {
       /* private mode */
     }

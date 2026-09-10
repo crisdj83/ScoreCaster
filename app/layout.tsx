@@ -9,7 +9,7 @@ import ServiceWorkerRegister from "./components/ServiceWorkerRegister";
 import ThemeProvider from "./components/ThemeProvider";
 import { LocaleProvider } from "./components/LocaleProvider";
 import { getServerLocale } from "../lib/i18n-server";
-import { getTranslations } from "../lib/i18n";
+import { defaultLocale, getTranslations } from "../lib/i18n";
 import { siteUrl } from "../lib/urls";
 
 const inter = Inter({
@@ -29,7 +29,13 @@ export const viewport: Viewport = {
 };
 
 export async function generateMetadata(): Promise<Metadata> {
-  const t = getTranslations(getServerLocale());
+  let locale = defaultLocale
+  try {
+    locale = getServerLocale()
+  } catch {
+    locale = defaultLocale
+  }
+  const t = getTranslations(locale);
   const base = siteUrl();
   const title = t("XactScore | Premier League Predictions");
   const description = t("Private Premier League prediction leagues. Exact scores with friends — no ads, no player cap, always free.");
@@ -76,7 +82,12 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const locale = getServerLocale();
+  let locale = defaultLocale
+  try {
+    locale = getServerLocale()
+  } catch {
+    locale = defaultLocale
+  };
   return (
     <html
       lang={locale}
