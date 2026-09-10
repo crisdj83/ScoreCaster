@@ -32,8 +32,8 @@ function JoinAction({ contestId, joined, joinLabel, openLabel, compact = false }
       <Link
         href={`/contests/${contestId}`}
         className={compact
-          ? 'inline-flex items-center px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-orange-200 hover:text-white'
-          : 'inline-flex h-7 items-center rounded-full border border-white/15 bg-white/[0.07] px-2.5 text-[10px] font-black uppercase tracking-wider text-orange-200 backdrop-blur-md hover:bg-white/12'}
+          ? 'inline-flex min-h-11 select-none items-center px-3 py-2 text-xs font-black uppercase tracking-wider text-orange-200 touch-manipulation hover:text-white'
+          : 'inline-flex h-11 min-h-11 items-center rounded-full border border-white/15 bg-white/[0.07] px-3 text-xs font-black uppercase tracking-wider text-orange-200 backdrop-blur-md hover:bg-white/12'}
       >
         {openLabel}
       </Link>
@@ -45,7 +45,7 @@ function JoinAction({ contestId, joined, joinLabel, openLabel, compact = false }
       {compact ? (
         <button
           type="submit"
-          className="inline-flex items-center px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-orange-200 hover:text-white"
+          className="inline-flex min-h-11 select-none items-center px-3 py-2 text-xs font-black uppercase tracking-wider text-orange-200 touch-manipulation hover:text-white"
         >
           {joinLabel}
         </button>
@@ -53,7 +53,7 @@ function JoinAction({ contestId, joined, joinLabel, openLabel, compact = false }
         <Button
           type="submit"
           size="sm"
-          className="h-7 rounded-full px-2.5 text-[10px] uppercase tracking-wider"
+          className="min-h-11 rounded-full px-3 text-xs uppercase tracking-wider"
         >
           {joinLabel}
         </Button>

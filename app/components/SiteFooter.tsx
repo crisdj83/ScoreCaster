@@ -7,27 +7,27 @@ export default function SiteFooter() {
 
   return (
     <footer className="mt-auto flex flex-col items-center gap-3 px-3 py-8 text-center">
-      <nav className="flex flex-wrap items-center justify-center gap-4 text-[11px] font-black uppercase tracking-wider text-zinc-500">
-        <Link href="/help" className="hover:text-zinc-200">
+      <nav className="flex flex-wrap items-center justify-center gap-2 text-[11px] font-black uppercase tracking-wider text-zinc-500">
+        <Link href="/help" className="inline-flex min-h-11 items-center px-2 hover:text-zinc-200">
           {t('Help')}
         </Link>
-        <Link href="/compare" className="hover:text-zinc-200">
+        <Link href="/compare" className="inline-flex min-h-11 items-center px-2 hover:text-zinc-200">
           {t('Compare')}
         </Link>
-        <Link href="/login" className="hover:text-zinc-200">
+        <Link href="/login" className="inline-flex min-h-11 items-center px-2 hover:text-zinc-200">
           {t('Sign In')}
         </Link>
-        <Link href="/login?mode=signup" className="hover:text-zinc-200">
+        <Link href="/login?mode=signup" className="inline-flex min-h-11 items-center px-2 hover:text-zinc-200">
           {t('Sign Up')}
         </Link>
       </nav>
-      <div className="flex items-center gap-5">
+      <div className="flex items-center gap-3">
         <a
           href="https://instagram.com/cristiansfariac"
           target="_blank"
           rel="noreferrer"
           aria-label="Instagram"
-          className="text-zinc-400 transition-colors hover:text-zinc-100"
+          className="inline-flex h-11 w-11 items-center justify-center text-zinc-400 transition-colors hover:text-zinc-100"
         >
           <svg viewBox="0 0 24 24" aria-hidden="true" className="h-6 w-6 fill-none stroke-current" strokeWidth="1.75">
             <rect x="3" y="3" width="18" height="18" rx="5" />
@@ -40,7 +40,7 @@ export default function SiteFooter() {
           target="_blank"
           rel="noreferrer"
           aria-label="YouTube"
-          className="text-zinc-400 transition-colors hover:text-zinc-100"
+          className="inline-flex h-11 w-11 items-center justify-center text-zinc-400 transition-colors hover:text-zinc-100"
         >
           <svg viewBox="0 0 24 24" aria-hidden="true" className="h-6 w-6 fill-none stroke-current" strokeWidth="1.75">
             <rect x="3" y="6" width="18" height="12" rx="3" />

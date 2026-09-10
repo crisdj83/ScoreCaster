@@ -105,7 +105,7 @@ export default function FixturesCalendar({
         )}
       </div>
 
-      <section className="space-y-2 dark:space-y-0 dark:overflow-hidden dark:rounded-xl dark:border dark:border-zinc-800 dark:bg-zinc-900/60 dark:shadow-lg">
+      <section className="content-panel space-y-2 overflow-hidden p-2 dark:space-y-0 dark:p-0">
         <TeamNameFitGroup resetKey={selectedMatchday}>
         <div className="space-y-2 dark:space-y-0 dark:divide-y dark:divide-zinc-800">
           {selectedFixtures.map((match) => {

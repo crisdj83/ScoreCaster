@@ -7,7 +7,6 @@ import { savePrediction } from './actions'
 import Link from 'next/link'
 import { useLocale, useTranslations } from '../../../components/LocaleProvider'
 import { cn } from '@/lib/utils'
-import { FitTeamName } from '@/components/ui/fit-team-name'
 import { teamDisplayName, teamTla } from '@/lib/team-tla'
 
 const SCORE_MAX = 5
@@ -74,28 +73,73 @@ export function KickoffGroupHeading({
   )
 }
 
-function TeamCrest({ src, name, dimmed }: { src?: string; name: string; dimmed?: boolean }) {
+const STEPPER_BTN =
+  'prediction-stepper-btn flex h-10 w-10 shrink-0 select-none items-center justify-center rounded-full bg-slate-100 font-bold text-slate-700 transition-colors touch-manipulation hover:bg-slate-200 disabled:opacity-25 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
+
+function TeamCrest({ src, name }: { src?: string; name: string }) {
   if (!src) {
     return (
-      <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white text-[11px] font-black text-zinc-700 shadow-[0_1px_8px_rgb(0_0_0/0.2)] sm:h-14 sm:w-14">
+      <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white text-[11px] font-black text-zinc-700 shadow-[0_1px_8px_rgb(0_0_0/0.18)] sm:h-14 sm:w-14">
         {name.slice(0, 3).toUpperCase()}
       </span>
     )
   }
   return (
-    <span className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white shadow-[0_1px_8px_rgb(0_0_0/0.2)] sm:h-14 sm:w-14">
+    <span className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white shadow-[0_1px_8px_rgb(0_0_0/0.18)] sm:h-14 sm:w-14">
       <Image
         src={src}
         alt={name}
         width={40}
         height={40}
-        className={cn('h-9 w-9 object-contain sm:h-10 sm:w-10', dimmed && 'opacity-50')}
+        className="h-9 w-9 object-contain sm:h-10 sm:w-10"
       />
     </span>
   )
 }
 
-function ScoreStepper({
+function ScoreValue({ score, readOnly }: { score: number | null; readOnly?: boolean }) {
+  const display = score === null ? '—' : score
+  if (readOnly) {
+    return (
+      <span className="flex h-10 items-center justify-center text-2xl font-bold tabular-nums leading-none text-slate-900 dark:text-white">
+        {display}
+      </span>
+    )
+  }
+  return (
+    <span className="prediction-score-box flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-xl font-bold tabular-nums text-slate-900 shadow-sm dark:border-white/15 dark:bg-black/35 dark:text-white">
+      {score === null ? <span className="text-slate-400 dark:text-zinc-500">—</span> : display}
+    </span>
+  )
+}
+
+function ScoreButtons({
+  label,
+  onDec,
+  onInc,
+  canDec,
+  canInc,
+}: {
+  label: string
+  onDec: () => void
+  onInc: () => void
+  canDec: boolean
+  canInc: boolean
+}) {
+  const btn = STEPPER_BTN
+  return (
+    <div className="flex items-center justify-center gap-3">
+      <button type="button" disabled={!canDec} onClick={onDec} className={btn} aria-label={`Decrease ${label} score`}>
+        <Minus className="h-3.5 w-3.5" strokeWidth={3} />
+      </button>
+      <button type="button" disabled={!canInc} onClick={onInc} className={btn} aria-label={`Increase ${label} score`}>
+        <Plus className="h-3.5 w-3.5" strokeWidth={3} />
+      </button>
+    </div>
+  )
+}
+
+function ScoreStepperRow({
   label,
   score,
   readOnly,
@@ -112,39 +156,14 @@ function ScoreStepper({
   canDec: boolean
   canInc: boolean
 }) {
-  if (readOnly) {
-    return (
-      <div className="flex h-10 shrink-0 items-center justify-center">
-        <span className="text-2xl font-bold tabular-nums leading-none text-slate-900 dark:text-white">
-          {score === null ? '—' : score}
-        </span>
-      </div>
-    )
-  }
-
-  const btn =
-    'prediction-stepper-btn inline-flex h-8 w-8 shrink-0 touch-manipulation items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm transition-colors duration-200 hover:bg-slate-50 active:scale-90 disabled:opacity-25 dark:border-white/15 dark:bg-white/10 dark:text-zinc-200 dark:hover:bg-white/15'
+  if (readOnly) return <ScoreValue score={score} readOnly />
   return (
-    <div className="flex h-10 shrink-0 items-center justify-center gap-1">
-      <button
-        type="button"
-        disabled={!canDec}
-        onClick={onDec}
-        className={btn}
-        aria-label={`Decrease ${label} score`}
-      >
+    <div className="flex h-11 items-center justify-center gap-2">
+      <button type="button" disabled={!canDec} onClick={onDec} className={STEPPER_BTN} aria-label={`Decrease ${label} score`}>
         <Minus className="h-3.5 w-3.5" strokeWidth={3} />
       </button>
-      <span className="prediction-score-box flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-lg font-bold tabular-nums text-slate-900 shadow-sm dark:border-white/15 dark:bg-black/35 dark:text-white sm:h-10 sm:w-10">
-        {score === null ? <span className="text-slate-400 dark:text-zinc-500">—</span> : score}
-      </span>
-      <button
-        type="button"
-        disabled={!canInc}
-        onClick={onInc}
-        className={btn}
-        aria-label={`Increase ${label} score`}
-      >
+      <ScoreValue score={score} />
+      <button type="button" disabled={!canInc} onClick={onInc} className={STEPPER_BTN} aria-label={`Increase ${label} score`}>
         <Plus className="h-3.5 w-3.5" strokeWidth={3} />
       </button>
     </div>
@@ -318,63 +337,94 @@ export default function PredictionCard({
       )
 
   const hasPick = homeScore !== null && awayScore !== null
+  const homeName = teamDisplayName(match.homeTeam)
+  const awayName = teamDisplayName(match.awayTeam)
+  const homeStepper = {
+    label: homeName,
+    score: homeScore,
+    readOnly: isLocked,
+    onDec: () => handleScoreChange('home', -1),
+    onInc: () => handleScoreChange('home', 1),
+    canDec: homeScore === null || homeScore > 0,
+    canInc: homeScore === null || homeScore < SCORE_MAX,
+  }
+  const awayStepper = {
+    label: awayName,
+    score: awayScore,
+    readOnly: isLocked,
+    onDec: () => handleScoreChange('away', -1),
+    onInc: () => handleScoreChange('away', 1),
+    canDec: awayScore === null || awayScore > 0,
+    canInc: awayScore === null || awayScore < SCORE_MAX,
+  }
 
   return (
     <div
       className={cn(
-        'prediction-fixture-content mb-2 touch-manipulation overflow-hidden rounded-2xl px-3 py-3 shadow-[0_4px_16px_rgb(0,0,0,0.03)] dark:mb-0 dark:shadow-none sm:mb-2.5 sm:px-4 sm:py-3.5',
+        'prediction-fixture-content mb-2 touch-manipulation select-none overflow-hidden rounded-2xl px-3 py-3 shadow-[0_4px_16px_rgb(0,0,0,0.03)] dark:mb-0 dark:shadow-none sm:mb-2.5 sm:px-4 sm:py-3.5',
         hasPick
           ? 'prediction-picked border border-emerald-100/90 bg-emerald-500/[0.04] dark:border-emerald-500/25 dark:bg-emerald-500/[0.08]'
           : 'prediction-unpicked border border-rose-100/80 bg-rose-500/[0.045] dark:border-rose-500/25 dark:bg-rose-500/[0.08]',
         isHurryUp && 'prediction-hurry border-red-400/35'
       )}
     >
-      <div className="grid grid-cols-[auto_minmax(0,1fr)_auto_minmax(0,1fr)_auto] grid-rows-[1.25rem_auto] items-center gap-x-2 sm:gap-x-3">
-        <div className="col-start-1 row-span-2 self-center">
-          <TeamCrest src={match.homeTeam.crest} name={teamTla(match.homeTeam)} />
-        </div>
-        <FitTeamName
-          name={match.homeTeam.name}
-          shortName={match.homeTeam.shortName}
-          tla={match.homeTeam.tla}
-          className="col-start-2 row-start-1 min-w-0 text-center text-sm font-medium leading-5 text-slate-900 dark:font-bold dark:text-xactscore-text"
-        />
-        <div className="col-start-2 row-start-2 flex items-center justify-center">
-          <ScoreStepper
-            label={teamDisplayName(match.homeTeam)}
-            score={homeScore}
-            readOnly={isLocked}
-            onDec={() => handleScoreChange('home', -1)}
-            onInc={() => handleScoreChange('home', 1)}
-            canDec={homeScore === null || homeScore > 0}
-            canInc={homeScore === null || homeScore < SCORE_MAX}
-          />
-        </div>
-        <span className="col-start-3 row-start-2 flex h-10 items-center justify-center px-1 text-base font-bold text-slate-400 sm:px-1.5">
-          –
-        </span>
-        <FitTeamName
-          name={match.awayTeam.name}
-          shortName={match.awayTeam.shortName}
-          tla={match.awayTeam.tla}
-          className="col-start-4 row-start-1 min-w-0 text-center text-sm font-medium leading-5 text-slate-900 dark:font-bold dark:text-xactscore-text"
-        />
-        <div className="col-start-4 row-start-2 flex items-center justify-center">
-          <ScoreStepper
-            label={teamDisplayName(match.awayTeam)}
-            score={awayScore}
-            readOnly={isLocked}
-            onDec={() => handleScoreChange('away', -1)}
-            onInc={() => handleScoreChange('away', 1)}
-            canDec={awayScore === null || awayScore > 0}
-            canInc={awayScore === null || awayScore < SCORE_MAX}
-          />
-        </div>
-        <div className="col-start-5 row-span-2 self-center">
-          <TeamCrest src={match.awayTeam.crest} name={teamTla(match.awayTeam)} />
-        </div>
+      <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] justify-items-center gap-x-2 gap-y-1.5 md:hidden">
+        <TeamCrest src={match.homeTeam.crest} name={teamTla(match.homeTeam)} />
+        <div />
+        <TeamCrest src={match.awayTeam.crest} name={teamTla(match.awayTeam)} />
+
+        <p className="w-full min-w-0 truncate text-center text-[13px] font-semibold leading-tight text-slate-800 dark:font-bold dark:text-zinc-100">
+          {homeName}
+        </p>
+        <div />
+        <p className="w-full min-w-0 truncate text-center text-[13px] font-semibold leading-tight text-slate-800 dark:font-bold dark:text-zinc-100">
+          {awayName}
+        </p>
+
+        <ScoreValue score={homeScore} readOnly={isLocked} />
+        <span className="flex h-10 items-center justify-center px-1 text-lg font-bold text-slate-400">–</span>
+        <ScoreValue score={awayScore} readOnly={isLocked} />
+
+        {isLocked ? null : (
+          <>
+            <ScoreButtons
+              label={homeName}
+              onDec={homeStepper.onDec}
+              onInc={homeStepper.onInc}
+              canDec={homeStepper.canDec}
+              canInc={homeStepper.canInc}
+            />
+            <div />
+            <ScoreButtons
+              label={awayName}
+              onDec={awayStepper.onDec}
+              onInc={awayStepper.onInc}
+              canDec={awayStepper.canDec}
+              canInc={awayStepper.canInc}
+            />
+          </>
+        )}
       </div>
 
+      <div className="hidden grid-cols-[auto_minmax(0,1fr)_auto_minmax(0,1fr)_auto] items-center gap-x-4 md:grid">
+        <TeamCrest src={match.homeTeam.crest} name={teamTla(match.homeTeam)} />
+        <div className="flex min-w-0 flex-col items-center gap-1">
+          <p className="w-full min-w-0 truncate text-center text-sm font-semibold text-slate-800 dark:font-bold dark:text-zinc-100">
+            {homeName}
+          </p>
+          <ScoreStepperRow {...homeStepper} />
+        </div>
+        <span className="flex h-10 items-center justify-center px-1 text-lg font-bold text-slate-400">–</span>
+        <div className="flex min-w-0 flex-col items-center gap-1">
+          <p className="w-full min-w-0 truncate text-center text-sm font-semibold text-slate-800 dark:font-bold dark:text-zinc-100">
+            {awayName}
+          </p>
+          <ScoreStepperRow {...awayStepper} />
+        </div>
+        <TeamCrest src={match.awayTeam.crest} name={teamTla(match.awayTeam)} />
+      </div>
+
+      {canReveal || showUrgency ? (
       <div className="relative mt-2 flex min-h-5 shrink-0 items-center justify-center">
         {canReveal ? (
           <Link
@@ -394,6 +444,7 @@ export default function PredictionCard({
           </span>
         ) : null}
       </div>
+      ) : null}
     </div>
   )
 }

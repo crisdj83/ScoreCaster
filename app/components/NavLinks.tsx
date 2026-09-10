@@ -26,7 +26,7 @@ export default function NavLinks({ isAdmin, isLoggedIn, unreadMessageCount }: Na
   const t = useTranslations()
 
   const linkClass = (path: string) =>
-    cn(tabBase, 'hidden h-10 sm:h-11 lg:inline-flex', pathname === path ? tabActive : tabInactive)
+    cn(tabBase, 'hidden h-11 min-h-11 sm:h-11 lg:inline-flex', pathname === path ? tabActive : tabInactive)
 
   return (
     <>

@@ -18,6 +18,8 @@ export default function MatchdayStrip({
   const leftPadRef = useRef<HTMLDivElement>(null)
   const rightPadRef = useRef<HTMLDivElement>(null)
   const onSelectRef = useRef(onSelect)
+  const programmaticRef = useRef(false)
+  const centerFnRef = useRef<(smooth: boolean) => void>(() => {})
   const [focused, setFocused] = useState(selected)
   const focusedRef = useRef(focused)
   const selectedRef = useRef(selected)
@@ -27,6 +29,8 @@ export default function MatchdayStrip({
 
   useEffect(() => {
     setFocused(selected)
+    if (programmaticRef.current) return
+    centerFnRef.current(false)
   }, [selected])
 
   useEffect(() => {
@@ -64,12 +68,22 @@ export default function MatchdayStrip({
       return { matchday: bestValue, chip: bestChip }
     }
 
+    let programmaticTimer = 0
+    const beginProgrammatic = (ms = 520) => {
+      programmaticRef.current = true
+      window.clearTimeout(programmaticTimer)
+      programmaticTimer = window.setTimeout(() => {
+        programmaticRef.current = false
+      }, ms)
+    }
+
     const scrollChipToCenter = (chip: HTMLElement, smooth: boolean) => {
       const stripRect = strip.getBoundingClientRect()
       const chipRect = chip.getBoundingClientRect()
       const delta =
         chipRect.left + chipRect.width / 2 - (stripRect.left + stripRect.width / 2)
       const max = Math.max(0, strip.scrollWidth - strip.clientWidth)
+      if (smooth) beginProgrammatic()
       strip.scrollTo({
         left: Math.min(max, Math.max(0, strip.scrollLeft + delta)),
         behavior: smooth ? 'smooth' : 'auto',
@@ -93,6 +107,7 @@ export default function MatchdayStrip({
       if (selectedChip) scrollChipToCenter(selectedChip, smooth)
     }
 
+    centerFnRef.current = centerFocused
     centerFocused(false)
     const frame = window.requestAnimationFrame(() => centerFocused(false))
 
@@ -103,6 +118,7 @@ export default function MatchdayStrip({
     let settleTimer = 0
 
     const onScroll = () => {
+      if (programmaticRef.current) return
       const { matchday } = chipAtCenter()
       if (Number.isFinite(matchday) && matchday !== focusedRef.current) {
         focusedRef.current = matchday
@@ -111,6 +127,7 @@ export default function MatchdayStrip({
       if (pointerId !== null) return
       window.clearTimeout(settleTimer)
       settleTimer = window.setTimeout(() => {
+        if (programmaticRef.current) return
         const settled = chipAtCenter()
         if (settled.chip) scrollChipToCenter(settled.chip, true)
         showMatchday(settled.matchday)
@@ -119,6 +136,7 @@ export default function MatchdayStrip({
 
     const onPointerDown = (event: PointerEvent) => {
       if (event.pointerType === 'mouse' && event.button !== 0) return
+      event.preventDefault()
       dragged = false
       pointerId = event.pointerId
       startX = event.clientX
@@ -149,8 +167,8 @@ export default function MatchdayStrip({
         /* already released */
       }
 
-      const { matchday, chip } = chipAtCenter()
       if (dragged) {
+        const { matchday, chip } = chipAtCenter()
         if (chip) scrollChipToCenter(chip, true)
         showMatchday(matchday)
         return
@@ -159,16 +177,28 @@ export default function MatchdayStrip({
       const hit = document
         .elementFromPoint(event.clientX, event.clientY)
         ?.closest('[data-matchday]') as HTMLElement | null
-      if (hit) {
-        scrollChipToCenter(hit, true)
-        showMatchday(Number(hit.dataset.matchday))
-      }
+      if (!hit) return
+      const matchday = Number(hit.dataset.matchday)
+      focusedRef.current = matchday
+      setFocused(matchday)
+      scrollChipToCenter(hit, true)
+      showMatchday(matchday)
     }
 
-    const resize = new ResizeObserver(() => centerFocused(false))
+    const onScrollEnd = () => {
+      if (!programmaticRef.current) return
+      programmaticRef.current = false
+      window.clearTimeout(programmaticTimer)
+    }
+
+    const resize = new ResizeObserver(() => {
+      if (programmaticRef.current) return
+      centerFocused(false)
+    })
     resize.observe(strip)
 
     strip.addEventListener('scroll', onScroll, { passive: true })
+    strip.addEventListener('scrollend', onScrollEnd)
     strip.addEventListener('pointerdown', onPointerDown)
     strip.addEventListener('pointermove', onPointerMove)
     strip.addEventListener('pointerup', onPointerUp)
@@ -177,14 +207,17 @@ export default function MatchdayStrip({
     return () => {
       window.cancelAnimationFrame(frame)
       window.clearTimeout(settleTimer)
+      window.clearTimeout(programmaticTimer)
+      programmaticRef.current = false
       resize.disconnect()
       strip.removeEventListener('scroll', onScroll)
+      strip.removeEventListener('scrollend', onScrollEnd)
       strip.removeEventListener('pointerdown', onPointerDown)
       strip.removeEventListener('pointermove', onPointerMove)
       strip.removeEventListener('pointerup', onPointerUp)
       strip.removeEventListener('pointercancel', onPointerUp)
     }
-  }, [matchdays.length, selected])
+  }, [matchdays.length])
 
   return (
     <div className="mb-3 min-w-0 max-w-full sm:mb-6">
@@ -203,11 +236,12 @@ export default function MatchdayStrip({
               key={matchday}
               type="button"
               role="option"
+              tabIndex={-1}
               aria-selected={isSelected}
               data-matchday={String(matchday)}
               aria-label={`${t('Matchday')} ${matchday}`}
               className={cn(
-                'flex shrink-0 items-center justify-center whitespace-nowrap px-4 py-1.5 text-center text-sm sm:px-6 sm:py-2',
+                'flex min-h-11 shrink-0 select-none items-center justify-center whitespace-nowrap px-4 py-2.5 text-center text-sm sm:px-6 sm:py-2',
                 isSelected
                   ? 'rounded-xl bg-white font-bold text-slate-900 shadow-sm dark:border-white/35 dark:bg-white/[0.1] dark:text-zinc-100 dark:shadow-[inset_0_1px_0_rgb(255_255_255/0.28),0_0_0_1px_rgb(255_149_61/0.35)]'
                   : 'rounded-xl font-semibold text-slate-500 transition-colors hover:text-slate-700 dark:text-zinc-400 dark:hover:text-zinc-200'

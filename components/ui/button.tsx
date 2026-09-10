@@ -5,7 +5,7 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-bold transition-all duration-300 outline-none ring-0 focus:ring-0 focus-visible:ring-0 focus-visible:border-indigo-400/50 dark:focus-visible:border-orange-400/50 active:scale-95 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "inline-flex select-none items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-bold transition-all duration-300 outline-none ring-0 touch-manipulation [-webkit-tap-highlight-color:transparent] focus:ring-0 focus-visible:ring-0 focus-visible:border-indigo-400/50 dark:focus-visible:border-orange-400/50 active:scale-95 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
@@ -24,10 +24,10 @@ const buttonVariants = cva(
       },
       size: {
         default: "min-h-11 h-11 px-5",
-        sm: "min-h-9 h-9 rounded-lg px-3 text-xs",
+        sm: "min-h-11 h-11 rounded-lg px-3.5 text-xs",
         lg: "min-h-12 h-12 px-6 text-base",
         icon: "min-h-11 min-w-11 h-11 w-11",
-        "icon-sm": "min-h-9 min-w-9 h-9 w-9 rounded-lg",
+        "icon-sm": "min-h-11 min-w-11 h-11 w-11 rounded-lg",
       },
     },
     defaultVariants: {

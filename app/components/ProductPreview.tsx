@@ -7,7 +7,7 @@ export default function ProductPreview({ locale }: { locale: Locale }) {
   return (
     <div className="relative mx-auto w-full max-w-sm">
       <div className="pointer-events-none absolute -inset-8 rounded-[2rem] bg-slate-300/30 blur-3xl dark:bg-orange-500/20" aria-hidden />
-      <div className="relative space-y-3 rounded-[28px] border border-slate-200 bg-white p-3 shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:border-white/15 dark:bg-zinc-950/80 dark:shadow-2xl dark:shadow-black/50">
+      <div className="content-panel relative space-y-3 p-3 dark:border-white/15 dark:!bg-zinc-950/80 dark:shadow-2xl dark:shadow-black/50">
         <article className="rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:border-white/10 dark:bg-white/[0.05] dark:shadow-none">
           <p className="text-[10px] font-black uppercase tracking-[0.22em] text-zinc-500 dark:text-orange-300/90">{t('Your pick')}</p>
           <div className="mt-3 flex items-center justify-between gap-3">

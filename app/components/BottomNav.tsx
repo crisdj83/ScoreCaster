@@ -73,9 +73,9 @@ export default function BottomNav({ isAdmin, isLoggedIn, unreadMessageCount }: B
   return (
     <nav
       aria-label="Primary"
-      className="ios-tab-bar fixed bottom-0 left-0 z-50 w-full bg-white pb-[max(0.5rem,env(safe-area-inset-bottom,0px))] dark:bg-zinc-900 lg:hidden"
+      className="ios-tab-bar fixed bottom-0 left-0 z-50 w-full border-t border-slate-200 bg-white/90 pb-[max(env(safe-area-inset-bottom),1rem)] pt-2 backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/90 lg:hidden"
     >
-      <div className="mx-auto flex max-w-2xl items-center gap-0.5 overflow-visible px-1 py-0.5 sm:gap-1 sm:px-2">
+      <div className="mx-auto flex max-w-2xl items-center gap-1 overflow-visible px-1.5 sm:gap-1.5 sm:px-2">
         {items.map(({ href, label, short, icon: Icon, badge }) => {
           const active = pathname === href
           return (

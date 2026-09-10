@@ -24,7 +24,7 @@ export default function HomeWeekList({
     return (
       <Link
         href="/contests"
-        className="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-4 shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition hover:shadow-md dark:border-xactscore-accent/40 dark:bg-xactscore-accent/10 dark:shadow-none dark:hover:bg-xactscore-accent/15"
+        className="content-panel flex items-center justify-between gap-3 px-4 py-4 transition hover:shadow-md dark:border-xactscore-accent/40 dark:!bg-xactscore-accent/10"
       >
         <div>
           <p className="text-sm font-semibold uppercase tracking-tight text-zinc-900 dark:font-black dark:text-zinc-100">{t('Join a league')}</p>
@@ -53,7 +53,7 @@ export default function HomeWeekList({
         ) : null}
       </div>
 
-      <ul className="space-y-2">
+      <ul className="content-panel divide-y divide-slate-100 overflow-hidden dark:divide-white/10">
         {leagues.map((league) => (
           <li key={league.contestId}>
             <Link
@@ -62,7 +62,7 @@ export default function HomeWeekList({
                   ? `/contests/${league.contestId}/predictions`
                   : `/contests/${league.contestId}/ranking`
               }
-              className="mb-2.5 flex min-h-14 items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-3.5 shadow-sm transition-all duration-200 dark:mb-0 dark:border-white/10 dark:bg-white/[0.04] dark:p-3 dark:shadow-none dark:hover:border-white/20 dark:hover:bg-white/[0.07] dark:hover:shadow-none"
+              className="flex min-h-14 items-center justify-between gap-3 p-3.5 transition-colors hover:bg-slate-50 dark:p-3 dark:hover:bg-white/[0.06]"
             >
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-100 bg-slate-100 text-slate-600 dark:border-transparent dark:bg-zinc-950 dark:text-xactscore-accent">
                 <Trophy className="h-5 w-5" />

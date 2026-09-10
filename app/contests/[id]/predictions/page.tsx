@@ -6,7 +6,6 @@ import { getActiveMatchday, isOpenForPrediction, isPredictionLocked } from '../.
 import PredictionCard, { KickoffGroupHeading } from './PredictionCard'
 import SuperLuckyButton from './SuperLuckyButton'
 import MatchdayNav from './MatchdayNav'
-import { TeamNameFitGroup } from '@/components/ui/fit-team-name'
 import { getTranslations } from '../../../../lib/i18n'
 import { getServerLocale } from '../../../../lib/i18n-server'
 import LiveRefresh from '../../../components/LiveRefresh'
@@ -138,7 +137,7 @@ export default async function PredictionsPage(props: {
 
   return (
     <>
-    <div className="min-w-0 bg-white p-1.5 shadow-xl shadow-slate-200/50 dark:border-0 dark:bg-transparent dark:p-0 dark:shadow-none sm:p-4">
+    <div className="content-panel min-w-0 p-1.5 sm:p-4 dark:border-0 dark:!bg-transparent dark:p-0 dark:shadow-none">
       <LiveRefresh refreshAfter={matchdayFixtures.map((match) => match.utcDate)} />
       {selectedMatchday ? (
         <MatchdayNav
@@ -151,7 +150,6 @@ export default async function PredictionsPage(props: {
         <p className="mb-3 text-sm text-zinc-500">{t('Season Ended / No Fixtures')}</p>
       )}
       <div className="space-y-3 pb-[calc(6rem+env(safe-area-inset-bottom,0px))] sm:space-y-4 lg:pb-16">
-        <TeamNameFitGroup resetKey={selectedMatchday ?? 'none'}>
         {groupFixturesByKickoff(matchdayFixtures).map((group, index) => (
           <section key={group.key} className="space-y-1.5 sm:space-y-2">
             <KickoffGroupHeading
@@ -190,7 +188,6 @@ export default async function PredictionsPage(props: {
             })}
           </section>
         ))}
-        </TeamNameFitGroup>
       </div>
     </div>
     {picksLeft > 0 ? (

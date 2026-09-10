@@ -40,11 +40,11 @@ export default async function LoginPage(props: {
             </p>
           </div>
 
-          <div className="mb-5 grid grid-cols-2 gap-1 rounded-full border border-slate-200 bg-slate-100 p-1 dark:border-white/10 dark:bg-white/5">
+          <div className="mb-5 grid grid-cols-2 gap-1.5 rounded-full border border-slate-200 bg-slate-100 p-1 dark:border-white/10 dark:bg-white/5">
             <Link
               href={loginPath({ next, message: searchParams?.message })}
               className={cn(
-                'inline-flex h-10 items-center justify-center rounded-full text-xs font-black uppercase tracking-wider transition',
+                'inline-flex h-11 min-h-11 select-none items-center justify-center rounded-full text-xs font-black uppercase tracking-wider transition touch-manipulation',
                 !isSignup
                   ? 'bg-white text-slate-900 shadow-sm dark:bg-amber-500 dark:text-zinc-950'
                   : 'text-slate-500 hover:text-slate-800 dark:text-orange-100/70 dark:hover:text-orange-50'
@@ -55,7 +55,7 @@ export default async function LoginPage(props: {
             <Link
               href={loginPath({ mode: 'signup', next, message: searchParams?.message })}
               className={cn(
-                'inline-flex h-10 items-center justify-center rounded-full text-xs font-black uppercase tracking-wider transition',
+                'inline-flex h-11 min-h-11 select-none items-center justify-center rounded-full text-xs font-black uppercase tracking-wider transition touch-manipulation',
                 isSignup
                   ? 'bg-white text-slate-900 shadow-sm dark:bg-amber-500 dark:text-zinc-950'
                   : 'text-slate-500 hover:text-slate-800 dark:text-orange-100/70 dark:hover:text-orange-50'

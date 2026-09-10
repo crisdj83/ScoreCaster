@@ -20,8 +20,8 @@ export default function ContestNav({ contestId, isAdmin }: { contestId: string; 
   const settingsHref = `/contests/${contestId}/edit`
 
   return (
-    <div className="sticky top-[57px] z-20 rounded-[28px] border border-slate-200 bg-white p-1.5 shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:border-white/10 dark:bg-zinc-950/70 dark:shadow-lg">
-      <div className="flex items-center gap-1 md:hidden">
+    <div className="content-panel sticky top-[calc(max(env(safe-area-inset-top),1rem)+3.75rem)] z-20 p-1.5 dark:!bg-zinc-950/70">
+      <div className="flex items-center gap-1.5 md:hidden">
         {tabs.map(({ href, label, icon: Icon }) => {
           const active = pathname === href
           return (
@@ -29,7 +29,7 @@ export default function ContestNav({ contestId, isAdmin }: { contestId: string; 
               key={href}
               href={href}
               className={cn(
-                'flex min-h-11 flex-1 flex-col items-center justify-center gap-0.5 rounded-xl border py-1.5 text-[10px] font-bold uppercase tracking-wide outline-none transition-all duration-300 active:scale-95',
+                'flex min-h-12 flex-1 select-none flex-col items-center justify-center gap-0.5 rounded-xl border py-1.5 text-[10px] font-bold uppercase tracking-wide outline-none transition-all duration-300 touch-manipulation active:scale-95',
                 active ? segmentActive : segmentInactive
               )}
             >
@@ -43,7 +43,7 @@ export default function ContestNav({ contestId, isAdmin }: { contestId: string; 
           aria-label={t('Rules')}
           title={t('Rules')}
           className={cn(
-            'flex min-h-11 w-11 shrink-0 flex-col items-center justify-center rounded-xl border outline-none transition-all duration-300 active:scale-95',
+            'flex h-12 min-h-12 w-12 shrink-0 select-none flex-col items-center justify-center rounded-xl border outline-none transition-all duration-300 touch-manipulation active:scale-95',
             pathname === rulesHref ? segmentActive : segmentInactive
           )}
         >
@@ -55,7 +55,7 @@ export default function ContestNav({ contestId, isAdmin }: { contestId: string; 
             aria-label={t('Settings')}
             title={t('Settings')}
             className={cn(
-              'flex min-h-11 w-11 shrink-0 flex-col items-center justify-center rounded-xl border outline-none transition-all duration-300 active:scale-95',
+              'flex h-12 min-h-12 w-12 shrink-0 select-none flex-col items-center justify-center rounded-xl border outline-none transition-all duration-300 touch-manipulation active:scale-95',
               pathname === settingsHref ? segmentActive : segmentInactive
             )}
           >
@@ -64,7 +64,7 @@ export default function ContestNav({ contestId, isAdmin }: { contestId: string; 
         )}
       </div>
 
-      <div className="hidden items-center gap-1 md:flex">
+      <div className="hidden items-center gap-1.5 md:flex">
         {[...tabs, { href: rulesHref, label: t('Rules'), icon: BookOpen }].map(({ href, label, icon: Icon }) => {
           const active = pathname === href
           return (
@@ -72,7 +72,7 @@ export default function ContestNav({ contestId, isAdmin }: { contestId: string; 
               key={href}
               href={href}
               className={cn(
-                'flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl border py-2.5 text-xs font-bold uppercase tracking-wider outline-none transition-all duration-300 active:scale-95 md:px-4 md:text-sm',
+                'flex min-h-11 flex-1 select-none items-center justify-center gap-2 rounded-xl border py-2.5 text-xs font-bold uppercase tracking-wider outline-none transition-all duration-300 touch-manipulation active:scale-95 md:px-4 md:text-sm',
                 active ? segmentActive : segmentInactive
               )}
             >
@@ -85,7 +85,7 @@ export default function ContestNav({ contestId, isAdmin }: { contestId: string; 
           <Link
             href={settingsHref}
             className={cn(
-              'flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-xs font-bold uppercase tracking-wider outline-none transition-all duration-300 active:scale-95 md:ml-auto md:text-sm',
+              'flex min-h-11 shrink-0 select-none items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-xs font-bold uppercase tracking-wider outline-none transition-all duration-300 touch-manipulation active:scale-95 md:ml-auto md:text-sm',
               pathname === settingsHref ? segmentActive : segmentInactive
             )}
           >

@@ -55,7 +55,7 @@ export default function HelpPage() {
         {sections.map((section) => (
           <details
             key={section.title}
-            className="group rounded-3xl border border-slate-200 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:rounded-xl dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-lg dark:shadow-black/20"
+            className="content-panel group"
           >
             <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 font-semibold text-zinc-900 marker:hidden dark:font-black dark:text-zinc-100">
               <span>{t(section.title)}</span>

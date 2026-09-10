@@ -185,7 +185,7 @@ export default async function Home(props: { searchParams: Promise<{ success?: st
 
       <HeroBanner nextMatch={nextMatch} recentScores={recentScores} predictHref={predictHref} />
 
-      <div className="flex items-center gap-2.5 rounded-3xl border border-slate-200 bg-white px-3 py-2.5 shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:border-zinc-800 dark:bg-gradient-to-br dark:from-orange-600 dark:via-zinc-900 dark:to-zinc-950 dark:shadow-lg dark:shadow-black/30 sm:gap-4 sm:px-5 sm:py-4">
+      <div className="flex items-center gap-2.5 rounded-[28px] border border-slate-200 bg-white px-3 py-2.5 shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:rounded-xl dark:border-zinc-800 dark:bg-gradient-to-br dark:from-orange-600 dark:via-zinc-900 dark:to-zinc-950 dark:shadow-lg dark:shadow-black/30 sm:gap-4 sm:px-5 sm:py-4">
         {profile?.avatar_url ? (
           <Image
             src={profile.avatar_url}

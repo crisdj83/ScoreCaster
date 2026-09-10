@@ -88,10 +88,10 @@ export default function RootLayout({
   return (
     <html
       lang={locale}
-      className={`${inter.variable} ${inter.className} min-h-[100dvh] bg-slate-200 dark:bg-zinc-900`}
+      className={`${inter.variable} ${inter.className} min-h-[100dvh] overscroll-none bg-slate-200 dark:bg-zinc-900`}
       suppressHydrationWarning
     >
-      <body className="flex min-h-[100dvh] flex-col bg-slate-200 text-xactscore-text transition-colors duration-300 dark:bg-zinc-900">
+      <body className="flex min-h-[100dvh] flex-col overscroll-none bg-slate-200 text-xactscore-text transition-colors duration-300 dark:bg-zinc-900">
         <Script id="device-class" strategy="beforeInteractive">
           {`(function(){var ua=navigator.userAgent||"";var ios=/iP(hone|ad|od)/.test(ua)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);document.documentElement.classList.toggle("android",/Android/i.test(ua));document.documentElement.classList.toggle("ios",ios)})()`}
         </Script>

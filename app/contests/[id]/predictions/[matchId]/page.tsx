@@ -73,7 +73,7 @@ export default async function MatchPredictionsPage({ params }: PageProps) {
       >
         <ArrowLeft className="h-4 w-4" /> {t('Back to fixtures')}
       </Link>
-      <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-6 text-zinc-100 shadow-xl md:p-8">
+      <div className="content-panel p-6 text-zinc-100 md:p-8">
         <div className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-xactscore-accent">
           <Trophy className="h-4 w-4" /> {t('Match predictions')}
         </div>
@@ -115,7 +115,7 @@ export default async function MatchPredictionsPage({ params }: PageProps) {
           </div>
         </div>
       </div>
-      <div className="overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900 shadow-lg">
+      <div className="content-panel overflow-hidden">
         <div className="grid grid-cols-[1fr_auto] border-b border-zinc-800 bg-zinc-950 px-5 py-4 text-xs font-black uppercase tracking-wider text-zinc-500">
           <span>{t('Player')}</span>
           <span>{t('Score / Points')}</span>

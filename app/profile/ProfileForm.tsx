@@ -76,7 +76,7 @@ export default function ProfileForm({ user, profile, messages }: ProfileFormProp
         {/* Email Address */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">{t('Email Address')}</label>
-          <input type="text" disabled value={user.email ?? ''} className="w-full rounded-xl px-4 py-3 bg-gray-50 border border-gray-200 text-gray-500 cursor-not-allowed" />
+          <input type="text" disabled value={user.email ?? ''} className="h-12 min-h-12 w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-base text-gray-500 cursor-not-allowed" />
         </div>
 
         {/* Username */}
@@ -84,7 +84,7 @@ export default function ProfileForm({ user, profile, messages }: ProfileFormProp
           <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
             <User className="h-4 w-4 text-gray-400" /> {t('Username')}
           </label>
-          <input type="text" name="username" defaultValue={profile?.username || ''} placeholder="e.g. Dracula's Revenge FC" className="focus-frost w-full rounded-xl border-0 bg-slate-100 px-4 py-3 text-base text-slate-900 outline-none ring-0 focus:ring-0 dark:border dark:border-zinc-700 dark:bg-zinc-900/80 dark:text-zinc-100" />
+          <input type="text" name="username" defaultValue={profile?.username || ''} placeholder="e.g. Dracula's Revenge FC" className="focus-frost h-12 min-h-12 w-full rounded-xl border-0 bg-slate-100 px-4 py-3 text-base text-slate-900 outline-none ring-0 focus:ring-0 dark:border dark:border-zinc-700 dark:bg-zinc-900/80 dark:text-zinc-100" />
         </div>
 
         {/* Custom Team Dropdown */}
@@ -94,7 +94,7 @@ export default function ProfileForm({ user, profile, messages }: ProfileFormProp
           </label>
           <div 
             onClick={() => setTeamOpen(!teamOpen)}
-            className="w-full rounded-md px-4 py-2 bg-white border border-gray-300 cursor-pointer flex items-center justify-between hover:border-gray-400"
+            className="flex min-h-12 w-full cursor-pointer items-center justify-between rounded-md border border-gray-300 bg-white px-4 py-3 text-base hover:border-gray-400"
           >
             <div className="flex items-center gap-3">
               {selectedTeam ? (
@@ -115,7 +115,7 @@ export default function ProfileForm({ user, profile, messages }: ProfileFormProp
                 <div 
                   key={team.name}
                   onClick={() => { setSelectedTeam(team); setTeamOpen(false); }}
-                  className="flex items-center gap-3 px-4 py-2 cursor-pointer hover:bg-green-50 transition-colors"
+                  className="flex min-h-12 cursor-pointer items-center gap-3 px-4 py-3 transition-colors hover:bg-green-50"
                 >
                   <Image src={team.logo} alt={team.name} width={24} height={24} className="h-6 w-6 object-contain" />
                   <span className="flex-1">{team.name}</span>
@@ -137,13 +137,13 @@ export default function ProfileForm({ user, profile, messages }: ProfileFormProp
             maxLength={18}
             onChange={(event) => setMotto(event.target.value.slice(0, 18))}
             placeholder="Football is a simple game. Twenty-two men chase a ball for 90 minutes..." 
-            className="focus-frost w-full resize-none rounded-xl border-0 bg-slate-100 px-4 py-2 text-base text-slate-900 outline-none ring-0 focus:ring-0 dark:border dark:border-zinc-700 dark:bg-zinc-900/80 dark:text-zinc-100" 
+            className="focus-frost h-12 min-h-12 w-full resize-none rounded-xl border-0 bg-slate-100 px-4 py-3 text-base text-slate-900 outline-none ring-0 focus:ring-0 dark:border dark:border-zinc-700 dark:bg-zinc-900/80 dark:text-zinc-100" 
           />
-          <button type="button" onClick={() => setMotto(['Play to win', 'Trust the process', 'Never stop scoring', 'Own the table'][Math.floor(Math.random() * 4)])} className="rounded-xl bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700">{t('Generate motto')}</button>
+          <button type="button" onClick={() => setMotto(['Play to win', 'Trust the process', 'Never stop scoring', 'Own the table'][Math.floor(Math.random() * 4)])} className="mt-2 min-h-11 select-none rounded-xl bg-gray-100 px-4 py-2.5 text-sm font-medium text-gray-700 touch-manipulation">{t('Generate motto')}</button>
         </div>
 
         <div className="pt-4 border-t border-gray-100 flex justify-end">
-          <button type="submit" className="bg-gray-900 hover:bg-gray-800 text-white rounded-xl px-6 py-3 font-semibold uppercase tracking-wider text-xs transition-colors shadow-sm dark:font-black">
+          <button type="submit" className="min-h-11 select-none rounded-xl bg-gray-900 px-6 py-3 text-xs font-semibold uppercase tracking-wider text-white shadow-sm transition-colors touch-manipulation hover:bg-gray-800 dark:font-black">
             {t('Save Profile Changes')}
           </button>
         </div>

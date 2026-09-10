@@ -32,7 +32,7 @@ export default async function ContestLayout(props: {
     <div className="mx-auto w-full space-y-2.5 pb-12 pt-1 sm:space-y-6 sm:pt-4">
       <ContestNav contestId={params.id} isAdmin={isAdmin} />
 
-      <div className="contest-shell min-h-[400px] min-w-0 overflow-x-clip overflow-y-visible rounded-3xl bg-white p-2.5 shadow-xl shadow-slate-200/50 dark:bg-[var(--glass-bg)] dark:shadow-[var(--glass-shadow)] sm:overflow-hidden sm:p-6 md:p-8">
+      <div className="content-panel contest-shell min-h-[400px] min-w-0 overflow-x-clip overflow-y-visible p-2.5 sm:overflow-hidden sm:p-6 md:p-8">
         {props.children}
       </div>
     </div>

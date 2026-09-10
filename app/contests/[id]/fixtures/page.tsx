@@ -48,7 +48,7 @@ function ScorerCard({
     .slice(0, 5)
 
   return (
-    <section className="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:rounded-xl dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-none">
+    <section className="content-panel overflow-hidden">
       <div className="border-b border-slate-200 bg-white px-5 py-4 text-zinc-900 dark:border-transparent dark:bg-zinc-950 dark:text-zinc-100">
         <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-900 dark:font-black dark:text-zinc-100">{title}</h3>
       </div>

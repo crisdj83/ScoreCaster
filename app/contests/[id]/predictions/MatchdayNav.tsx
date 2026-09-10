@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback } from 'react'
+import { startTransition, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import MatchdayStrip from '../../../components/MatchdayStrip'
 
@@ -19,11 +19,14 @@ export default function MatchdayNav({
 
   const onSelect = useCallback(
     (matchday: number) => {
-      router.push(
-        matchday === active
-          ? `/contests/${contestId}/predictions`
-          : `/contests/${contestId}/predictions?md=${matchday}`
-      )
+      startTransition(() => {
+        router.push(
+          matchday === active
+            ? `/contests/${contestId}/predictions`
+            : `/contests/${contestId}/predictions?md=${matchday}`,
+          { scroll: false }
+        )
+      })
     },
     [router, contestId, active]
   )

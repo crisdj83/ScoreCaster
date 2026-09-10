@@ -24,7 +24,7 @@ export function ExpandableRow({ trigger, content, className }: ExpandableRowProp
     <li className={className}>
       <div
         className={cn(
-          "flex min-h-9 w-full items-center gap-1.5 px-2.5 py-1.5 text-left transition-colors duration-200",
+          "flex min-h-12 w-full items-center gap-2 px-2.5 py-2 text-left transition-colors duration-200",
           canExpand && "hover:bg-white/[0.04] active:bg-white/[0.06]"
         )}
       >
@@ -35,11 +35,11 @@ export function ExpandableRow({ trigger, content, className }: ExpandableRowProp
             aria-expanded={isExpanded}
             aria-label={isExpanded ? "Hide details" : "Show details"}
             onClick={() => setIsExpanded((prev) => !prev)}
-            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-zinc-500 touch-manipulation"
+            className="inline-flex h-11 w-11 shrink-0 select-none items-center justify-center rounded-full text-zinc-500 touch-manipulation"
           >
             <ChevronDown
               className={cn(
-                "h-3.5 w-3.5 transition-transform duration-300",
+                "h-4 w-4 transition-transform duration-300",
                 isExpanded && "rotate-180 text-zinc-300"
               )}
             />
@@ -48,7 +48,7 @@ export function ExpandableRow({ trigger, content, className }: ExpandableRowProp
       </div>
 
       {canExpand && isExpanded ? (
-        <div className="border-t border-white/[0.06] bg-white/[0.03] px-2.5 py-1.5">
+        <div className="border-t border-white/[0.06] bg-white/[0.03] px-2.5 py-2">
           {content}
         </div>
       ) : null}

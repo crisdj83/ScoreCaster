@@ -119,7 +119,7 @@ export default function HeroBanner({
   )
 
   return (
-    <div className="hero-score-card relative flex w-full flex-col overflow-hidden rounded-3xl bg-white p-4 shadow-xl shadow-slate-200/50 dark:border-white/10 dark:bg-gradient-to-bl dark:from-orange-600 dark:via-zinc-900 dark:to-zinc-950 dark:p-0 dark:shadow-2xl dark:shadow-black/40 sm:p-6 lg:flex-row">
+    <div className="hero-score-card relative flex w-full flex-col overflow-hidden rounded-[28px] border border-slate-200 bg-white p-4 shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:rounded-xl dark:border-white/10 dark:bg-gradient-to-bl dark:from-orange-600 dark:via-zinc-900 dark:to-zinc-950 dark:p-0 dark:shadow-2xl dark:shadow-black/40 sm:p-6 lg:flex-row">
       
       <style dangerouslySetInnerHTML={{__html: `
         @keyframes scroll-y {

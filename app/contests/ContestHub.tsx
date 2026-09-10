@@ -52,7 +52,7 @@ export default function ContestHub({ myContests, messages }: any) {
         </div>
       )}
 
-      <div className="flex gap-1 rounded-[28px] border border-slate-200 bg-white p-1.5 shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:rounded-xl dark:border-white/10 dark:bg-zinc-950/70 dark:shadow-md">
+      <div className="content-panel flex gap-1.5 p-1.5 dark:!bg-zinc-950/70">
         <button type="button" onClick={() => setActiveTab('my_contests')} className={tabClass('my_contests')}>
           <Trophy className="h-4 w-4 shrink-0" />
           <span className="hidden xs:inline sm:inline">{t('My Contests')}</span>
@@ -96,7 +96,7 @@ export default function ContestHub({ myContests, messages }: any) {
                     <Link
                       key={membership.contest_id}
                       href={`/contests/${membership.contest_id}`}
-                      className="group flex min-h-[120px] cursor-pointer flex-col rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-all hover:border-slate-200 hover:shadow-md dark:rounded-xl dark:border-zinc-800 dark:bg-zinc-950/50 dark:shadow-none dark:hover:border-xactscore-accent dark:hover:shadow-lg"
+                      className="content-panel group flex min-h-[120px] cursor-pointer flex-col p-5 transition-all hover:shadow-md dark:!bg-zinc-950/50 dark:hover:border-xactscore-accent"
                     >
                       <div className="mb-2 flex items-start justify-between gap-2">
                         <div className="flex min-w-0 items-start gap-3">
@@ -236,7 +236,7 @@ export default function ContestHub({ myContests, messages }: any) {
                       <label
                         key={option.value}
                         className={cn(
-                          'cursor-pointer rounded-xl border px-3 py-3 text-left transition',
+                          'min-h-12 cursor-pointer select-none rounded-xl border px-3 py-3 text-left transition touch-manipulation',
                           seasonLength === option.value
                             ? 'border-0 bg-indigo-100 text-indigo-700 dark:border dark:border-orange-400/50 dark:bg-orange-500/15'
                             : 'border-slate-200 bg-white hover:border-slate-300 dark:border-zinc-800 dark:bg-zinc-950/60 dark:hover:border-zinc-600'
@@ -261,7 +261,7 @@ export default function ContestHub({ myContests, messages }: any) {
                     type="button"
                     onClick={() => setVisibility('public')}
                     className={cn(
-                      'rounded-xl border px-3 py-3 text-left transition',
+                      'min-h-12 select-none rounded-xl border px-3 py-3 text-left transition touch-manipulation',
                       visibility === 'public'
                         ? 'border-0 bg-indigo-100 text-indigo-700 dark:border dark:border-orange-400/50 dark:bg-orange-500/15'
                         : 'border-slate-200 bg-white hover:border-slate-300 dark:border-zinc-800 dark:bg-zinc-950/60 dark:hover:border-zinc-600'
@@ -277,7 +277,7 @@ export default function ContestHub({ myContests, messages }: any) {
                     type="button"
                     onClick={() => setVisibility('private')}
                     className={cn(
-                      'rounded-xl border px-3 py-3 text-left transition',
+                      'min-h-12 select-none rounded-xl border px-3 py-3 text-left transition touch-manipulation',
                       visibility === 'private'
                         ? 'border-0 bg-indigo-100 text-indigo-700 dark:border dark:border-orange-400/50 dark:bg-orange-500/15'
                         : 'border-slate-200 bg-white hover:border-slate-300 dark:border-zinc-800 dark:bg-zinc-950/60 dark:hover:border-zinc-600'

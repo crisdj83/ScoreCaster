@@ -5,11 +5,7 @@ import { getServerLocale } from '../../../../lib/i18n-server'
 import { getPLMatches, getPLStandings } from '../../../../lib/football'
 import { getLiveGoalScorers } from '../../../../lib/goal-api'
 import { loadStoredScorers, persistMatchScorers } from '../../../../lib/match-scorers'
-import {
-  getSeasonLengthLabelKey,
-  isMatchInContestSeason,
-  normalizeSeasonLength,
-} from '../../../../lib/contest-season'
+import { isMatchInContestSeason, normalizeSeasonLength } from '../../../../lib/contest-season'
 import {
   calculatePoints,
   getOfficialScore,
@@ -18,7 +14,7 @@ import {
   resolveContestScoring,
   type ContestScoring,
 } from '../../../../lib/scoring'
-import { Target, Activity, CheckCircle2, Gauge, ArrowUp, ArrowDown } from 'lucide-react'
+import { Target, Activity, CheckCircle2, ArrowUp, ArrowDown } from 'lucide-react'
 import Image from 'next/image'
 import RankingInsights from './RankingInsights'
 import CurrentGameweek from './CurrentGameweek'
@@ -26,7 +22,6 @@ import LiveRefresh from '../../../components/LiveRefresh'
 import { RankTable, type RankColumn } from '@/components/ui/rank-table'
 import { MemberLink } from '@/components/ui/member-link'
 import { ScoreBadge } from '@/components/ui/badge'
-import { PageHeader } from '@/components/ui/page-header'
 import { isUnoptimizedAvatar } from '../../../../lib/soccer-avatar'
 
 type MatchGoal = {
@@ -767,18 +762,6 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
         refreshAfter={liveNow.map((match) => match.utcDate)}
         always={liveNow.length > 0}
         pingUrl={liveNow.length > 0 ? '/api/scorers' : undefined}
-      />
-      <PageHeader
-        title={t('League table')}
-        className="mb-3 sm:mb-4 sm:items-center"
-        actions={
-          <div className="flex items-center gap-1.5 whitespace-nowrap text-xactscore-accent">
-            <Gauge className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
-            <span className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-[10px] dark:font-black dark:text-xactscore-accent sm:dark:text-xs">
-              {t('Season')} {t(getSeasonLengthLabelKey(seasonLength))}
-            </span>
-          </div>
-        }
       />
       <CurrentGameweek
         contestId={params.id}

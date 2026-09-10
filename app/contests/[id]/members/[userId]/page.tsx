@@ -285,7 +285,7 @@ export default async function ContestMemberProfilePage(props: {
 
       <PageHeader title={displayName} description={profile.quote ? `"${profile.quote}"` : contest.name} />
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-white/5 dark:shadow-none sm:p-6">
+      <section className="content-panel p-4 sm:p-6">
         <div className="flex items-center gap-4">
           {profile.avatar_url ? (
             <Image

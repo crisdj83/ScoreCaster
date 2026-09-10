@@ -111,7 +111,7 @@ export default async function MessagesPage(props: { searchParams: Promise<{ erro
               <select
                 name="contest_id"
                 required
-                className="focus-frost flex h-11 w-full rounded-xl border-0 bg-slate-100 px-4 py-2 text-sm text-slate-900 outline-none ring-0 transition-[border-color,box-shadow] focus:ring-0 dark:border dark:border-zinc-700 dark:bg-zinc-900/80 dark:text-zinc-100"
+                className="focus-frost flex h-12 min-h-12 w-full rounded-xl border-0 bg-slate-100 px-4 py-2 text-base text-slate-900 outline-none ring-0 transition-[border-color,box-shadow] focus:ring-0 dark:border dark:border-zinc-700 dark:bg-zinc-900/80 dark:text-zinc-100"
               >
                 <option value="" className="bg-white text-slate-900 dark:bg-zinc-900 dark:text-white">{t('Choose a contest')}</option>
                 {memberContests.map(contest => (

@@ -1,12 +1,13 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import Image from 'next/image'
 import { BadgeDollarSign, Gauge, SlidersHorizontal, UserRound, Check, Crosshair, X } from 'lucide-react'
 import { useTranslations } from '../../../components/LocaleProvider'
 import { cn } from '@/lib/utils'
 import { MemberLink } from '@/components/ui/member-link'
 import { isUnoptimizedAvatar } from '../../../../lib/soccer-avatar'
+import { teamTla } from '@/lib/team-tla'
 
 type Fixture = {
   id: string
@@ -79,16 +80,38 @@ export default function CurrentGameweek({
     [...fixtures]
       .filter((fixture) => fixture.status === 'FINISHED')
       .sort((a, b) => new Date(b.kickoff).getTime() - new Date(a.kickoff).getTime())[0] ||
+    [...fixtures].sort((a, b) => new Date(a.kickoff).getTime() - new Date(b.kickoff).getTime()).at(-1) ||
     fixtures[0]
   const [selectedMatchday] = useState(defaultFixture?.matchday ?? 1)
-  const [focusedMatchId, setFocusedMatchId] = useState(defaultFixture?.id)
+  const t = useTranslations()
+
+  const gameweekFixtures = useMemo(
+    () =>
+      fixtures
+        .filter((fixture) => fixture.matchday === selectedMatchday)
+        .sort((a, b) => new Date(a.kickoff).getTime() - new Date(b.kickoff).getTime()),
+    [fixtures, selectedMatchday]
+  )
+
+  const lastGameId = gameweekFixtures[gameweekFixtures.length - 1]?.id
+  const [focusedMatchId, setFocusedMatchId] = useState(
+    selectedFixtureFromUrl?.id && gameweekFixtures.some((fixture) => fixture.id === selectedFixtureFromUrl.id)
+      ? selectedFixtureFromUrl.id
+      : lastGameId
+  )
   const [now, setNow] = useState<number | null>(null)
   const stripRef = useRef<HTMLDivElement>(null)
   const focusedMatchIdRef = useRef(focusedMatchId)
-  const t = useTranslations()
   focusedMatchIdRef.current = focusedMatchId
 
-  const gameweekFixtures = fixtures.filter((fixture) => fixture.matchday === selectedMatchday)
+  const loopCopies = gameweekFixtures.length > 1 ? 3 : 1
+  const stripItems = useMemo(
+    () =>
+      Array.from({ length: loopCopies }, (_, copy) =>
+        gameweekFixtures.map((fixture) => ({ fixture, copy }))
+      ).flat(),
+    [gameweekFixtures, loopCopies]
+  )
 
   useEffect(() => {
     setNow(Date.now())
@@ -96,15 +119,41 @@ export default function CurrentGameweek({
 
   useEffect(() => {
     const strip = stripRef.current
-    if (!strip) return
+    if (!strip || gameweekFixtures.length === 0) return
+
+    const chips = () => strip.querySelectorAll<HTMLElement>('[data-fixture-id]')
+
+    const setWidth = () => {
+      const first = strip.querySelector<HTMLElement>('[data-copy="0"]')
+      const second = strip.querySelector<HTMLElement>('[data-copy="1"]')
+      if (!first || !second) return 0
+      return second.offsetLeft - first.offsetLeft
+    }
+
+    const wrapIfNeeded = () => {
+      if (loopCopies < 3) return 0
+      const width = setWidth()
+      if (width <= 0) return 0
+      if (strip.scrollLeft < width * 0.5) {
+        strip.scrollLeft += width
+        return width
+      }
+      if (strip.scrollLeft >= width * 1.5) {
+        strip.scrollLeft -= width
+        return -width
+      }
+      return 0
+    }
 
     const chipAtCenter = () => {
-      const center = strip.scrollLeft + strip.clientWidth / 2
-      let bestId = ''
+      const stripRect = strip.getBoundingClientRect()
+      const center = stripRect.left + stripRect.width / 2
+      let bestId = focusedMatchIdRef.current || ''
       let bestChip: HTMLElement | null = null
       let bestDist = Infinity
-      strip.querySelectorAll<HTMLElement>('[data-fixture-id]').forEach((chip) => {
-        const dist = Math.abs(chip.offsetLeft + chip.offsetWidth / 2 - center)
+      chips().forEach((chip) => {
+        const rect = chip.getBoundingClientRect()
+        const dist = Math.abs(rect.left + rect.width / 2 - center)
         if (dist < bestDist) {
           bestDist = dist
           bestId = chip.dataset.fixtureId || ''
@@ -114,20 +163,54 @@ export default function CurrentGameweek({
       return { id: bestId, chip: bestChip }
     }
 
+    let programmatic = false
+    let programmaticTimer = 0
+    const beginProgrammatic = (ms = 520) => {
+      programmatic = true
+      window.clearTimeout(programmaticTimer)
+      programmaticTimer = window.setTimeout(() => {
+        programmatic = false
+      }, ms)
+    }
+
     const scrollChipToCenter = (chip: HTMLElement, smooth: boolean) => {
-      const left = chip.offsetLeft - strip.clientWidth / 2 + chip.offsetWidth / 2
-      strip.scrollTo({ left: Math.max(0, left), behavior: smooth ? 'smooth' : 'auto' })
+      const stripRect = strip.getBoundingClientRect()
+      const chipRect = chip.getBoundingClientRect()
+      const delta =
+        chipRect.left + chipRect.width / 2 - (stripRect.left + stripRect.width / 2)
+      const max = Math.max(0, strip.scrollWidth - strip.clientWidth)
+      if (smooth) beginProgrammatic()
+      strip.scrollTo({
+        left: Math.min(max, Math.max(0, strip.scrollLeft + delta)),
+        behavior: smooth ? 'smooth' : 'auto',
+      })
     }
 
-    const selectCentered = () => {
+    const middleChip = (id: string) =>
+      strip.querySelector<HTMLElement>(
+        `[data-copy="${loopCopies > 1 ? '1' : '0'}"][data-fixture-id="${CSS.escape(id)}"]`
+      ) || strip.querySelector<HTMLElement>(`[data-fixture-id="${CSS.escape(id)}"]`)
+
+    const centerFocused = (smooth: boolean) => {
+      const selectedChip = middleChip(focusedMatchIdRef.current || '')
+      if (selectedChip) scrollChipToCenter(selectedChip, smooth)
+    }
+
+    const showMatch = (id: string) => {
+      if (!id) return
+      focusedMatchIdRef.current = id
+      setFocusedMatchId(id)
+    }
+
+    const normalizeToMiddle = () => {
+      if (loopCopies < 3) return
       const { id } = chipAtCenter()
-      if (id && id !== focusedMatchIdRef.current) setFocusedMatchId(id)
+      const middle = id ? middleChip(id) : null
+      if (middle) scrollChipToCenter(middle, false)
     }
 
-    const selected = strip.querySelector<HTMLElement>(
-      `[data-fixture-id="${CSS.escape(focusedMatchIdRef.current || '')}"]`
-    )
-    if (selected) scrollChipToCenter(selected, false)
+    centerFocused(false)
+    const frame = window.requestAnimationFrame(() => centerFocused(false))
 
     let pointerId: number | null = null
     let startX = 0
@@ -136,12 +219,25 @@ export default function CurrentGameweek({
     let settleTimer = 0
 
     const onScroll = () => {
+      if (programmatic) return
+      wrapIfNeeded()
+      const { id } = chipAtCenter()
+      if (id && id !== focusedMatchIdRef.current) showMatch(id)
+      if (pointerId !== null) return
       window.clearTimeout(settleTimer)
-      settleTimer = window.setTimeout(selectCentered, 80)
+      settleTimer = window.setTimeout(() => {
+        if (programmatic) return
+        wrapIfNeeded()
+        const settled = chipAtCenter()
+        if (settled.chip) scrollChipToCenter(settled.chip, true)
+        showMatch(settled.id)
+        window.setTimeout(normalizeToMiddle, 520)
+      }, 80)
     }
 
     const onPointerDown = (event: PointerEvent) => {
       if (event.pointerType === 'mouse' && event.button !== 0) return
+      event.preventDefault()
       dragged = false
       pointerId = event.pointerId
       startX = event.clientX
@@ -160,6 +256,10 @@ export default function CurrentGameweek({
       if (Math.abs(dx) < 8 && !dragged) return
       dragged = true
       strip.scrollLeft = startLeft - dx
+      const jumped = wrapIfNeeded()
+      if (jumped) startLeft += jumped
+      const { id } = chipAtCenter()
+      if (id && id !== focusedMatchIdRef.current) showMatch(id)
     }
 
     const onPointerUp = (event: PointerEvent) => {
@@ -173,37 +273,59 @@ export default function CurrentGameweek({
       }
 
       if (dragged) {
-        const { chip } = chipAtCenter()
+        wrapIfNeeded()
+        const { id, chip } = chipAtCenter()
         if (chip) scrollChipToCenter(chip, true)
-        selectCentered()
+        showMatch(id)
+        window.setTimeout(normalizeToMiddle, 520)
         return
       }
 
       const hit = document
         .elementFromPoint(event.clientX, event.clientY)
         ?.closest('[data-fixture-id]') as HTMLElement | null
-      if (hit) {
-        scrollChipToCenter(hit, true)
-        const id = hit.dataset.fixtureId
-        if (id) setFocusedMatchId(id)
-      }
+      if (!hit) return
+      const id = hit.dataset.fixtureId || ''
+      showMatch(id)
+      scrollChipToCenter(hit, true)
+      window.setTimeout(normalizeToMiddle, 520)
     }
 
+    const onScrollEnd = () => {
+      if (!programmatic) return
+      programmatic = false
+      window.clearTimeout(programmaticTimer)
+      wrapIfNeeded()
+      normalizeToMiddle()
+    }
+
+    const resize = new ResizeObserver(() => {
+      if (programmatic) return
+      centerFocused(false)
+    })
+    resize.observe(strip)
+
     strip.addEventListener('scroll', onScroll, { passive: true })
+    strip.addEventListener('scrollend', onScrollEnd)
     strip.addEventListener('pointerdown', onPointerDown)
     strip.addEventListener('pointermove', onPointerMove)
     strip.addEventListener('pointerup', onPointerUp)
     strip.addEventListener('pointercancel', onPointerUp)
 
     return () => {
+      window.cancelAnimationFrame(frame)
       window.clearTimeout(settleTimer)
+      window.clearTimeout(programmaticTimer)
+      resize.disconnect()
       strip.removeEventListener('scroll', onScroll)
+      strip.removeEventListener('scrollend', onScrollEnd)
       strip.removeEventListener('pointerdown', onPointerDown)
       strip.removeEventListener('pointermove', onPointerMove)
       strip.removeEventListener('pointerup', onPointerUp)
       strip.removeEventListener('pointercancel', onPointerUp)
     }
-  }, [selectedMatchday, gameweekFixtures.length])
+  }, [gameweekFixtures, loopCopies])
+
   const focusedIndex = gameweekFixtures.findIndex((fixture) => fixture.id === focusedMatchId)
   const selectedPlayers =
     focusedIndex >= 0 ? playersByMatch[gameweekFixtures[focusedIndex].id] || [] : []
@@ -218,7 +340,7 @@ export default function CurrentGameweek({
   )
 
   return (
-    <section className="mb-5 rounded-[28px] border border-slate-200 bg-white p-3 shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:rounded-xl dark:border-orange-500/40 dark:bg-zinc-900 dark:shadow-lg sm:p-5 md:p-6">
+    <section className="content-panel mb-5 p-3 dark:border-orange-500/40 sm:p-5 md:p-6">
       <div className="flex items-center justify-between gap-2">
         <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:truncate dark:text-sm dark:font-black dark:tracking-wider dark:text-zinc-100 sm:dark:text-base">
           GW {selectedMatchday} · {t('Predictions')}
@@ -229,6 +351,47 @@ export default function CurrentGameweek({
           </span>
         ) : null}
       </div>
+
+      {gameweekFixtures.length > 1 ? (
+        <div className="mt-3 min-w-0 max-w-full">
+          <div
+            ref={stripRef}
+            className="relative flex h-[3.25rem] w-full min-w-0 cursor-grab touch-none items-center overflow-x-auto overscroll-x-contain rounded-2xl bg-slate-100 py-1 select-none active:cursor-grabbing [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden dark:bg-white/[0.08] sm:h-[3.5rem] sm:py-1.5"
+            style={{ WebkitOverflowScrolling: 'touch' }}
+            role="listbox"
+            aria-label={t('Fixtures')}
+          >
+            {stripItems.map(({ fixture, copy }) => {
+              const selected = fixture.id === focusedMatchId
+              return (
+                <button
+                  key={`${copy}-${fixture.id}`}
+                  type="button"
+                  role="option"
+                  tabIndex={-1}
+                  aria-selected={selected}
+                  data-fixture-id={fixture.id}
+                  data-copy={String(copy)}
+                  title={`${fixture.home} vs ${fixture.away}`}
+                  aria-label={`${fixture.home} vs ${fixture.away}`}
+                  className={cn(
+                    'flex h-11 min-h-11 shrink-0 select-none items-center justify-center gap-1 whitespace-nowrap px-4 text-center text-sm sm:px-6',
+                    selected
+                      ? 'rounded-xl bg-white font-bold text-slate-900 shadow-sm dark:border-white/35 dark:bg-white/[0.1] dark:text-zinc-100 dark:shadow-[inset_0_1px_0_rgb(255_255_255/0.28),0_0_0_1px_rgb(255_149_61/0.35)]'
+                      : 'rounded-xl font-semibold text-slate-500 transition-colors hover:text-slate-700 dark:text-zinc-400 dark:hover:text-zinc-200'
+                  )}
+                >
+                  <Crest src={fixture.homeCrest} name={fixture.home} size={18} />
+                  <span className="text-xs font-bold tracking-wide">{teamTla({ name: fixture.home })}</span>
+                  <span className="text-sm font-semibold text-slate-400">–</span>
+                  <span className="text-xs font-bold tracking-wide">{teamTla({ name: fixture.away })}</span>
+                  <Crest src={fixture.awayCrest} name={fixture.away} size={18} />
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      ) : null}
 
       <div className="mt-3">
         {selectedFixture ? (
@@ -280,47 +443,6 @@ export default function CurrentGameweek({
                   : null}
               </div>
             </div>
-
-            {gameweekFixtures.length > 1 ? (
-              <div className="relative mt-3 h-14">
-                <div
-                  className="pointer-events-none absolute left-1/2 top-1/2 z-0 h-12 w-[6.5rem] -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-white/35 bg-white/[0.1] shadow-[inset_0_1px_0_rgb(255_255_255/0.28),0_0_0_1px_rgb(255_149_61/0.35)]"
-                  aria-hidden
-                />
-                <div
-                  ref={stripRef}
-                  className="hide-scrollbar relative z-10 flex h-14 cursor-grab touch-none items-center gap-2 overflow-x-auto overscroll-x-contain py-1 select-none active:cursor-grabbing [padding-inline:calc(50%-3.25rem)]"
-                  role="listbox"
-                  aria-label={t('Fixtures')}
-                >
-                  {gameweekFixtures.map((fixture) => {
-                    const selected = fixture.id === focusedMatchId
-                    return (
-                      <button
-                        key={fixture.id}
-                        type="button"
-                        role="option"
-                        aria-selected={selected}
-                        data-fixture-id={fixture.id}
-                        data-selected={selected ? 'true' : undefined}
-                        title={`${fixture.home} vs ${fixture.away}`}
-                        aria-label={`${fixture.home} vs ${fixture.away}`}
-                        className={cn(
-                          'flex h-12 w-[6.5rem] shrink-0 snap-center items-center justify-center gap-1 rounded-2xl bg-transparent transition-opacity',
-                          selected ? 'opacity-100' : 'opacity-40'
-                        )}
-                      >
-                        <Crest src={fixture.homeCrest} name={fixture.home} size={26} />
-                        <span className="text-[8px] font-semibold uppercase tracking-wide text-slate-500 dark:font-black dark:tracking-wider dark:text-zinc-400">vs</span>
-                        <Crest src={fixture.awayCrest} name={fixture.away} size={26} />
-                      </button>
-                    )
-                  })}
-                </div>
-                <div className="pointer-events-none absolute inset-y-0 left-0 z-20 w-8 bg-gradient-to-r from-transparent to-transparent dark:from-zinc-950" />
-                <div className="pointer-events-none absolute inset-y-0 right-0 z-20 w-8 bg-gradient-to-l from-transparent to-transparent dark:from-zinc-950" />
-              </div>
-            ) : null}
           </div>
         ) : (
           <p className="text-sm text-zinc-400">No fixtures available for this gameweek.</p>
