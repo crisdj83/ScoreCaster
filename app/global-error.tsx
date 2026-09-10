@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import { isChunkLoadError, isTransientNavigationError } from '../lib/client-errors'
 
 async function recoverFromStaleClient() {
   try {
@@ -24,19 +25,43 @@ export default function GlobalError({
   error: Error & { digest?: string }
   reset: () => void
 }) {
+  const [showUi, setShowUi] = useState(false)
+
   useEffect(() => {
-    console.error('Root layout error:', error)
-    const key = 'xactscore-global-error-reload'
-    try {
-      if (sessionStorage.getItem(key) === '1') return
-      sessionStorage.setItem(key, '1')
-    } catch {
+    if (isTransientNavigationError(error) && !isChunkLoadError(error)) {
+      reset()
       return
     }
-    void recoverFromStaleClient().finally(() => {
-      window.location.replace(window.location.href)
-    })
-  }, [error])
+
+    if (isChunkLoadError(error)) {
+      const key = 'xactscore-global-error-reload'
+      try {
+        if (sessionStorage.getItem(key) === '1') {
+          setShowUi(true)
+          return
+        }
+        sessionStorage.setItem(key, '1')
+      } catch {
+        setShowUi(true)
+        return
+      }
+      void recoverFromStaleClient().finally(() => {
+        window.location.reload()
+      })
+      return
+    }
+
+    const timeout = window.setTimeout(() => setShowUi(true), 400)
+    return () => window.clearTimeout(timeout)
+  }, [error, reset])
+
+  if (!showUi) {
+    return (
+      <html lang="en">
+        <body className="min-h-[100dvh] bg-slate-200 dark:bg-zinc-900" />
+      </html>
+    )
+  }
 
   return (
     <html lang="en" className="dark">

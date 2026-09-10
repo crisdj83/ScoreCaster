@@ -10,13 +10,13 @@ function applyThemeColor(color: string) {
     meta.setAttribute('name', 'theme-color')
     meta.setAttribute('content', color)
     document.head.appendChild(meta)
-  } else {
-    metas.forEach((meta, index) => {
-      meta.removeAttribute('media')
-      if (index === 0) meta.setAttribute('content', color)
-      else meta.remove()
-    })
+    document.documentElement.style.backgroundColor = color
+    return
   }
+  metas.forEach((meta) => {
+    meta.removeAttribute('media')
+    meta.setAttribute('content', color)
+  })
   document.documentElement.style.backgroundColor = color
 }
 

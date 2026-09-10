@@ -58,6 +58,7 @@ export default function BottomNav({ isAdmin, isLoggedIn, unreadMessageCount }: B
             <Link
               key={href}
               href={href}
+              prefetch={false}
               aria-label={label}
               className={cn(
                 iosTabItem,

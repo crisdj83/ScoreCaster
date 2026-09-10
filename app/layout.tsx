@@ -19,10 +19,7 @@ const inter = Inter({
 });
 
 export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#E2E8F0" },
-    { media: "(prefers-color-scheme: dark)", color: "#18181b" },
-  ],
+  themeColor: "#E2E8F0",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
@@ -87,7 +84,7 @@ export default function RootLayout({
     locale = getServerLocale()
   } catch {
     locale = defaultLocale
-  };
+  }
   return (
     <html
       lang={locale}
@@ -99,7 +96,7 @@ export default function RootLayout({
           {`(function(){var ua=navigator.userAgent||"";var ios=/iP(hone|ad|od)/.test(ua)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);document.documentElement.classList.toggle("android",/Android/i.test(ua));document.documentElement.classList.toggle("ios",ios)})()`}
         </Script>
         <Script id="theme-init" strategy="beforeInteractive">
-          {`(function(){try{var stored=localStorage.getItem("xactscore-theme");var theme=stored||"dark";if(theme==="system"){theme=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}var dark=theme==="dark";if(dark){document.documentElement.classList.add("dark")}else{document.documentElement.classList.remove("dark")}var color=dark?"#18181b":"#E2E8F0";document.documentElement.style.backgroundColor=color;var metas=document.querySelectorAll('meta[name="theme-color"]');if(!metas.length){var m=document.createElement("meta");m.setAttribute("name","theme-color");m.setAttribute("content",color);document.head.appendChild(m)}else{metas.forEach(function(meta,i){meta.removeAttribute("media");if(i===0)meta.setAttribute("content",color);else meta.parentNode&&meta.parentNode.removeChild(meta)})}}catch(e){document.documentElement.classList.add("dark")}})();`}
+          {`(function(){try{var stored=localStorage.getItem("xactscore-theme");var theme=stored||"dark";if(theme==="system"){theme=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}var dark=theme==="dark";if(dark){document.documentElement.classList.add("dark")}else{document.documentElement.classList.remove("dark")}var color=dark?"#18181b":"#E2E8F0";document.documentElement.style.backgroundColor=color;var metas=document.querySelectorAll('meta[name="theme-color"]');if(!metas.length){var m=document.createElement("meta");m.setAttribute("name","theme-color");m.setAttribute("content",color);document.head.appendChild(m)}else{metas.forEach(function(meta){meta.removeAttribute("media");meta.setAttribute("content",color)})}}catch(e){document.documentElement.classList.add("dark")}})();`}
         </Script>
         <ThemeProvider>
           <LocaleProvider initialLocale={locale}>

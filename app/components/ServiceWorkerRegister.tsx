@@ -1,19 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
-
-function isChunkLoadError(error: unknown) {
-  if (!error) return false
-  const message = error instanceof Error ? error.message : String(error)
-  const name = error instanceof Error ? error.name : ''
-  return (
-    name === 'ChunkLoadError' ||
-    /Loading chunk [\d]+ failed/i.test(message) ||
-    /Failed to fetch dynamically imported module/i.test(message) ||
-    /Importing a module script failed/i.test(message) ||
-    /error loading dynamically imported module/i.test(message)
-  )
-}
+import { isChunkLoadError } from '../../lib/client-errors'
 
 async function clearAppCaches() {
   if ('serviceWorker' in navigator) {

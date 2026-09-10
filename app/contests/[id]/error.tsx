@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { AlertTriangle } from 'lucide-react'
+import { isTransientNavigationError } from '../../../lib/client-errors'
 
 export default function ContestError({
   error,
@@ -11,9 +12,19 @@ export default function ContestError({
   error: Error & { digest?: string }
   reset: () => void
 }) {
+  const [showUi, setShowUi] = useState(false)
+
   useEffect(() => {
+    if (isTransientNavigationError(error)) {
+      reset()
+      return
+    }
     console.error('Contest page error:', error)
-  }, [error])
+    const timeout = window.setTimeout(() => setShowUi(true), 400)
+    return () => window.clearTimeout(timeout)
+  }, [error, reset])
+
+  if (!showUi) return null
 
   return (
     <div className="mx-auto flex max-w-lg flex-col items-center gap-4 rounded-xl border border-xactscore-border bg-xactscore-card p-8 text-center">
