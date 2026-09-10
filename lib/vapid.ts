@@ -30,7 +30,7 @@ export function envVapidSubject() {
  * Decode a VAPID applicationServerKey for PushManager.subscribe.
  * Throws with a stable message when the key is malformed.
  */
-export function vapidPublicKeyToUint8Array(raw: string): Uint8Array {
+export function vapidPublicKeyToUint8Array(raw: string): Uint8Array<ArrayBuffer> {
   const cleaned = normalizeVapidPublicKey(raw)
   if (!cleaned) {
     throw new Error('VAPID_PUBLIC_KEY_MISSING')
@@ -45,7 +45,7 @@ export function vapidPublicKeyToUint8Array(raw: string): Uint8Array {
 
   try {
     const rawData = globalThis.atob(base64)
-    const output = new Uint8Array(rawData.length)
+    const output = new Uint8Array(new ArrayBuffer(rawData.length))
     for (let i = 0; i < rawData.length; i += 1) {
       output[i] = rawData.charCodeAt(i)
     }
@@ -79,15 +79,13 @@ export function resolveVapidPublicKey() {
  * Standalone 65-byte key for PushManager.subscribe.
  * Chrome Android rejects shared/offset views and some Uint8Array copies.
  */
-export function vapidApplicationServerKey(raw: string): Uint8Array {
+export function vapidApplicationServerKey(raw: string): Uint8Array<ArrayBuffer> {
   const bytes = vapidPublicKeyToUint8Array(raw)
-  const buffer = new ArrayBuffer(bytes.byteLength)
-  const copy = new Uint8Array(buffer)
+  const copy = new Uint8Array(new ArrayBuffer(bytes.byteLength))
   copy.set(bytes)
   return copy
 }
 
 export function vapidApplicationServerKeyBuffer(raw: string): ArrayBuffer {
-  const bytes = vapidApplicationServerKey(raw)
-  return bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength)
+  return vapidApplicationServerKey(raw).buffer
 }

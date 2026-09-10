@@ -65,7 +65,7 @@ export default function MatchReminderToggle() {
 
     setPending(true)
     try {
-      let bytes: Uint8Array
+      let bytes: Uint8Array<ArrayBuffer>
       let buffer: ArrayBuffer
       try {
         bytes = vapidApplicationServerKey(key)
@@ -176,7 +176,7 @@ function isVapidSubscribeError(error: unknown) {
 
 async function subscribePush(
   registration: ServiceWorkerRegistration,
-  bytes: Uint8Array,
+  bytes: Uint8Array<ArrayBuffer>,
   buffer: ArrayBuffer,
   key: string
 ) {
