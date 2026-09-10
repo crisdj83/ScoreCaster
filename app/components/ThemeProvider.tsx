@@ -10,13 +10,14 @@ function applyThemeColor(color: string) {
     meta.setAttribute('name', 'theme-color')
     meta.setAttribute('content', color)
     document.head.appendChild(meta)
-    return
+  } else {
+    metas.forEach((meta, index) => {
+      meta.removeAttribute('media')
+      if (index === 0) meta.setAttribute('content', color)
+      else meta.remove()
+    })
   }
-  metas.forEach((meta, index) => {
-    meta.removeAttribute('media')
-    if (index === 0) meta.setAttribute('content', color)
-    else meta.remove()
-  })
+  document.documentElement.style.backgroundColor = color
 }
 
 function ThemeColorSync() {
@@ -24,7 +25,7 @@ function ThemeColorSync() {
 
   useEffect(() => {
     if (!resolvedTheme) return
-    applyThemeColor(resolvedTheme === 'light' ? '#e4e7eb' : '#050506')
+    applyThemeColor(resolvedTheme === 'light' ? '#E2E8F0' : '#18181b')
   }, [resolvedTheme])
 
   return null

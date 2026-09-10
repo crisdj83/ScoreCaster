@@ -1,4 +1,5 @@
 import { LogOut } from 'lucide-react'
+import Link from 'next/link'
 import { createClient } from '../../lib/supabase/server'
 import { signOut } from '../actions'
 import NavLinks from './NavLinks'
@@ -8,6 +9,9 @@ import ThemeToggle from './ThemeToggle'
 import InstallPwaBar from './InstallPwaBar'
 import { getTranslations } from '../../lib/i18n'
 import { getServerLocale } from '../../lib/i18n-server'
+import { loginPath } from '../../lib/urls'
+import { buttonVariants } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 
 export default async function Navbar() {
   const t = getTranslations(getServerLocale())
@@ -53,7 +57,7 @@ export default async function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 w-full overflow-visible bg-transparent px-3 pt-[max(0.5rem,env(safe-area-inset-top))] dark:border-b dark:border-xactscore-border dark:bg-xactscore-bg/70 dark:px-0 dark:pt-[env(safe-area-inset-top)]">
+      <header className="sticky top-0 z-40 w-full overflow-visible bg-slate-200 px-3 pt-[max(0.5rem,env(safe-area-inset-top))] dark:border-b dark:border-xactscore-border dark:bg-zinc-900 dark:px-0 dark:pt-[env(safe-area-inset-top)]">
         <div className="app-topbar flex w-full min-w-0 flex-nowrap items-center gap-1 overflow-visible rounded-2xl border border-slate-200 bg-white py-1.5 pl-2.5 pr-3.5 shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:rounded-none dark:border-0 dark:bg-transparent dark:px-3 dark:py-3 dark:shadow-none sm:gap-2.5 sm:rounded-full sm:px-5 sm:py-2 lg:px-8 xl:px-10">
           <NavLinks isAdmin={isAdmin} isLoggedIn={Boolean(user)} unreadMessageCount={unreadMessageCount} />
 
@@ -71,7 +75,25 @@ export default async function Navbar() {
                   <LogOut className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" strokeWidth={2.25} aria-hidden />
                 </button>
               </form>
-            ) : null}
+            ) : (
+              <span className="inline-flex shrink-0 items-center overflow-hidden rounded-full border border-slate-200 bg-slate-50 dark:border-white/15 dark:bg-white/5">
+                <Link
+                  href={loginPath()}
+                  className="inline-flex h-8 items-center px-2.5 text-[10px] font-black uppercase tracking-wider text-slate-700 sm:h-11 sm:px-3.5 sm:text-xs dark:text-orange-100"
+                >
+                  {t('Sign In')}
+                </Link>
+                <Link
+                  href={loginPath({ mode: 'signup' })}
+                  className={cn(
+                    buttonVariants({ size: 'sm' }),
+                    'h-8 min-h-8 rounded-none rounded-r-full px-2.5 text-[10px] uppercase tracking-wider sm:h-11 sm:min-h-11 sm:px-3.5 sm:text-xs'
+                  )}
+                >
+                  {t('Sign Up')}
+                </Link>
+              </span>
+            )}
           </div>
         </div>
         <InstallPwaBar />

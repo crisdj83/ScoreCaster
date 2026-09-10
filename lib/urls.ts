@@ -12,3 +12,12 @@ export function safeNextPath(value: string | null | undefined) {
 export function inviteUrl(contestKey: string) {
   return `${siteUrl()}/join/${encodeURIComponent(contestKey.trim().toLowerCase())}`
 }
+
+export function loginPath(options?: { mode?: 'signin' | 'signup'; next?: string; message?: string }) {
+  const params = new URLSearchParams()
+  if (options?.mode === 'signup') params.set('mode', 'signup')
+  if (options?.next && options.next !== '/') params.set('next', options.next)
+  if (options?.message) params.set('message', options.message)
+  const query = params.toString()
+  return query ? `/login?${query}` : '/login'
+}

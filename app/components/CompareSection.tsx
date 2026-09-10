@@ -99,8 +99,8 @@ export default function CompareSection({
       </div>
 
       {showCta ? (
-        <Link href="/login" className={cn(buttonVariants(), 'uppercase tracking-wider')}>
-          {t('Start for free')}
+        <Link href="/login?mode=signup" className={cn(buttonVariants(), 'uppercase tracking-wider')}>
+          {t('Sign Up')}
         </Link>
       ) : null}
     </section>

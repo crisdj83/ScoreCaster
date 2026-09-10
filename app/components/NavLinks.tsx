@@ -6,7 +6,6 @@ import {
   Trophy,
   User as UserIcon,
   Home as HomeIcon,
-  LogIn,
   MessageSquare,
   ShieldCheck,
   CircleHelp,
@@ -14,7 +13,6 @@ import {
 import { useTranslations } from './LocaleProvider'
 import XactScoreLogo from './XactScoreLogo'
 import { cn } from '@/lib/utils'
-import { buttonVariants } from '@/components/ui/button'
 import { tabActive, tabBase, tabInactive } from '@/lib/tab-styles'
 
 type NavLinksProps = {
@@ -37,7 +35,7 @@ export default function NavLinks({ isAdmin, isLoggedIn, unreadMessageCount }: Na
         aria-label="XactScore home"
         className="inline-flex items-center outline-none"
       >
-        <XactScoreLogo compact />
+        <XactScoreLogo compact hideWordmarkOnMobile={!isLoggedIn} />
       </Link>
       <Link href="/" className={linkClass('/')}>
         <HomeIcon className="h-4 w-4" />
@@ -75,18 +73,6 @@ export default function NavLinks({ isAdmin, isLoggedIn, unreadMessageCount }: Na
       {isAdmin && (
         <Link href="/admin" className={linkClass('/admin')}>
           <ShieldCheck className="h-4 w-4" /> {t('Admin')}
-        </Link>
-      )}
-      {!isLoggedIn && (
-        <Link
-          href="/login"
-          className={cn(
-            buttonVariants({ size: 'sm' }),
-            'hidden uppercase tracking-wider lg:inline-flex',
-            pathname === '/login' && 'brightness-110'
-          )}
-        >
-          <LogIn className="h-4 w-4" /> {t('Start for free')}
         </Link>
       )}
     </>

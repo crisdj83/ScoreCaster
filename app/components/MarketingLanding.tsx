@@ -5,7 +5,7 @@ import { getTranslations } from '../../lib/i18n'
 import type { Locale } from '../../lib/i18n'
 import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { siteUrl } from '../../lib/urls'
+import { siteUrl, loginPath } from '../../lib/urls'
 import LandingJoinForm from './LandingJoinForm'
 import ProductPreview from './ProductPreview'
 import CompareSection from './CompareSection'
@@ -135,16 +135,21 @@ export default function MarketingLanding({
               {t('Predict Premier League scores with friends. No transfers, no squads — just the score, your league, and the table.')}
             </p>
             <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:items-center">
-              <Link href="/login" className={cn(buttonVariants(), 'w-full rounded-full bg-gradient-to-r from-indigo-600 to-blue-500 px-6 py-3.5 font-bold uppercase tracking-wide text-white shadow-lg shadow-indigo-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-indigo-500/40 active:scale-95 dark:bg-gradient-to-r dark:from-amber-500 dark:to-orange-600 dark:shadow-[0_10px_25px_rgba(245,158,11,0.35)] dark:hover:shadow-[0_10px_25px_rgba(245,158,11,0.35)] sm:w-auto')}>
-                {t('Create a league')}
+              <Link href={loginPath()} className={cn(buttonVariants(), 'w-full rounded-full bg-gradient-to-r from-indigo-600 to-blue-500 px-6 py-3.5 font-bold uppercase tracking-wide text-white shadow-lg shadow-indigo-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-indigo-500/40 active:scale-95 dark:bg-gradient-to-r dark:from-amber-500 dark:to-orange-600 dark:shadow-[0_10px_25px_rgba(245,158,11,0.35)] dark:hover:shadow-[0_10px_25px_rgba(245,158,11,0.35)] sm:w-auto')}>
+                {t('Sign In')}
               </Link>
               <Link
-                href="#join"
+                href={loginPath({ mode: 'signup' })}
                 className={cn(buttonVariants({ variant: 'glass' }), 'w-full rounded-full uppercase tracking-wider sm:w-auto')}
               >
-                {t('Have an invite?')}
+                {t('Sign Up')}
               </Link>
             </div>
+            <p className="mt-3 text-sm font-medium text-zinc-500">
+              <Link href="#join" className="underline-offset-4 hover:underline dark:text-orange-100">
+                {t('Have an invite?')}
+              </Link>
+            </p>
             <ul className="mt-6 flex flex-wrap gap-2 text-[10px] font-black uppercase tracking-wider text-zinc-500 dark:text-orange-100/90">
               <li className="rounded-full border border-slate-100/80 bg-[#F1F4F9] px-3 py-1 dark:border-white/15 dark:bg-black/20">{t('No ads')}</li>
               <li className="rounded-full border border-slate-100/80 bg-[#F1F4F9] px-3 py-1 dark:border-white/15 dark:bg-black/20">{t('No player limit')}</li>
@@ -253,8 +258,8 @@ export default function MarketingLanding({
         <p className="mx-auto mt-2 max-w-lg text-sm font-medium text-zinc-500 dark:text-orange-50/80">
           {t('Always free, no ads, unlimited players. Built for a private Premier League table — not a sports megamenu.')}
         </p>
-        <Link href="/login" className={cn(buttonVariants(), 'mt-5 uppercase tracking-wider')}>
-          {t('Start for free')}
+        <Link href={loginPath({ mode: 'signup' })} className={cn(buttonVariants(), 'mt-5 uppercase tracking-wider')}>
+          {t('Sign Up')}
         </Link>
       </div>
     </div>

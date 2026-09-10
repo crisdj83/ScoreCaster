@@ -141,7 +141,7 @@
 
 @layer base {
   :root {
-    --xactscore-bg: #e4e7eb;
+    --xactscore-bg: #e2e8f0;
     --xactscore-card: #ffffff;
     --xactscore-surface: #ffffff;
     --xactscore-border: transparent;
@@ -151,7 +151,7 @@
     --xactscore-orange: #f97316;
     --xactscore-green: #059669;
 
-    --background: #e4e7eb;
+    --background: #e2e8f0;
     --foreground: #0f172a;
     --card: #ffffff;
     --card-foreground: #0f172a;
@@ -240,16 +240,19 @@
   }
 
   html {
-    @apply font-sans antialiased;
+    @apply font-sans antialiased bg-slate-200 dark:bg-zinc-900;
     font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
     text-rendering: optimizeLegibility;
     color-scheme: light;
+    min-height: 100dvh;
+    background-color: #e2e8f0;
   }
 
   html.dark {
     color-scheme: dark;
+    background-color: #18181b;
   }
 
   html.android {
@@ -308,10 +311,13 @@
   }
 
   html.android .ios-tab-bar {
-    bottom: max(0.7rem, env(safe-area-inset-bottom, 0px));
+    bottom: 0;
+    left: 0;
+    width: 100%;
     padding-top: 0.4rem;
-    padding-bottom: 0.45rem;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
     overflow: visible;
+    border-radius: 0;
   }
 
   html.android .ios-tab-bar a {
@@ -351,7 +357,8 @@
   html.android header .app-topbar-actions > form,
   html.android header .app-topbar-actions > button,
   html.android header .app-topbar-actions > label,
-  html.android header .app-topbar-actions > span {
+  html.android header .app-topbar-actions > span,
+  html.android header .app-topbar-actions > a {
     flex-shrink: 0;
   }
 
@@ -367,13 +374,14 @@
   }
 
   body {
-    @apply min-h-screen bg-xactscore-bg text-xactscore-text transition-colors duration-300;
+    @apply flex min-h-[100dvh] flex-col bg-slate-200 text-xactscore-text transition-colors duration-300 dark:bg-zinc-900;
     background-attachment: fixed;
-    background-color: var(--xactscore-bg);
+    background-color: #e2e8f0;
     background-image: none;
   }
 
   html.dark body {
+    background-color: #18181b;
     background-image:
       radial-gradient(ellipse 120% 80% at 15% -10%, rgb(255 138 43 / 0.16), transparent 60%),
       radial-gradient(ellipse 100% 60% at 100% 0%, rgb(255 90 60 / 0.1), transparent 55%),
@@ -828,25 +836,24 @@
   }
 
   .ios-tab-bar {
-    bottom: max(0.5rem, env(safe-area-inset-bottom, 0px));
+    bottom: 0;
+    left: 0;
+    width: 100%;
     padding-top: 0.35rem;
-    padding-bottom: 0.35rem;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
     overflow: visible;
     background-color: #ffffff;
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
-    border: 1px solid rgb(226 232 240);
-    border-radius: 9999px;
-    box-shadow: 0 8px 30px rgb(0 0 0 / 0.06);
+    border: 0;
+    border-top: 1px solid rgb(226 232 240);
+    border-radius: 0;
+    box-shadow: 0 -8px 30px rgb(0 0 0 / 0.06);
   }
 
   html.dark .ios-tab-bar {
-    bottom: 0;
-    padding-bottom: env(safe-area-inset-bottom, 0px);
-    background-color: rgb(20 20 23 / 0.55);
-    border: 0;
+    background-color: #18181b;
     border-top: 1px solid rgb(255 255 255 / 0.1);
-    border-radius: 0;
     box-shadow:
       0 -8px 32px rgb(0 0 0 / 0.35),
       inset 0 1px 0 rgb(255 255 255 / 0.06);

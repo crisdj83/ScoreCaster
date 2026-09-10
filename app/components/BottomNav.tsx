@@ -49,7 +49,7 @@ export default function BottomNav({ isAdmin, isLoggedIn, unreadMessageCount }: B
   return (
     <nav
       aria-label="Primary"
-      className="ios-tab-bar fixed inset-x-3 z-40 dark:inset-x-0 lg:hidden"
+      className="ios-tab-bar fixed bottom-0 left-0 z-50 w-full bg-white pb-[env(safe-area-inset-bottom)] dark:bg-zinc-900 lg:hidden"
     >
       <div className="mx-auto flex max-w-2xl items-center gap-0.5 overflow-visible px-1 py-0.5 sm:gap-1 sm:px-2">
         {items.map(({ href, label, short, icon: Icon, badge }) => {

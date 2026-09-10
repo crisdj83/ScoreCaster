@@ -17,6 +17,9 @@ export default function SiteFooter() {
         <Link href="/login" className="hover:text-zinc-200">
           {t('Sign In')}
         </Link>
+        <Link href="/login?mode=signup" className="hover:text-zinc-200">
+          {t('Sign Up')}
+        </Link>
       </nav>
       <div className="flex items-center gap-5">
         <a
