@@ -6,7 +6,7 @@ import { Bell } from 'lucide-react'
 import { useTranslations } from './LocaleProvider'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { normalizeVapidPublicKey, vapidApplicationServerKey } from '../../lib/vapid'
+import { normalizeVapidPublicKey, vapidApplicationServerKey, vapidApplicationServerKeyBuffer } from '../../lib/vapid'
 
 function isStandaloneDisplay() {
   if (typeof window === 'undefined') return false
@@ -65,9 +65,11 @@ export default function MatchReminderToggle() {
 
     setPending(true)
     try {
-      let applicationServerKey: Uint8Array
+      let bytes: Uint8Array
+      let buffer: ArrayBuffer
       try {
-        applicationServerKey = vapidApplicationServerKey(key)
+        bytes = vapidApplicationServerKey(key)
+        buffer = vapidApplicationServerKeyBuffer(key)
       } catch {
         setMessage(t('Push notifications are misconfigured. Check the VAPID public key.'))
         return
@@ -87,10 +89,7 @@ export default function MatchReminderToggle() {
       const existing = await registration.pushManager.getSubscription()
       if (existing) await existing.unsubscribe()
 
-      const subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: applicationServerKey as BufferSource,
-      })
+      const subscription = await subscribePush(registration, bytes, buffer, key)
 
       const response = await fetch('/api/push/subscribe', {
         method: 'POST',
@@ -102,11 +101,10 @@ export default function MatchReminderToggle() {
       }
       setEnabled(true)
     } catch (error) {
-      const raw = error instanceof Error ? error.message : ''
-      if (/invalid characters|atob|applicationServerKey|InvalidAccessError|DataError/i.test(raw)) {
+      if (isVapidSubscribeError(error)) {
         setMessage(t('Push notifications are misconfigured. Check the VAPID public key.'))
       } else {
-        setMessage(raw || t('Could not enable match reminders'))
+        setMessage(error instanceof Error ? error.message : t('Could not enable match reminders'))
       }
     } finally {
       setPending(false)
@@ -169,4 +167,31 @@ export default function MatchReminderToggle() {
       </CardContent>
     </Card>
   )
+}
+
+function isVapidSubscribeError(error: unknown) {
+  const raw = error instanceof Error ? `${error.name} ${error.message}` : String(error)
+  return /invalid characters|atob|applicationServerKey|InvalidAccessError|DataError|Invalid raw ECDSA/i.test(raw)
+}
+
+async function subscribePush(
+  registration: ServiceWorkerRegistration,
+  bytes: Uint8Array,
+  buffer: ArrayBuffer,
+  key: string
+) {
+  const attempts: Array<string | BufferSource> = [bytes, buffer, key]
+  let lastError: unknown
+  for (const applicationServerKey of attempts) {
+    try {
+      return await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey,
+      })
+    } catch (error) {
+      lastError = error
+      if (!isVapidSubscribeError(error)) throw error
+    }
+  }
+  throw lastError instanceof Error ? lastError : new Error('VAPID_PUBLIC_KEY_INVALID')
 }

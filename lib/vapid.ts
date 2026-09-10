@@ -1,10 +1,29 @@
-/** Strip quotes/whitespace that often sneak into Vercel env values. */
+/** Strip quotes, labels, and whitespace that often sneak into Vercel env values. */
 export function normalizeVapidPublicKey(raw: string | null | undefined): string {
   if (!raw) return ''
   return String(raw)
     .trim()
     .replace(/^["']+|["']+$/g, '')
+    .replace(/^(public\s*key|vapid[_ ]?public[_ ]?key)\s*[:=]\s*/i, '')
     .replace(/\s+/g, '')
+}
+
+/** Dynamic lookup so Next cannot bake an empty NEXT_PUBLIC_ value in at build time. */
+function readEnv(name: string) {
+  if (typeof process === 'undefined' || !process.env) return ''
+  return process.env[name] || ''
+}
+
+function envPublicKey() {
+  return normalizeVapidPublicKey(readEnv('VAPID_PUBLIC_KEY') || readEnv('NEXT_PUBLIC_VAPID_PUBLIC_KEY'))
+}
+
+export function envVapidPrivateKey() {
+  return normalizeVapidPublicKey(readEnv('VAPID_PRIVATE_KEY'))
+}
+
+export function envVapidSubject() {
+  return readEnv('VAPID_SUBJECT').trim() || 'mailto:noreply@xactscore.app'
 }
 
 /**
@@ -17,7 +36,7 @@ export function vapidPublicKeyToUint8Array(raw: string): Uint8Array {
     throw new Error('VAPID_PUBLIC_KEY_MISSING')
   }
   // URL-safe or standard base64 (optional padding)
-  if (!/^[A-Za-z0-9\-_+]+={0,2}$/.test(cleaned)) {
+  if (!/^[A-Za-z0-9\-_+/=]+$/.test(cleaned)) {
     throw new Error('VAPID_PUBLIC_KEY_INVALID')
   }
 
@@ -30,8 +49,8 @@ export function vapidPublicKeyToUint8Array(raw: string): Uint8Array {
     for (let i = 0; i < rawData.length; i += 1) {
       output[i] = rawData.charCodeAt(i)
     }
-    // Uncompressed P-256 public keys are 65 bytes
-    if (output.length !== 65) {
+    // Uncompressed P-256 public keys are 65 bytes starting with 0x04
+    if (output.length !== 65 || output[0] !== 0x04) {
       throw new Error('VAPID_PUBLIC_KEY_INVALID')
     }
     return output
@@ -41,10 +60,34 @@ export function vapidPublicKeyToUint8Array(raw: string): Uint8Array {
   }
 }
 
-/** Copy into a standalone buffer — Chrome Android rejects shared/offset views. */
+export function isValidVapidPublicKey(raw: string | null | undefined): boolean {
+  try {
+    vapidPublicKeyToUint8Array(raw || '')
+    return true
+  } catch {
+    return false
+  }
+}
+
+/** Validated public key from env, or empty if missing/malformed. */
+export function resolveVapidPublicKey() {
+  const key = envPublicKey()
+  return isValidVapidPublicKey(key) ? key : ''
+}
+
+/**
+ * Standalone 65-byte key for PushManager.subscribe.
+ * Chrome Android rejects shared/offset views and some Uint8Array copies.
+ */
 export function vapidApplicationServerKey(raw: string): Uint8Array {
   const bytes = vapidPublicKeyToUint8Array(raw)
-  const copy = new Uint8Array(bytes.byteLength)
+  const buffer = new ArrayBuffer(bytes.byteLength)
+  const copy = new Uint8Array(buffer)
   copy.set(bytes)
   return copy
+}
+
+export function vapidApplicationServerKeyBuffer(raw: string): ArrayBuffer {
+  const bytes = vapidApplicationServerKey(raw)
+  return bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength)
 }

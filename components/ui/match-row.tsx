@@ -3,9 +3,12 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 import { ScoreBadge } from "@/components/ui/badge"
+import { FitTeamName, TeamNameFitGroup } from "@/components/ui/fit-team-name"
 
 type TeamSide = {
   name: string
+  shortName?: string
+  tla?: string
   crest?: string | null
 }
 
@@ -63,11 +66,16 @@ export function MatchRow({
       ) : null}
 
       <div className="flex w-full items-center gap-3 sm:grid sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:gap-4">
-        <div className="flex min-w-0 items-center gap-3 sm:justify-end">
+        <TeamNameFitGroup>
+        <div className="flex min-w-0 flex-1 items-center gap-3 sm:justify-end">
           <Crest src={home.crest} name={home.name} />
-          <span className="min-w-0 break-words text-sm font-medium text-slate-900 dark:font-bold dark:text-zinc-100 sm:text-right">
-            {home.name}
-          </span>
+          <FitTeamName
+            name={home.name}
+            shortName={home.shortName}
+            tla={home.tla}
+            align="right"
+            className="min-w-0 flex-1 text-sm font-medium text-slate-900 dark:font-bold dark:text-zinc-100 sm:text-right"
+          />
         </div>
 
         <div className="flex items-center justify-center">
@@ -78,10 +86,16 @@ export function MatchRow({
           )}
         </div>
 
-        <div className="flex min-w-0 items-center gap-3">
+        <div className="flex min-w-0 flex-1 items-center gap-3">
           <Crest src={away.crest} name={away.name} />
-          <span className="min-w-0 break-words text-sm font-medium text-slate-900 dark:font-bold dark:text-zinc-100">{away.name}</span>
+          <FitTeamName
+            name={away.name}
+            shortName={away.shortName}
+            tla={away.tla}
+            className="min-w-0 flex-1 text-sm font-medium text-slate-900 dark:font-bold dark:text-zinc-100"
+          />
         </div>
+        </TeamNameFitGroup>
       </div>
 
       {children}

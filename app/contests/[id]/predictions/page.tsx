@@ -6,6 +6,7 @@ import { getActiveMatchday, isOpenForPrediction, isPredictionLocked, isPredictio
 import PredictionCard from './PredictionCard'
 import SuperLuckyButton from './SuperLuckyButton'
 import MatchdayNav from './MatchdayNav'
+import { TeamNameFitGroup } from '@/components/ui/fit-team-name'
 import { getTranslations } from '../../../../lib/i18n'
 import { getServerLocale } from '../../../../lib/i18n-server'
 import LiveRefresh from '../../../components/LiveRefresh'
@@ -173,6 +174,7 @@ export default async function PredictionsPage(props: {
       </div>
 
       <div className="space-y-1.5 pb-[calc(6rem+env(safe-area-inset-bottom,0px))] sm:space-y-2 lg:pb-16">
+        <TeamNameFitGroup resetKey={selectedMatchday ?? 'none'}>
         {matchdayFixtures.map((match) => {
           // Find if the user already made a prediction for this specific match
         const existingPrediction = myPredictions?.find(p => String(p.match_id) === String(match.id))
@@ -187,6 +189,7 @@ export default async function PredictionsPage(props: {
             />
           )
         })}
+        </TeamNameFitGroup>
       </div>
     </div>
     {picksLeft > 0 ? (

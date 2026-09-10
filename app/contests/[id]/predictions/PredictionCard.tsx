@@ -7,6 +7,8 @@ import { savePrediction } from './actions'
 import Link from 'next/link'
 import { useLocale, useTranslations } from '../../../components/LocaleProvider'
 import { cn } from '@/lib/utils'
+import { FitTeamName } from '@/components/ui/fit-team-name'
+import { teamDisplayName, teamTla } from '@/lib/team-tla'
 
 const SCORE_MAX = 5
 
@@ -39,17 +41,11 @@ function nextScore(current: number | null, change: number) {
   return clampScore(current + change)
 }
 
-function teamCode(team: MatchTeam) {
-  if (team.tla) return team.tla
-  const short = (team.shortName || team.name).replace(/[^A-Za-z]/g, '')
-  return short.slice(0, 3).toUpperCase()
-}
-
 function TeamCrest({ src, name, dimmed }: { src?: string; name: string; dimmed?: boolean }) {
   if (!src) {
     return (
       <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white text-[9px] font-black text-zinc-700 shadow-[0_1px_4px_rgb(0_0_0/0.2)] sm:h-8 sm:w-8">
-        {name.slice(0, 2).toUpperCase()}
+        {name.slice(0, 3).toUpperCase()}
       </span>
     )
   }
@@ -260,8 +256,8 @@ export default function PredictionCard({
     persistScores(newHome, newAway)
   }
 
-  const homeName = match.homeTeam.shortName || match.homeTeam.name
-  const awayName = match.awayTeam.shortName || match.awayTeam.name
+  const homeName = teamDisplayName(match.homeTeam)
+  const awayName = teamDisplayName(match.awayTeam)
   const saveLabel = isPending
     ? t('Saving...')
     : saveError
@@ -285,8 +281,8 @@ export default function PredictionCard({
         isHurryUp && 'prediction-hurry border-red-400/35'
       )}
     >
-      <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-1.5 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:gap-2.5">
-        <TeamBlock team={match.homeTeam} displayName={homeName} dimmed={isLocked} align="end" />
+      <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-1.5 sm:gap-2.5">
+        <TeamBlock team={match.homeTeam} dimmed={isLocked} align="end" />
 
         <div className="flex min-w-0 items-center justify-center gap-0.5 sm:gap-1.5">
           <ScoreStepper
@@ -310,7 +306,7 @@ export default function PredictionCard({
           />
         </div>
 
-        <TeamBlock team={match.awayTeam} displayName={awayName} dimmed={isLocked} align="start" />
+        <TeamBlock team={match.awayTeam} dimmed={isLocked} align="start" />
       </div>
 
       <div className="relative mt-1.5 min-h-[1.1rem] px-1 sm:mt-1.5 sm:px-8">
@@ -356,35 +352,32 @@ export default function PredictionCard({
 
 function TeamBlock({
   team,
-  displayName,
   dimmed,
   align,
 }: {
   team: MatchTeam
-  displayName: string
   dimmed?: boolean
   align: 'start' | 'end'
 }) {
   return (
     <div
       className={cn(
-        'flex min-w-0 shrink-0 items-center gap-1.5 sm:gap-2',
+        'flex min-w-0 items-center gap-1.5 sm:gap-2',
         align === 'end' ? 'justify-end' : 'justify-start',
         align === 'end' ? 'flex-row' : 'flex-row-reverse'
       )}
     >
-      <TeamCrest src={team.crest} name={displayName} dimmed={dimmed} />
-      <span
+      <TeamCrest src={team.crest} name={teamTla(team)} dimmed={dimmed} />
+      <FitTeamName
+        name={team.name}
+        shortName={team.shortName}
+        tla={team.tla}
+        align={align === 'end' ? 'right' : 'left'}
         className={cn(
-          'hidden min-w-0 truncate text-[11px] font-bold uppercase tracking-wide text-slate-900 dark:text-xactscore-text sm:inline',
-          align === 'end' ? 'text-right' : 'text-left',
+          'min-w-0 flex-1 text-sm font-medium text-slate-900 dark:font-bold dark:text-xactscore-text',
           dimmed && 'opacity-60'
         )}
-        title={team.name}
-      >
-        {displayName}
-      </span>
-      <span className="sr-only">{teamCode(team)}</span>
+      />
     </div>
   )
 }

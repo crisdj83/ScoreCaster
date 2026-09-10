@@ -7,14 +7,15 @@ import { Clock, Sparkles, MapPin } from 'lucide-react'
 import { useTranslations } from '../../../components/LocaleProvider'
 import MatchdayStrip from '../../../components/MatchdayStrip'
 import { ScoreBadge } from '@/components/ui/badge'
+import { FitTeamName, TeamNameFitGroup } from '@/components/ui/fit-team-name'
 
 export type Match = {
   id: number | string
   matchday: number
   utcDate: string
   status: string
-  homeTeam: { id?: number | string; name: string; shortName?: string; crest?: string }
-  awayTeam: { id?: number | string; name: string; shortName?: string; crest?: string }
+  homeTeam: { id?: number | string; name: string; shortName?: string; tla?: string; crest?: string }
+  awayTeam: { id?: number | string; name: string; shortName?: string; tla?: string; crest?: string }
   score?: {
     fullTime?: { home?: number | null; away?: number | null }
   }
@@ -105,6 +106,7 @@ export default function FixturesCalendar({
       </div>
 
       <section className="space-y-2 dark:space-y-0 dark:overflow-hidden dark:rounded-xl dark:border dark:border-zinc-800 dark:bg-zinc-900/60 dark:shadow-lg">
+        <TeamNameFitGroup resetKey={selectedMatchday}>
         <div className="space-y-2 dark:space-y-0 dark:divide-y dark:divide-zinc-800">
           {selectedFixtures.map((match) => {
             const score = match.score?.fullTime
@@ -113,16 +115,13 @@ export default function FixturesCalendar({
               score?.home !== undefined &&
               score?.away !== null &&
               score?.away !== undefined
-            const homeName = match.homeTeam.shortName || match.homeTeam.name
-            const awayName = match.awayTeam.shortName || match.awayTeam.name
-
             return (
               <Link
                 key={match.id}
                 href={`/contests/${contestId}/predictions/${match.id}`}
                 className="prediction-fixture-content fixture-calendar-game mb-2.5 flex min-h-[52px] items-center justify-between gap-3 overflow-hidden rounded-2xl border border-emerald-100 bg-emerald-500/5 p-3.5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-200 dark:mb-0 dark:min-h-[72px] dark:flex-col dark:gap-3 dark:rounded-none dark:border-0 dark:bg-transparent dark:px-4 dark:py-4 dark:shadow-none dark:hover:bg-zinc-800/50 dark:hover:shadow-none sm:grid sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:items-center sm:gap-4 sm:px-5"
               >
-                <span className="flex min-w-0 items-center gap-2 text-sm font-medium text-slate-900 dark:font-bold dark:text-zinc-100 sm:justify-end sm:text-right">
+                <span className="flex min-w-0 flex-1 items-center gap-2 text-sm font-medium text-slate-900 dark:font-bold dark:text-zinc-100 sm:justify-end sm:text-right">
                   {match.homeTeam.crest ? (
                     <Image
                       src={match.homeTeam.crest}
@@ -132,7 +131,13 @@ export default function FixturesCalendar({
                       className="h-7 w-7 shrink-0 object-contain sm:order-2"
                     />
                   ) : null}
-                  <span className="min-w-0 break-words sm:order-1">{homeName}</span>
+                  <FitTeamName
+                    name={match.homeTeam.name}
+                    shortName={match.homeTeam.shortName}
+                    tla={match.homeTeam.tla}
+                    align="right"
+                    className="min-w-0 flex-1 sm:order-1 sm:text-right"
+                  />
                 </span>
 
                 <span className="flex min-w-24 flex-col items-center gap-1 self-center">
@@ -160,7 +165,7 @@ export default function FixturesCalendar({
                   ) : null}
                 </span>
 
-                <span className="flex min-w-0 items-center gap-2 text-sm font-medium text-slate-900 dark:font-bold dark:text-zinc-100">
+                <span className="flex min-w-0 flex-1 items-center gap-2 text-sm font-medium text-slate-900 dark:font-bold dark:text-zinc-100">
                   {match.awayTeam.crest ? (
                     <Image
                       src={match.awayTeam.crest}
@@ -170,12 +175,18 @@ export default function FixturesCalendar({
                       className="h-7 w-7 shrink-0 object-contain"
                     />
                   ) : null}
-                  <span className="min-w-0 break-words">{awayName}</span>
+                  <FitTeamName
+                    name={match.awayTeam.name}
+                    shortName={match.awayTeam.shortName}
+                    tla={match.awayTeam.tla}
+                    className="min-w-0 flex-1"
+                  />
                 </span>
               </Link>
             )
           })}
         </div>
+        </TeamNameFitGroup>
       </section>
     </div>
   )
