@@ -26,6 +26,11 @@ type StandingRow = {
   points: number
 }
 
+function formatGoalDifference(value: number) {
+  if (value > 0) return `+${value}`
+  return String(value)
+}
+
 function ScorerCard({
   title,
   players,
@@ -153,7 +158,7 @@ export default async function FixturesPage(props: { params: Promise<{ id: string
       header: 'W',
       headerClassName: 'text-center',
       className: 'text-center text-slate-500 dark:text-zinc-300',
-      mobileExpandable: true,
+      hideOnMobile: true,
       cell: (row) => row.won,
     },
     {
@@ -161,7 +166,7 @@ export default async function FixturesPage(props: { params: Promise<{ id: string
       header: 'D',
       headerClassName: 'text-center',
       className: 'text-center text-slate-500 dark:text-zinc-300',
-      mobileExpandable: true,
+      hideOnMobile: true,
       cell: (row) => row.draw,
     },
     {
@@ -169,7 +174,7 @@ export default async function FixturesPage(props: { params: Promise<{ id: string
       header: 'L',
       headerClassName: 'text-center',
       className: 'text-center text-slate-500 dark:text-zinc-300',
-      mobileExpandable: true,
+      hideOnMobile: true,
       cell: (row) => row.lost,
     },
     {
@@ -177,7 +182,7 @@ export default async function FixturesPage(props: { params: Promise<{ id: string
       header: 'GF',
       headerClassName: 'text-center',
       className: 'text-center text-slate-500 dark:text-zinc-300',
-      mobileExpandable: true,
+      hideOnMobile: true,
       cell: (row) => row.goalsFor,
     },
     {
@@ -185,7 +190,7 @@ export default async function FixturesPage(props: { params: Promise<{ id: string
       header: 'GA',
       headerClassName: 'text-center',
       className: 'text-center text-slate-500 dark:text-zinc-300',
-      mobileExpandable: true,
+      hideOnMobile: true,
       cell: (row) => row.goalsAgainst,
     },
     {
@@ -193,7 +198,7 @@ export default async function FixturesPage(props: { params: Promise<{ id: string
       header: 'GD',
       headerClassName: 'text-center',
       className: 'text-center font-semibold text-slate-500 dark:font-bold dark:text-zinc-200',
-      mobileExpandable: true,
+      hideOnMobile: true,
       cell: (row) => row.goalDifference,
     },
     {
@@ -218,7 +223,15 @@ export default async function FixturesPage(props: { params: Promise<{ id: string
         <h2 className="text-xl font-semibold uppercase tracking-tight text-slate-900 dark:text-base dark:font-black dark:tracking-wider dark:text-zinc-100 sm:dark:text-xl">
           {t('Premier League Standings')}
         </h2>
-
+        <div className="flex items-center gap-1.5 px-2.5 text-[9px] font-semibold uppercase tracking-wide text-slate-400 md:hidden dark:text-zinc-500">
+          <span className="flex min-w-6 justify-center">#</span>
+          <span className="min-w-0 flex-1">{t('Club')}</span>
+          <span className="inline-flex items-center gap-1">
+            <span className="w-[3.4rem] text-center">W-D-L</span>
+            <span className="w-7 text-right">GD</span>
+          </span>
+          <span className="min-w-[1.75rem] text-right">Pts</span>
+        </div>
         <RankTable
           rows={standingsTable}
           columns={standingsColumns}
@@ -241,13 +254,33 @@ export default async function FixturesPage(props: { params: Promise<{ id: string
                   className="h-4 w-4 shrink-0 object-contain"
                 />
               ) : null}
-              <span className="min-w-0 break-words text-sm font-medium [overflow-wrap:anywhere]">{row.team.shortName || row.team.name}</span>
+              <span className="min-w-0 truncate text-sm font-medium">{row.team.shortName || row.team.name}</span>
+            </span>
+          )}
+          mobileStats={(row) => (
+            <span className="inline-flex items-center gap-1">
+              <span className="w-[3.4rem] text-center text-[10px] font-semibold tabular-nums text-slate-500 dark:text-zinc-400" title="W-D-L">
+                {row.won}-{row.draw}-{row.lost}
+              </span>
+              <span
+                className={`w-7 text-right text-[10px] font-semibold tabular-nums ${
+                  row.goalDifference > 0
+                    ? 'text-emerald-600 dark:text-emerald-400'
+                    : row.goalDifference < 0
+                      ? 'text-rose-500 dark:text-rose-400'
+                      : 'text-slate-500 dark:text-zinc-400'
+                }`}
+                title="GD"
+              >
+                {formatGoalDifference(row.goalDifference)}
+              </span>
             </span>
           )}
           mobileEnd={(row) => (
             <span className="text-sm font-semibold tabular-nums dark:text-[12px] dark:font-black">{row.points}</span>
           )}
         />
+        </div>
 
         <div className="grid gap-6 md:grid-cols-2">
           <ScorerCard

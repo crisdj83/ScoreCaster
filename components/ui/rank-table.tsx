@@ -135,7 +135,7 @@ export function RankTable<T>({
 
             if (!details) {
               const rowClass = cn(
-                "flex min-h-11 items-center gap-1.5 px-2.5 py-2 touch-manipulation",
+                "group flex min-h-11 items-center gap-1.5 px-2.5 py-2 touch-manipulation",
                 index % 2 === 1 && "bg-slate-50/80 dark:bg-white/[0.02]",
                 href && "active:bg-indigo-50 dark:active:bg-white/[0.06]"
               )
@@ -220,7 +220,7 @@ export function RankTable<T>({
             {rows.map((row, index) => (
               <tr
                 key={getRowKey(row, index)}
-                className="transition-colors duration-300 hover:bg-slate-50 dark:hover:bg-white/[0.06]"
+                className="group transition-colors duration-300 hover:bg-slate-50 dark:hover:bg-white/[0.06]"
               >
                 {columns.map((col) => (
                   <td key={col.key} className={cn("px-4 py-3", col.className)}>

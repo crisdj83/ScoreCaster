@@ -301,9 +301,9 @@
   }
 
   html.android .prediction-score-box {
-    height: 1.95rem;
-    width: 1.95rem;
-    font-size: 0.95rem;
+    height: 2.35rem;
+    width: 2.35rem;
+    font-size: 1.125rem;
   }
 
   html.ios .prediction-stepper-btn {
@@ -312,9 +312,9 @@
   }
 
   html.ios .prediction-score-box {
-    height: 2.25rem;
-    width: 2.25rem;
-    font-size: 1.125rem;
+    height: 2.5rem;
+    width: 2.5rem;
+    font-size: 1.25rem;
   }
 
   html.android .ios-tab-bar {
@@ -743,6 +743,43 @@
       180deg,
       rgb(14 14 16 / 0.52),
       rgb(8 8 10 / 0.68)
+    );
+  }
+
+  .prediction-fixture-content.prediction-unpicked {
+    background-color: rgb(244 63 94 / 0.045);
+    border-color: rgb(255 228 230 / 0.85);
+  }
+
+  html.dark .prediction-fixture-content.prediction-picked::after {
+    background: linear-gradient(
+      180deg,
+      rgb(12 28 20 / 0.58),
+      rgb(8 18 12 / 0.74)
+    );
+  }
+
+  html.dark .prediction-fixture-content.prediction-unpicked::after {
+    background: linear-gradient(
+      180deg,
+      rgb(32 14 16 / 0.58),
+      rgb(18 8 10 / 0.74)
+    );
+  }
+
+  html.dark .prediction-fixture-content.prediction-picked:hover::after {
+    background: linear-gradient(
+      180deg,
+      rgb(14 32 22 / 0.52),
+      rgb(8 18 12 / 0.68)
+    );
+  }
+
+  html.dark .prediction-fixture-content.prediction-unpicked:hover::after {
+    background: linear-gradient(
+      180deg,
+      rgb(36 16 18 / 0.52),
+      rgb(18 8 10 / 0.68)
     );
   }
 

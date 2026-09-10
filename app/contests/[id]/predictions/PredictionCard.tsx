@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState, useTransition } from 'react'
+import { useEffect, useRef, useState, useTransition, type ReactNode } from 'react'
 import Image from 'next/image'
 import { Plus, Minus, Eye } from 'lucide-react'
 import { savePrediction } from './actions'
@@ -24,10 +24,6 @@ type ExistingPrediction = {
   predicted_away_score?: number | null
 }
 
-type RevealedPrediction = {
-  match_id?: number | string
-}
-
 function clampScore(value: number) {
   return Math.min(SCORE_MAX, Math.max(0, value))
 }
@@ -41,22 +37,59 @@ function nextScore(current: number | null, change: number) {
   return clampScore(current + change)
 }
 
+export function KickoffGroupHeading({
+  utcDate,
+  aside,
+}: {
+  utcDate: string
+  aside?: ReactNode
+}) {
+  const { locale } = useLocale()
+  const kickoff = new Date(utcDate)
+  const label = Number.isFinite(kickoff.getTime())
+    ? new Intl.DateTimeFormat(locale === 'en' ? 'en-GB' : locale, {
+        weekday: 'short',
+        day: 'numeric',
+        month: 'short',
+        hour: '2-digit',
+        minute: '2-digit',
+      }).format(kickoff)
+    : '—'
+
+  const heading = (
+    <h2 className="min-w-0 shrink-0 text-xs font-semibold tracking-tight text-slate-500 dark:text-[11px] dark:font-black dark:uppercase dark:tracking-widest dark:text-zinc-500">
+      {label}
+    </h2>
+  )
+
+  if (!aside) {
+    return <div className="px-1">{heading}</div>
+  }
+
+  return (
+    <div className="flex items-center justify-between gap-2 px-1">
+      {heading}
+      <div className="flex min-w-0 flex-1 items-center justify-end gap-1.5">{aside}</div>
+    </div>
+  )
+}
+
 function TeamCrest({ src, name, dimmed }: { src?: string; name: string; dimmed?: boolean }) {
   if (!src) {
     return (
-      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white text-[9px] font-black text-zinc-700 shadow-[0_1px_4px_rgb(0_0_0/0.2)] sm:h-8 sm:w-8">
+      <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white text-[11px] font-black text-zinc-700 shadow-[0_1px_8px_rgb(0_0_0/0.2)] sm:h-14 sm:w-14">
         {name.slice(0, 3).toUpperCase()}
       </span>
     )
   }
   return (
-    <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white shadow-[0_1px_4px_rgb(0_0_0/0.2)] sm:h-8 sm:w-8">
+    <span className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white shadow-[0_1px_8px_rgb(0_0_0/0.2)] sm:h-14 sm:w-14">
       <Image
         src={src}
         alt={name}
-        width={22}
-        height={22}
-        className={cn('h-[18px] w-[18px] object-contain sm:h-[22px] sm:w-[22px]', dimmed && 'opacity-50')}
+        width={40}
+        height={40}
+        className={cn('h-9 w-9 object-contain sm:h-10 sm:w-10', dimmed && 'opacity-50')}
       />
     </span>
   )
@@ -65,7 +98,7 @@ function TeamCrest({ src, name, dimmed }: { src?: string; name: string; dimmed?:
 function ScoreStepper({
   label,
   score,
-  disabled,
+  readOnly,
   onDec,
   onInc,
   canDec,
@@ -73,33 +106,43 @@ function ScoreStepper({
 }: {
   label: string
   score: number | null
-  disabled?: boolean
+  readOnly?: boolean
   onDec: () => void
   onInc: () => void
   canDec: boolean
   canInc: boolean
 }) {
+  if (readOnly) {
+    return (
+      <div className="flex h-10 shrink-0 items-center justify-center">
+        <span className="text-2xl font-bold tabular-nums leading-none text-slate-900 dark:text-white">
+          {score === null ? '—' : score}
+        </span>
+      </div>
+    )
+  }
+
   const btn =
-    'prediction-stepper-btn inline-flex h-9 w-9 touch-manipulation items-center justify-center rounded-full transition-colors duration-200 active:scale-90 disabled:opacity-25 sm:h-7 sm:w-7 sm:rounded-md'
+    'prediction-stepper-btn inline-flex h-8 w-8 shrink-0 touch-manipulation items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm transition-colors duration-200 hover:bg-slate-50 active:scale-90 disabled:opacity-25 dark:border-white/15 dark:bg-white/10 dark:text-zinc-200 dark:hover:bg-white/15'
   return (
-    <div className="flex items-center gap-0.5 sm:gap-1">
+    <div className="flex h-10 shrink-0 items-center justify-center gap-1">
       <button
         type="button"
-        disabled={disabled || !canDec}
+        disabled={!canDec}
         onClick={onDec}
-        className={cn(btn, 'text-rose-400 hover:bg-rose-500/10')}
+        className={btn}
         aria-label={`Decrease ${label} score`}
       >
         <Minus className="h-3.5 w-3.5" strokeWidth={3} />
       </button>
-      <span className="prediction-score-box flex h-8 w-8 items-center justify-center rounded-xl border-0 bg-white text-base font-black tabular-nums text-slate-900 shadow-[0_4px_14px_rgb(0,0,0,0.05)] dark:border dark:border-white/15 dark:bg-black/35 dark:text-white dark:shadow-none sm:h-8 sm:w-8 sm:text-lg">
+      <span className="prediction-score-box flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-lg font-bold tabular-nums text-slate-900 shadow-sm dark:border-white/15 dark:bg-black/35 dark:text-white sm:h-10 sm:w-10">
         {score === null ? <span className="text-slate-400 dark:text-zinc-500">—</span> : score}
       </span>
       <button
         type="button"
-        disabled={disabled || !canInc}
+        disabled={!canInc}
         onClick={onInc}
-        className={cn(btn, 'text-emerald-500 hover:bg-emerald-500/10')}
+        className={btn}
         aria-label={`Increase ${label} score`}
       >
         <Plus className="h-3.5 w-3.5" strokeWidth={3} />
@@ -112,7 +155,6 @@ export default function PredictionCard({
   match,
   contestId,
   existingPrediction,
-  revealedPredictions = [],
 }: {
   match: {
     id: number | string
@@ -123,7 +165,6 @@ export default function PredictionCard({
   }
   contestId: string
   existingPrediction?: ExistingPrediction | null
-  revealedPredictions?: RevealedPrediction[]
 }) {
   const initialHome = savedScore(existingPrediction?.predicted_home_score)
   const initialAway = savedScore(existingPrediction?.predicted_away_score)
@@ -134,7 +175,6 @@ export default function PredictionCard({
   const [saveError, setSaveError] = useState('')
   const [now, setNow] = useState<number | null>(null)
   const t = useTranslations()
-  const { locale } = useLocale()
   const homeScoreRef = useRef(initialHome)
   const awayScoreRef = useRef(initialAway)
   const lastSavedRef = useRef({ home: initialHome, away: initialAway })
@@ -219,14 +259,6 @@ export default function PredictionCard({
       ? '…'
       : `${Math.floor(millisecondsUntilKickoff / 86400000)}d ${String(Math.floor((millisecondsUntilKickoff % 86400000) / 3600000)).padStart(2, '0')}:${String(Math.floor((millisecondsUntilKickoff % 3600000) / 60000)).padStart(2, '0')}:${String(Math.floor((millisecondsUntilKickoff % 60000) / 1000)).padStart(2, '0')}`
 
-  const dateCompact = Number.isFinite(kickoffTime.getTime())
-    ? new Intl.DateTimeFormat(locale === 'en' ? 'en-GB' : locale, {
-        weekday: 'short',
-        hour: '2-digit',
-        minute: '2-digit',
-      }).format(kickoffTime)
-    : '—'
-
   const persistScores = (newHome: number | null, newAway: number | null) => {
     const home = newHome === null ? null : clampScore(newHome)
     const away = newAway === null ? null : clampScore(newAway)
@@ -256,8 +288,6 @@ export default function PredictionCard({
     persistScores(newHome, newAway)
   }
 
-  const homeName = teamDisplayName(match.homeTeam)
-  const awayName = teamDisplayName(match.awayTeam)
   const saveLabel = isPending
     ? t('Saving...')
     : saveError
@@ -273,111 +303,97 @@ export default function PredictionCard({
         ? countdown
         : saveLabel
   const showUrgency = Boolean(urgencyLabel)
+  const isStatusBadge = Boolean(statusLabel) || (isLocked && !isEnded && !isInPlay)
+  const urgencyClass = isStatusBadge
+    ? 'rounded-md bg-slate-200/50 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-600 dark:bg-white/10 dark:text-zinc-400'
+    : cn(
+        'text-[10px] font-semibold tabular-nums',
+        saveError
+          ? 'text-red-400'
+          : isPending
+            ? 'animate-pulse italic text-zinc-400'
+            : isHurryUp
+              ? 'font-black tabular-nums text-red-300'
+              : 'text-xactscore-accent'
+      )
+
+  const hasPick = homeScore !== null && awayScore !== null
 
   return (
     <div
       className={cn(
-        'prediction-fixture-content mb-2 touch-manipulation overflow-hidden rounded-2xl border border-emerald-100/90 bg-emerald-500/[0.04] px-2.5 py-2.5 shadow-[0_4px_16px_rgb(0,0,0,0.03)] dark:mb-0 dark:border-white/10 dark:bg-transparent dark:shadow-none sm:mb-2.5 sm:px-3.5 sm:py-2.5',
+        'prediction-fixture-content mb-2 touch-manipulation overflow-hidden rounded-2xl px-3 py-3 shadow-[0_4px_16px_rgb(0,0,0,0.03)] dark:mb-0 dark:shadow-none sm:mb-2.5 sm:px-4 sm:py-3.5',
+        hasPick
+          ? 'prediction-picked border border-emerald-100/90 bg-emerald-500/[0.04] dark:border-emerald-500/25 dark:bg-emerald-500/[0.08]'
+          : 'prediction-unpicked border border-rose-100/80 bg-rose-500/[0.045] dark:border-rose-500/25 dark:bg-rose-500/[0.08]',
         isHurryUp && 'prediction-hurry border-red-400/35'
       )}
     >
-      <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-1.5 sm:gap-2.5">
-        <TeamBlock team={match.homeTeam} dimmed={isLocked} align="end" />
-
-        <div className="flex min-w-0 items-center justify-center gap-0.5 sm:gap-1.5">
+      <div className="grid grid-cols-[auto_minmax(0,1fr)_auto_minmax(0,1fr)_auto] grid-rows-[1.25rem_auto] items-center gap-x-2 sm:gap-x-3">
+        <div className="col-start-1 row-span-2 self-center">
+          <TeamCrest src={match.homeTeam.crest} name={teamTla(match.homeTeam)} />
+        </div>
+        <FitTeamName
+          name={match.homeTeam.name}
+          shortName={match.homeTeam.shortName}
+          tla={match.homeTeam.tla}
+          className="col-start-2 row-start-1 min-w-0 text-center text-sm font-medium leading-5 text-slate-900 dark:font-bold dark:text-xactscore-text"
+        />
+        <div className="col-start-2 row-start-2 flex items-center justify-center">
           <ScoreStepper
-            label={homeName}
+            label={teamDisplayName(match.homeTeam)}
             score={homeScore}
-            disabled={isLocked}
+            readOnly={isLocked}
             onDec={() => handleScoreChange('home', -1)}
             onInc={() => handleScoreChange('home', 1)}
             canDec={homeScore === null || homeScore > 0}
             canInc={homeScore === null || homeScore < SCORE_MAX}
           />
-          <span className="px-0.5 text-sm font-black text-zinc-400">–</span>
+        </div>
+        <span className="col-start-3 row-start-2 flex h-10 items-center justify-center px-1 text-base font-bold text-slate-400 sm:px-1.5">
+          –
+        </span>
+        <FitTeamName
+          name={match.awayTeam.name}
+          shortName={match.awayTeam.shortName}
+          tla={match.awayTeam.tla}
+          className="col-start-4 row-start-1 min-w-0 text-center text-sm font-medium leading-5 text-slate-900 dark:font-bold dark:text-xactscore-text"
+        />
+        <div className="col-start-4 row-start-2 flex items-center justify-center">
           <ScoreStepper
-            label={awayName}
+            label={teamDisplayName(match.awayTeam)}
             score={awayScore}
-            disabled={isLocked}
+            readOnly={isLocked}
             onDec={() => handleScoreChange('away', -1)}
             onInc={() => handleScoreChange('away', 1)}
             canDec={awayScore === null || awayScore > 0}
             canInc={awayScore === null || awayScore < SCORE_MAX}
           />
         </div>
-
-        <TeamBlock team={match.awayTeam} dimmed={isLocked} align="start" />
+        <div className="col-start-5 row-span-2 self-center">
+          <TeamCrest src={match.awayTeam.crest} name={teamTla(match.awayTeam)} />
+        </div>
       </div>
 
-      <div className="relative mt-1.5 min-h-[1.1rem] px-1 sm:mt-1.5 sm:px-8">
-        <p className="truncate text-center text-[10px] font-medium leading-tight text-slate-500">
-          <span className="tabular-nums">{dateCompact}</span>
-        </p>
-        <span className="absolute inset-y-0 right-0 flex items-center gap-1.5 text-[10px] font-semibold">
-          {showUrgency ? (
-            <span
-              className={cn(
-                'max-w-[6.5rem] truncate tabular-nums',
-                saveError
-                  ? 'text-red-400'
-                  : isPending
-                    ? 'animate-pulse italic text-zinc-400'
-                    : isEnded
-                      ? 'text-zinc-400'
-                      : isHurryUp
-                        ? 'font-black tabular-nums text-red-300'
-                        : isInPlay || (isLocked && !isEnded)
-                          ? 'font-black uppercase tracking-wider text-red-300'
-                          : 'text-xactscore-accent'
-              )}
-            >
-              {urgencyLabel}
-            </span>
-          ) : null}
-          {canReveal ? (
-            <Link
-              href={`/contests/${contestId}/ranking?matchId=${match.id}`}
-              className="inline-flex items-center gap-0.5 text-zinc-400 transition hover:text-xactscore-accent"
-              aria-label={t("View everyone's predictions")}
-            >
-              <Eye className="h-3 w-3" />
-              <span className="tabular-nums">{revealedPredictions.length}</span>
-            </Link>
-          ) : null}
-        </span>
+      <div className="relative mt-2 flex min-h-5 shrink-0 items-center justify-center">
+        {canReveal ? (
+          <Link
+            href={`/contests/${contestId}/ranking?matchId=${match.id}`}
+            className="inline-flex max-w-[calc(100%-5.5rem)] items-center gap-1 overflow-hidden whitespace-nowrap text-[10px] font-semibold leading-none text-zinc-500 transition-colors hover:text-indigo-600 dark:text-zinc-400 dark:hover:text-indigo-400"
+            aria-label={t("See everyone's prediction")}
+          >
+            <Eye className="h-3.5 w-3.5 shrink-0" />
+            <span className="truncate">{t("See everyone's prediction")}</span>
+          </Link>
+        ) : showUrgency ? (
+          <span className={cn(urgencyClass, 'leading-none')}>{urgencyLabel}</span>
+        ) : null}
+        {canReveal && showUrgency ? (
+          <span className={cn(urgencyClass, 'pointer-events-none absolute inset-y-0 right-0 flex items-center leading-none')}>
+            {urgencyLabel}
+          </span>
+        ) : null}
       </div>
-    </div>
-  )
-}
-
-function TeamBlock({
-  team,
-  dimmed,
-  align,
-}: {
-  team: MatchTeam
-  dimmed?: boolean
-  align: 'start' | 'end'
-}) {
-  return (
-    <div
-      className={cn(
-        'flex min-w-0 items-center gap-1.5 sm:gap-2',
-        align === 'end' ? 'justify-end' : 'justify-start',
-        align === 'end' ? 'flex-row' : 'flex-row-reverse'
-      )}
-    >
-      <TeamCrest src={team.crest} name={teamTla(team)} dimmed={dimmed} />
-      <FitTeamName
-        name={team.name}
-        shortName={team.shortName}
-        tla={team.tla}
-        align={align === 'end' ? 'right' : 'left'}
-        className={cn(
-          'min-w-0 flex-1 text-sm font-medium text-slate-900 dark:font-bold dark:text-xactscore-text',
-          dimmed && 'opacity-60'
-        )}
-      />
     </div>
   )
 }

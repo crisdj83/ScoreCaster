@@ -2,8 +2,8 @@
 import { createClient } from '../../../../lib/supabase/server'
 import { getPLMatches } from '../../../../lib/football'
 import { isMatchInContestSeason, normalizeSeasonLength } from '../../../../lib/contest-season'
-import { getActiveMatchday, isOpenForPrediction, isPredictionLocked, isPredictionRevealable } from '../../../../lib/scoring'
-import PredictionCard from './PredictionCard'
+import { getActiveMatchday, isOpenForPrediction, isPredictionLocked } from '../../../../lib/scoring'
+import PredictionCard, { KickoffGroupHeading } from './PredictionCard'
 import SuperLuckyButton from './SuperLuckyButton'
 import MatchdayNav from './MatchdayNav'
 import { TeamNameFitGroup } from '@/components/ui/fit-team-name'
@@ -20,12 +20,29 @@ type PlMatch = {
   awayTeam: { name: string; shortName?: string; tla?: string; crest?: string }
 }
 
-type RevealedPrediction = {
-  user_id: string
-  match_id: number | string
-  points?: number | null
-  predicted_home_score?: number | null
-  predicted_away_score?: number | null
+function kickoffMinuteKey(utcDate: string) {
+  const kickoff = new Date(utcDate).getTime()
+  if (!Number.isFinite(kickoff)) return 'unknown'
+  return String(Math.floor(kickoff / 60_000))
+}
+
+function groupFixturesByKickoff(matches: PlMatch[]) {
+  const groups: { key: string; minuteKey: string; utcDate: string; matches: PlMatch[] }[] = []
+  for (const match of matches) {
+    const minuteKey = kickoffMinuteKey(match.utcDate)
+    const last = groups[groups.length - 1]
+    if (last && last.minuteKey === minuteKey) {
+      last.matches.push(match)
+      continue
+    }
+    groups.push({
+      key: `${minuteKey}-${groups.length}`,
+      minuteKey,
+      utcDate: match.utcDate,
+      matches: [match],
+    })
+  }
+  return groups
 }
 
 export default async function PredictionsPage(props: {
@@ -107,29 +124,6 @@ export default async function PredictionsPage(props: {
       .in('match_id', allowedMatchIds)
     : { data: [] }
 
-  const revealableMatchIds = matchdayFixtures
-    .filter((match: { utcDate: string }) => isPredictionRevealable(match.utcDate))
-    .map((match: { id: number | string }) => Number(match.id))
-    .filter((id) => Number.isFinite(id))
-  // Cross-member prediction aggregation is enforced via a SECURITY DEFINER
-  // Postgres RPC (get_contest_predictions) that verifies contest membership
-  // server-side, rather than a service-role client bypass.
-  const { data: revealedPredictionsRaw, error: revealedPredictionsError } = revealableMatchIds.length
-    ? await supabase.rpc('get_contest_predictions', {
-        p_contest_id: params.id,
-        p_match_ids: revealableMatchIds,
-      })
-    : { data: [], error: null }
-  if (revealedPredictionsError) {
-    // Reveal counts are decorative on this page — don't hard-fail the whole
-    // predictions UI if the RPC is missing or type-mismatched in production.
-    console.error('Unable to load revealed predictions:', revealedPredictionsError.message)
-  }
-  const revealedPredictions = ((revealedPredictionsRaw || []) as RevealedPrediction[]).map((prediction) => ({
-    ...prediction,
-    points_earned: prediction.points,
-  }))
-
   const openThisWeek = matchdayFixtures.filter((match) => isOpenForPrediction(match, now))
   const unmadeMatches = openThisWeek.filter(
     (match) =>
@@ -156,39 +150,46 @@ export default async function PredictionsPage(props: {
       ) : (
         <p className="mb-3 text-sm text-zinc-500">{t('Season Ended / No Fixtures')}</p>
       )}
-      <div className="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1 sm:mb-3 sm:gap-3">
-        {openThisWeek.length > 0 ? (
-          picksLeft > 0 ? (
-            <span className="rounded-full bg-xactscore-accent px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-xactscore-bg">
-              {picksLeft} {picksLeft === 1 ? t('pick left') : t('picks left')}
-            </span>
-          ) : (
-            <span className="rounded-full border border-slate-200 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-zinc-400 dark:border-white/15">
-              {t('All picks in')}
-            </span>
-          )
-        ) : null}
-        <p className="text-[10px] font-medium leading-snug text-slate-500">
-          {t('Picks lock 60 minutes before kickoff.')}
-        </p>
-      </div>
-
-      <div className="space-y-1.5 pb-[calc(6rem+env(safe-area-inset-bottom,0px))] sm:space-y-2 lg:pb-16">
+      <div className="space-y-3 pb-[calc(6rem+env(safe-area-inset-bottom,0px))] sm:space-y-4 lg:pb-16">
         <TeamNameFitGroup resetKey={selectedMatchday ?? 'none'}>
-        {matchdayFixtures.map((match) => {
-          // Find if the user already made a prediction for this specific match
-        const existingPrediction = myPredictions?.find(p => String(p.match_id) === String(match.id))
-          
-          return (
-            <PredictionCard 
-              key={match.id} 
-              match={match} 
-              contestId={params.id} 
-              existingPrediction={existingPrediction} 
-              revealedPredictions={revealedPredictions?.filter((prediction) => String(prediction.match_id) === String(match.id)) || []}
+        {groupFixturesByKickoff(matchdayFixtures).map((group, index) => (
+          <section key={group.key} className="space-y-1.5 sm:space-y-2">
+            <KickoffGroupHeading
+              utcDate={group.utcDate}
+              aside={
+                index === 0 ? (
+                  <>
+                    {openThisWeek.length > 0 ? (
+                      picksLeft > 0 ? (
+                        <span className="shrink-0 rounded-full bg-xactscore-accent px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-xactscore-bg">
+                          {picksLeft} {picksLeft === 1 ? t('pick left') : t('picks left')}
+                        </span>
+                      ) : (
+                        <span className="shrink-0 rounded-full border border-slate-200 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-zinc-400 dark:border-white/15">
+                          {t('All picks in')}
+                        </span>
+                      )
+                    ) : null}
+                    <p className="min-w-0 truncate text-right text-[10px] font-medium leading-none text-slate-500">
+                      {t('Picks lock 60 minutes before kickoff.')}
+                    </p>
+                  </>
+                ) : undefined
+              }
             />
-          )
-        })}
+            {group.matches.map((match) => {
+              const existingPrediction = myPredictions?.find(p => String(p.match_id) === String(match.id))
+              return (
+                <PredictionCard
+                  key={match.id}
+                  match={match}
+                  contestId={params.id}
+                  existingPrediction={existingPrediction}
+                />
+              )
+            })}
+          </section>
+        ))}
         </TeamNameFitGroup>
       </div>
     </div>

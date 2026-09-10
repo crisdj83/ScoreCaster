@@ -688,7 +688,7 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
             <PlayerAvatar src={player.avatar} name={player.username} />
             <div className="min-w-0">
               <div className="flex min-w-0 items-center gap-1.5">
-                <span className="break-words text-sm font-medium [overflow-wrap:anywhere] dark:font-bold">
+                <span className="break-words text-sm font-medium [overflow-wrap:anywhere] group-hover:text-indigo-700 dark:font-bold dark:group-hover:text-xactscore-accent">
                   {player.username}
                 </span>
                 <RankMovement
@@ -700,7 +700,7 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
                 />
               </div>
               {player.motto ? (
-                <div className="mt-0.5 inline-block max-w-[18ch] truncate rounded-full bg-indigo-100 px-2 py-0.5 text-xs italic text-indigo-700 dark:bg-transparent dark:px-0 dark:py-0 dark:text-xactscore-accent">
+                <div className="mt-0.5 inline-block max-w-[18ch] truncate rounded-full bg-slate-100 px-2 py-0.5 text-xs italic text-slate-600 dark:bg-transparent dark:px-0 dark:py-0 dark:text-zinc-400">
                   &ldquo;{player.motto}&rdquo;
                 </div>
               ) : null}
@@ -723,9 +723,10 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
     {
       key: 'exact',
       header: (
-        <span className="inline-flex items-center gap-1">
+        <span className="inline-flex items-center gap-1" title={`${t('Exact Score')} (${ptsExact}pts)`}>
           <Target className="h-4 w-4 text-xactscore-accent" />
           {t('Exact Score')}
+          <span className="tabular-nums text-xactscore-accent">{ptsExact}pts</span>
         </span>
       ),
       headerClassName: 'text-center',
@@ -735,9 +736,10 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
     {
       key: 'close',
       header: (
-        <span className="inline-flex items-center gap-1">
+        <span className="inline-flex items-center gap-1" title={`${t('Close Prediction')} (${ptsClose}pts)`}>
           <Activity className="h-4 w-4 text-sky-400" />
           {t('Close Prediction')}
+          <span className="tabular-nums text-sky-400">{ptsClose}pts</span>
         </span>
       ),
       headerClassName: 'text-center',
@@ -747,9 +749,10 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
     {
       key: 'result',
       header: (
-        <span className="inline-flex items-center gap-1">
+        <span className="inline-flex items-center gap-1" title={`${t('Correct Result')} (${ptsResult}pts)`}>
           <CheckCircle2 className="h-4 w-4 text-emerald-400" />
           {t('Correct Result')}
+          <span className="tabular-nums text-emerald-400">{ptsResult}pts</span>
         </span>
       ),
       headerClassName: 'text-center',
@@ -767,17 +770,12 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
       />
       <PageHeader
         title={t('League table')}
-        description={`${t('Tiered Scoring')}: ${t('Exact Score')} (${ptsExact}pts) • ${t('Close Prediction')} (${ptsClose}pts) • ${t('Correct Result')} (${ptsResult}pts)`}
+        className="mb-3 sm:mb-4 sm:items-center"
         actions={
-          <div className="flex items-center gap-1.5 text-xactscore-accent">
+          <div className="flex items-center gap-1.5 whitespace-nowrap text-xactscore-accent">
             <Gauge className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
-            <span className="flex flex-col items-end leading-none">
-              <span className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-[9px] dark:font-black dark:tracking-wide dark:text-xactscore-accent/70">
-                {t('Season')}
-              </span>
-              <span className="whitespace-nowrap text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-[10px] dark:font-black dark:text-xactscore-accent sm:dark:text-xs">
-                {t(getSeasonLengthLabelKey(seasonLength))}
-              </span>
+            <span className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-[10px] dark:font-black dark:text-xactscore-accent sm:dark:text-xs">
+              {t('Season')} {t(getSeasonLengthLabelKey(seasonLength))}
             </span>
           </div>
         }
@@ -790,21 +788,21 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
       />
 
       <div className="mb-2 mt-6 sm:mb-4 sm:mt-8">
-        <h2 className="text-xl font-semibold uppercase tracking-tight text-slate-900 dark:text-base dark:font-black dark:tracking-wider dark:text-zinc-100 sm:dark:text-xl">
+        <h2 className="text-gradient-accent pb-0.5 text-xl font-semibold leading-tight tracking-tight sm:text-2xl dark:font-bold sm:dark:text-3xl">
           {t('Contest Leaderboard')}
         </h2>
         <p className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] font-semibold leading-none text-zinc-500 md:hidden">
-          <span className="inline-flex items-center gap-1">
+          <span className="inline-flex items-center gap-1" title={t('Exact Score')}>
             <Target className="h-3 w-3 text-xactscore-accent" aria-hidden />
-            {t('Exact Score')}
+            {ptsExact}pts
           </span>
-          <span className="inline-flex items-center gap-1">
+          <span className="inline-flex items-center gap-1" title={t('Close Prediction')}>
             <Activity className="h-3 w-3 text-sky-400" aria-hidden />
-            {t('Close Prediction')}
+            {ptsClose}pts
           </span>
-          <span className="inline-flex items-center gap-1">
+          <span className="inline-flex items-center gap-1" title={t('Correct Result')}>
             <CheckCircle2 className="h-3 w-3 text-emerald-400" aria-hidden />
-            {t('Correct Result')}
+            {ptsResult}pts
           </span>
         </p>
       </div>
@@ -825,7 +823,7 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
             title={player.motto ? `"${player.motto}"` : undefined}
           >
             <PlayerAvatar src={player.avatar} name={player.username} />
-            <span className="min-w-0 flex-1 break-words text-sm font-medium leading-snug text-indigo-700 [overflow-wrap:anywhere] dark:font-semibold dark:text-xactscore-accent">
+            <span className="min-w-0 flex-1 break-words text-sm font-medium leading-snug text-slate-800 [overflow-wrap:anywhere] group-hover:text-indigo-700 group-active:text-indigo-700 dark:font-semibold dark:text-zinc-200 dark:group-hover:text-xactscore-accent dark:group-active:text-xactscore-accent">
               {player.username}
             </span>
             <RankMovement

@@ -349,7 +349,7 @@ export default function CurrentGameweek({
               selectedPlayers.map((player, index) => (
                 <div
                   key={player.id}
-                  className="mb-2.5 flex min-h-10 items-center gap-1.5 rounded-2xl border border-slate-200 bg-white px-2.5 py-2.5 text-sm shadow-sm dark:mb-0 dark:rounded-lg dark:border-transparent dark:bg-zinc-950 dark:p-1.5 dark:px-3 dark:shadow-none sm:grid sm:grid-cols-[4rem_minmax(0,1fr)_7rem_5rem] sm:gap-2 sm:p-3.5"
+                  className="group mb-2.5 flex min-h-10 items-center gap-1.5 rounded-2xl border border-slate-200 bg-white px-2.5 py-2.5 text-sm shadow-sm dark:mb-0 dark:rounded-lg dark:border-transparent dark:bg-zinc-950 dark:p-1.5 dark:px-3 dark:shadow-none sm:grid sm:grid-cols-[4rem_minmax(0,1fr)_7rem_5rem] sm:gap-2 sm:p-3.5"
                 >
                   <span className="w-7 shrink-0 font-mono text-xs font-semibold text-xactscore-accent dark:font-black sm:w-auto sm:text-sm">
                     {index + 1}
@@ -373,7 +373,7 @@ export default function CurrentGameweek({
                         <UserRound className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                       </span>
                     )}
-                    <span className="min-w-0 flex-1 break-words text-sm font-medium leading-snug [overflow-wrap:anywhere] dark:font-bold">
+                    <span className="min-w-0 flex-1 break-words text-sm font-medium leading-snug [overflow-wrap:anywhere] group-hover:text-indigo-700 group-active:text-indigo-700 dark:font-bold dark:group-hover:text-xactscore-accent dark:group-active:text-xactscore-accent">
                       {player.name}
                     </span>
                   </MemberLink>

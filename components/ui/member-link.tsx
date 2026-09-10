@@ -15,7 +15,7 @@ export function MemberLink({
       href={href}
       prefetch
       className={cn(
-        'relative z-10 cursor-pointer touch-manipulation text-indigo-700 underline-offset-2 active:opacity-70 dark:text-xactscore-accent',
+        'relative z-10 cursor-pointer touch-manipulation text-slate-800 underline-offset-2 transition-colors hover:text-indigo-700 active:text-indigo-700 focus-visible:text-indigo-700 dark:text-zinc-200 dark:hover:text-xactscore-accent dark:active:text-xactscore-accent dark:focus-visible:text-xactscore-accent',
         className
       )}
       {...props}
