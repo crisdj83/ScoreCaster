@@ -6,7 +6,7 @@ import { Bell } from 'lucide-react'
 import { useTranslations } from './LocaleProvider'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { normalizeVapidPublicKey, vapidPublicKeyToUint8Array } from '../../lib/vapid'
+import { normalizeVapidPublicKey, vapidApplicationServerKey } from '../../lib/vapid'
 
 function isStandaloneDisplay() {
   if (typeof window === 'undefined') return false
@@ -22,7 +22,8 @@ function isIosDevice() {
 
 export default function MatchReminderToggle() {
   const t = useTranslations()
-  const vapidKey = normalizeVapidPublicKey(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || '')
+  const bundledKey = normalizeVapidPublicKey(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || '')
+  const [vapidKey, setVapidKey] = useState(bundledKey)
   const [enabled, setEnabled] = useState(false)
   const [pending, setPending] = useState(false)
   const [message, setMessage] = useState('')
@@ -31,19 +32,29 @@ export default function MatchReminderToggle() {
 
   useEffect(() => {
     const pushOk = 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window
-    setSupported(pushOk && Boolean(vapidKey))
     setIosNeedsInstall(isIosDevice() && !isStandaloneDisplay())
-    if (!pushOk) return
+    if (!pushOk) {
+      setSupported(false)
+      return
+    }
 
     void fetch('/api/push/subscribe')
       .then((response) => response.json())
-      .then((data: { enabled?: boolean }) => setEnabled(Boolean(data.enabled)))
-      .catch(() => {})
-  }, [vapidKey])
+      .then((data: { enabled?: boolean; configured?: boolean; publicKey?: string }) => {
+        const liveKey = normalizeVapidPublicKey(data.publicKey)
+        if (liveKey) setVapidKey(liveKey)
+        setEnabled(Boolean(data.enabled))
+        setSupported(data.configured !== false && Boolean(liveKey || bundledKey))
+      })
+      .catch(() => {
+        setSupported(Boolean(bundledKey))
+      })
+  }, [bundledKey])
 
   async function enable() {
     setMessage('')
-    if (!vapidKey) {
+    const key = vapidKey || bundledKey
+    if (!key) {
       setMessage(t('Match reminders are not configured yet.'))
       return
     }
@@ -56,7 +67,7 @@ export default function MatchReminderToggle() {
     try {
       let applicationServerKey: Uint8Array
       try {
-        applicationServerKey = vapidPublicKeyToUint8Array(vapidKey)
+        applicationServerKey = vapidApplicationServerKey(key)
       } catch {
         setMessage(t('Push notifications are misconfigured. Check the VAPID public key.'))
         return
@@ -68,8 +79,14 @@ export default function MatchReminderToggle() {
         return
       }
 
-      const registration = await navigator.serviceWorker.register('/sw.js')
+      const registration =
+        (await navigator.serviceWorker.getRegistration('/sw.js')) ||
+        (await navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' }))
       await navigator.serviceWorker.ready
+
+      const existing = await registration.pushManager.getSubscription()
+      if (existing) await existing.unsubscribe()
+
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: applicationServerKey as BufferSource,

@@ -75,7 +75,7 @@ function ProfileBanners() {
 
 function ProfileLoadingSkeleton() {
   return (
-    <div className="mx-auto max-w-3xl space-y-6 pb-12 pt-2">
+    <div className="mx-auto max-w-3xl space-y-6 pb-[calc(8rem+env(safe-area-inset-bottom,0px))] pt-2">
       <div className="mb-8 space-y-3">
         <Skeleton className="h-4 w-40" />
         <Skeleton className="h-10 w-64" />
@@ -186,7 +186,7 @@ function ProfilePageInner() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6 pb-12 pt-2">
+    <div className="mx-auto max-w-3xl space-y-6 pb-[calc(8rem+env(safe-area-inset-bottom,0px))] pt-2">
       <div className="mb-8 flex items-center justify-between">
         <div>
           <Breadcrumb items={[{ label: t('Your Profile') }]} className="mb-2 hidden md:flex" />

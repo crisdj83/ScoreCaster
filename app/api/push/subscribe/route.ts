@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '../../../../lib/supabase/server'
-import { isPushConfigured } from '../../../../lib/web-push'
+import { getVapidPublicKey, isPushConfigured } from '../../../../lib/web-push'
 
 type PushBody = {
   endpoint?: string
@@ -24,6 +24,7 @@ export async function GET() {
   return NextResponse.json({
     enabled: (count || 0) > 0,
     configured: isPushConfigured(),
+    publicKey: getVapidPublicKey() || undefined,
   })
 }
 

@@ -36,6 +36,10 @@ export function isPushConfigured() {
   return vapidConfigured()
 }
 
+export function getVapidPublicKey() {
+  return normalizeVapidPublicKey(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY)
+}
+
 export async function sendWebPush(
   subscription: StoredPushSubscription,
   payload: { title: string; body: string; url?: string; tag?: string }

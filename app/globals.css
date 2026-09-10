@@ -260,6 +260,13 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
+  /* viewport-fit:cover + Chrome often reports inset 0, so the header sits
+     under the status bar. Keep a physical fallback (~40px) on Android. */
+  html.android header {
+    overflow: visible;
+    padding-top: max(2.5rem, env(safe-area-inset-top, 0px));
+  }
+
   html.android,
   html.android body,
   html.android button,
@@ -274,7 +281,7 @@
   html.android main {
     padding-left: 0.875rem;
     padding-right: 0.875rem;
-    padding-bottom: calc(6.25rem + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(8.5rem + env(safe-area-inset-bottom, 0px));
   }
 
   html.android .contest-shell {
@@ -334,12 +341,6 @@
     white-space: nowrap;
     max-width: 100%;
     font-size: 0.6rem;
-  }
-
-  /* Keep the floating header pill from clipping theme / language / sign-out
-     on the right edge (Android Chrome often squeezes overflow). */
-  html.android header {
-    overflow: visible;
   }
 
   html.android header .app-topbar {

@@ -40,3 +40,11 @@ export function vapidPublicKeyToUint8Array(raw: string): Uint8Array {
     throw new Error('VAPID_PUBLIC_KEY_INVALID')
   }
 }
+
+/** Copy into a standalone buffer — Chrome Android rejects shared/offset views. */
+export function vapidApplicationServerKey(raw: string): Uint8Array {
+  const bytes = vapidPublicKeyToUint8Array(raw)
+  const copy = new Uint8Array(bytes.byteLength)
+  copy.set(bytes)
+  return copy
+}
