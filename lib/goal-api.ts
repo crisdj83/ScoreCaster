@@ -395,6 +395,7 @@ async function goalGet(
     const res = await fetch(url, {
       headers: { Authorization: `Bearer ${key}` },
       next: { revalidate: revalidateSeconds, tags: ['goal-api'] },
+      signal: AbortSignal.timeout(6000),
     })
     const remaining = Number(res.headers.get('x-ratelimit-remaining'))
     if (Number.isFinite(remaining)) {
@@ -477,8 +478,17 @@ function scorersFor(fixture: GoalFixture, events: GoalEvent[]): LiveScorers {
 export async function getMatchVenues(matches: FootballMatchRef[]): Promise<Map<string, string>> {
   const venues = new Map<string, string>()
   if (!matches.length) return venues
-  const fixtures = apiKey() ? await getSeasonFixtures() : []
+
+  const unresolved: FootballMatchRef[] = []
   for (const match of matches) {
+    const known = homeVenue(match.homeTeam)
+    if (known) venues.set(String(match.id), known)
+    else unresolved.push(match)
+  }
+  if (!unresolved.length || !apiKey()) return venues
+
+  const fixtures = await getSeasonFixtures()
+  for (const match of unresolved) {
     const fixture = fixtures.length ? findGoalFixture(fixtures, match) : null
     const venue = (fixture ? formatVenue(fixture) : '') || homeVenue(match.homeTeam)
     if (venue) venues.set(String(match.id), venue)

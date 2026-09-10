@@ -93,7 +93,7 @@ export default async function FixturesPage(props: { params: Promise<{ id: string
 
   const seasonLength = normalizeSeasonLength(contest?.season_length)
   const [data, standingsData, footballScorers, goalScorers] = await Promise.all([
-    getPLMatches(),
+    getPLMatches().catch(() => ({ matches: [] })),
     getPLStandings().catch(() => null),
     getPLScorers().catch(() => ({ scorers: [] as Array<Record<string, unknown>> })),
     getPlTopScorers().catch(() => ({ scorers: [] })),

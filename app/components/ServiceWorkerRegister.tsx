@@ -46,7 +46,7 @@ export default function ServiceWorkerRegister() {
     window.addEventListener('unhandledrejection', onRejection)
 
     void navigator.serviceWorker
-      .register('/sw.js')
+      .register('/sw.js', { updateViaCache: 'none' })
       .then((registration) => {
         void registration.update()
         // Clear any legacy cached Next chunks from older SW versions.

@@ -10,22 +10,29 @@ async function fetchFootballData(
     throw new Error('FOOTBALL_DATA_API_KEY is not configured');
   }
 
-  const res = await fetch(`${BASE_URL}${path}`, {
-    headers: {
-      'X-Auth-Token': apiKey,
-      ...extraHeaders,
-    },
-    next: { revalidate: revalidateSeconds, tags: ['football-data'] },
-  });
+  try {
+    const res = await fetch(`${BASE_URL}${path}`, {
+      headers: {
+        'X-Auth-Token': apiKey,
+        ...extraHeaders,
+      },
+      next: { revalidate: revalidateSeconds, tags: ['football-data'] },
+      signal: AbortSignal.timeout(8000),
+    });
 
-  if (!res.ok) {
-    const details = await res.text();
+    if (!res.ok) {
+      const details = await res.text();
+      throw new Error(
+        `football-data.org request failed: ${res.status} ${res.statusText}${details ? ` — ${details}` : ''}`
+      );
+    }
+
+    return res.json();
+  } catch (error) {
     throw new Error(
-      `football-data.org request failed: ${res.status} ${res.statusText}${details ? ` — ${details}` : ''}`
+      error instanceof Error ? error.message : 'football-data.org request failed'
     );
   }
-
-  return res.json();
 }
 
 // Function 1: Gets the individual matches (What we just used)

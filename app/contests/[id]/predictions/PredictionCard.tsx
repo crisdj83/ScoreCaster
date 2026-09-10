@@ -117,7 +117,6 @@ export default function PredictionCard({
   contestId,
   existingPrediction,
   revealedPredictions = [],
-  venue,
 }: {
   match: {
     id: number | string
@@ -129,7 +128,6 @@ export default function PredictionCard({
   contestId: string
   existingPrediction?: ExistingPrediction | null
   revealedPredictions?: RevealedPrediction[]
-  venue?: string
 }) {
   const initialHome = savedScore(existingPrediction?.predicted_home_score)
   const initialAway = savedScore(existingPrediction?.predicted_away_score)
@@ -318,12 +316,6 @@ export default function PredictionCard({
       <div className="relative mt-1.5 min-h-[1.1rem] px-1 sm:mt-1.5 sm:px-8">
         <p className="truncate text-center text-[10px] font-medium leading-tight text-slate-500">
           <span className="tabular-nums">{dateCompact}</span>
-          {venue ? (
-            <>
-              <span className="px-1 text-zinc-400">·</span>
-              <span>{venue}</span>
-            </>
-          ) : null}
         </p>
         <span className="absolute inset-y-0 right-0 flex items-center gap-1.5 text-[10px] font-semibold">
           {showUrgency ? (

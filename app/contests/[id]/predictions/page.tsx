@@ -1,7 +1,6 @@
 // Fixed both imports to go up 4 folders instead of 5!
 import { createClient } from '../../../../lib/supabase/server'
 import { getPLMatches } from '../../../../lib/football'
-import { getMatchVenues } from '../../../../lib/goal-api'
 import { isMatchInContestSeason, normalizeSeasonLength } from '../../../../lib/contest-season'
 import { getActiveMatchday, isOpenForPrediction, isPredictionLocked, isPredictionRevealable } from '../../../../lib/scoring'
 import PredictionCard from './PredictionCard'
@@ -130,12 +129,6 @@ export default async function PredictionsPage(props: {
     points_earned: prediction.points,
   }))
 
-  let venues = new Map<string, string>()
-  try {
-    venues = await getMatchVenues(matchdayFixtures)
-  } catch (error) {
-    console.error('Predictions venues fetch failed:', error)
-  }
   const openThisWeek = matchdayFixtures.filter((match) => isOpenForPrediction(match, now))
   const unmadeMatches = openThisWeek.filter(
     (match) =>
@@ -191,7 +184,6 @@ export default async function PredictionsPage(props: {
               contestId={params.id} 
               existingPrediction={existingPrediction} 
               revealedPredictions={revealedPredictions?.filter((prediction) => String(prediction.match_id) === String(match.id)) || []}
-              venue={venues.get(String(match.id))}
             />
           )
         })}

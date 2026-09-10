@@ -310,7 +310,7 @@ export default async function RankingPage(props: { params: Promise<{ id: string 
   const ptsResult = scoring.result
   const seasonLength = normalizeSeasonLength(contest.season_length)
   const [matchData, standingsData] = await Promise.all([
-    getPLMatches(),
+    getPLMatches().catch(() => ({ matches: [] })),
     getPLStandings().catch(() => null),
   ])
   const matches: Match[] = (matchData.matches || [])

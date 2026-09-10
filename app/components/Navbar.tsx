@@ -11,37 +11,44 @@ import { getServerLocale } from '../../lib/i18n-server'
 
 export default async function Navbar() {
   const t = getTranslations(getServerLocale())
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  let user: { id: string } | null = null
   let unreadMessageCount = 0
   let isAdmin = false
-  if (user) {
-    const { data: memberships } = await supabase.from('contest_members').select('contest_id').eq('user_id', user.id)
-    const contestIds = (memberships || []).map(membership => membership.contest_id)
-    const [{ data: profile }, { data: messageReadState }] = await Promise.all([
-      supabase.from('users').select('is_global_admin').eq('id', user.id).single(),
-      supabase.from('message_reads').select('last_read_at').eq('user_id', user.id).maybeSingle(),
-    ])
-    isAdmin = profile?.is_global_admin === true
-    const lastRead = messageReadState?.last_read_at || '1970-01-01T00:00:00.000Z'
 
-    const [{ count: newMessageCount }, { count: newReplyCount }] = await Promise.all([
-      contestIds.length
-        ? supabase
-          .from('messages')
-          .select('id', { count: 'exact', head: true })
-          .in('contest_id', contestIds)
-          .gt('created_at', lastRead)
-        : Promise.resolve({ count: 0 }),
-      contestIds.length
-        ? supabase
-          .from('message_replies')
-          .select('id, messages!inner(contest_id)', { count: 'exact', head: true })
-          .in('messages.contest_id', contestIds)
-          .gt('created_at', lastRead)
-        : Promise.resolve({ count: 0 }),
-    ])
-    unreadMessageCount = (newMessageCount || 0) + (newReplyCount || 0)
+  try {
+    const supabase = await createClient()
+    const { data } = await supabase.auth.getUser()
+    user = data.user
+    if (user) {
+      const { data: memberships } = await supabase.from('contest_members').select('contest_id').eq('user_id', user.id)
+      const contestIds = (memberships || []).map((membership) => membership.contest_id)
+      const [{ data: profile }, { data: messageReadState }] = await Promise.all([
+        supabase.from('users').select('is_global_admin').eq('id', user.id).maybeSingle(),
+        supabase.from('message_reads').select('last_read_at').eq('user_id', user.id).maybeSingle(),
+      ])
+      isAdmin = profile?.is_global_admin === true
+      const lastRead = messageReadState?.last_read_at || '1970-01-01T00:00:00.000Z'
+
+      const [{ count: newMessageCount }, { count: newReplyCount }] = await Promise.all([
+        contestIds.length
+          ? supabase
+              .from('messages')
+              .select('id', { count: 'exact', head: true })
+              .in('contest_id', contestIds)
+              .gt('created_at', lastRead)
+          : Promise.resolve({ count: 0 }),
+        contestIds.length
+          ? supabase
+              .from('message_replies')
+              .select('id, messages!inner(contest_id)', { count: 'exact', head: true })
+              .in('messages.contest_id', contestIds)
+              .gt('created_at', lastRead)
+          : Promise.resolve({ count: 0 }),
+      ])
+      unreadMessageCount = (newMessageCount || 0) + (newReplyCount || 0)
+    }
+  } catch (error) {
+    console.error('Navbar failed to load session:', error)
   }
 
   return (

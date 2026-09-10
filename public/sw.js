@@ -19,12 +19,24 @@ self.addEventListener('activate', (event) => {
   )
 })
 
+function shouldBypass(request, url) {
+  if (request.method !== 'GET') return true
+  if (url.origin !== self.location.origin) return true
+  if (request.headers.get('RSC') === '1') return true
+  if (request.headers.has('Next-Router-State-Tree')) return true
+  if (request.headers.has('Next-Router-Prefetch')) return true
+  if (request.headers.has('Next-Url')) return true
+  if (url.searchParams.has('_rsc')) return true
+  if (url.pathname.startsWith('/api/')) return true
+  if (url.pathname.startsWith('/auth/')) return true
+  if (url.pathname.startsWith('/_next/') && !url.pathname.startsWith('/_next/static/')) return true
+  return false
+}
+
 self.addEventListener('fetch', (event) => {
   const { request } = event
-  if (request.method !== 'GET') return
-
   const url = new URL(request.url)
-  if (url.origin !== self.location.origin) return
+  if (shouldBypass(request, url)) return
 
   // Never cache Next.js build assets. Hashed chunks change every deploy; a
   // stale cacheFirst entry (especially on iOS Home Screen PWAs) causes
@@ -39,7 +51,9 @@ self.addEventListener('fetch', (event) => {
     return
   }
 
-  event.respondWith(networkFirst(request))
+  if (request.mode === 'navigate') {
+    event.respondWith(networkFirstNavigate(request))
+  }
 })
 
 async function cacheFirst(request) {
@@ -54,17 +68,13 @@ async function cacheFirst(request) {
   return response
 }
 
-async function networkFirst(request) {
+async function networkFirstNavigate(request) {
   try {
     return await fetch(request)
-  } catch (error) {
-    if (request.mode === 'navigate') {
-      const offline = await caches.match('/offline.html')
-      if (offline) return offline
-    }
-    const cached = await caches.match(request)
-    if (cached) return cached
-    throw error
+  } catch {
+    const offline = await caches.match('/offline.html')
+    if (offline) return offline
+    throw new Error('offline')
   }
 }
 

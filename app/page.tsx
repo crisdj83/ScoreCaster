@@ -91,7 +91,7 @@ export default async function Home(props: { searchParams: Promise<{ success?: st
   }
 
   const [{ data: profile }, { data: myContests }, plData] = await Promise.all([
-    supabase.from('users').select('username, email, avatar_url, favorite_team, is_global_admin').eq('id', user.id).single(),
+    supabase.from('users').select('username, email, avatar_url, favorite_team, is_global_admin').eq('id', user.id).maybeSingle(),
     supabase.from('contest_members').select(`
       contest_id,
       role,
