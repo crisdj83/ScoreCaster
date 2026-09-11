@@ -1,5 +1,5 @@
 /**
- * XactScore brand tokens for the native app.
+ * XactScore brand tokens mirrored from the web app globals.css.
  */
 
 import '@/global.css';
@@ -19,12 +19,12 @@ export const Colors = {
     success: '#059669',
   },
   dark: {
-    text: '#fafafa',
-    background: '#09090b',
+    text: '#f7f7f8',
+    background: '#18181b',
     backgroundElement: '#18181b',
     backgroundSelected: '#27272a',
-    textSecondary: '#a1a1aa',
-    accent: '#f59e0b',
+    textSecondary: '#9a9aa3',
+    accent: '#ff8a2b',
     accentMuted: '#78350f',
     danger: '#f87171',
     success: '#34d399',

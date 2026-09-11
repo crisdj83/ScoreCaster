@@ -1,63 +1,48 @@
 import { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
-  Pressable,
+  Linking,
   RefreshControl,
   ScrollView,
   StyleSheet,
+  Text,
   View,
 } from 'react-native';
-import { useFocusEffect } from 'expo-router';
+import { type Href, router, useFocusEffect } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
+import { HomeHeroBanner } from '@/components/home/hero-banner';
+import { HomeProfileStrip } from '@/components/home/profile-strip';
+import { HomeWeekList } from '@/components/home/home-week-list';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
-import { useAuth } from '@/contexts/auth';
 import { useTheme } from '@/hooks/use-theme';
-import { normalizeContestMemberships } from '@/lib/normalize';
-import { supabase } from '@/lib/supabase';
-import type { ContestMembership } from '@/lib/types';
+import {
+  fetchHomeDashboard,
+  webPath,
+  type HomeDashboard,
+  type HomeLeague,
+} from '@/lib/home-api';
 
 export default function HomeScreen() {
   const theme = useTheme();
-  const { user, profile } = useAuth();
-  const [contests, setContests] = useState<ContestMembership[]>([]);
+  const [data, setData] = useState<HomeDashboard | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    if (!user) return;
     setError(null);
-    const { data, error: queryError } = await supabase
-      .from('contest_members')
-      .select(
-        `
-        contest_id,
-        role,
-        joined_at,
-        contests (
-          name,
-          contest_key,
-          season_length,
-          is_open,
-          is_public
-        )
-      `
-      )
-      .eq('user_id', user.id)
-      .order('joined_at', { ascending: false });
-
-    if (queryError) {
-      setError(queryError.message);
-      setContests([]);
-    } else {
-      setContests(normalizeContestMemberships(data));
+    try {
+      const dashboard = await fetchHomeDashboard();
+      setData(dashboard);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load home');
+      setData(null);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
     }
-    setLoading(false);
-    setRefreshing(false);
-  }, [user]);
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -66,13 +51,20 @@ export default function HomeScreen() {
     }, [load])
   );
 
-  const displayName = profile?.username || profile?.email || user?.email || 'Player';
+  const onLeaguePress = (league: HomeLeague) => {
+    const path =
+      league.openPicks > 0
+        ? `/contests/${league.contestId}/predictions`
+        : `/contests/${league.contestId}/ranking`;
+    void Linking.openURL(webPath(path));
+  };
 
   return (
-    <ThemedView style={styles.root}>
+    <View style={[styles.root, { backgroundColor: theme.background }]}>
       <SafeAreaView style={styles.safe} edges={['top']}>
         <ScrollView
           contentContainerStyle={styles.content}
+          showsVerticalScrollIndicator={false}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
@@ -83,88 +75,83 @@ export default function HomeScreen() {
               tintColor={theme.accent}
             />
           }>
-          <View style={styles.header}>
-            <ThemedText type="small" themeColor="textSecondary">
-              Welcome back
-            </ThemedText>
-            <ThemedText type="subtitle" style={styles.title}>
-              {displayName}
-            </ThemedText>
-            <ThemedText themeColor="textSecondary">
-              Predict Premier League scores and climb your league tables.
-            </ThemedText>
-          </View>
+          {loading && !data ? (
+            <View style={styles.loadingWrap}>
+              <ActivityIndicator size="large" color={theme.accent} />
+            </View>
+          ) : null}
 
-          <View style={[styles.card, { backgroundColor: theme.backgroundElement }]}>
-            <ThemedText type="smallBold" style={styles.sectionLabel}>
-              Your leagues
-            </ThemedText>
+          {error ? (
+            <View
+              style={[
+                styles.errorCard,
+                {
+                  backgroundColor: `${theme.danger}18`,
+                  borderColor: theme.danger,
+                },
+              ]}>
+              <Text style={[styles.errorText, { color: theme.danger }]}>{error}</Text>
+              <Text style={[styles.errorHint, { color: theme.textSecondary }]}>
+                Pull to refresh. If this persists, confirm EXPO_PUBLIC_SITE_URL points at a
+                deployment that includes /api/mobile/home.
+              </Text>
+            </View>
+          ) : null}
 
-            {loading ? (
-              <ActivityIndicator color={theme.accent} style={{ marginVertical: Spacing.four }} />
-            ) : error ? (
-              <ThemedText themeColor="danger">{error}</ThemedText>
-            ) : contests.length === 0 ? (
-              <ThemedText themeColor="textSecondary">
-                You are not in a league yet. Open the Leagues tab to create or join one.
-              </ThemedText>
-            ) : (
-              contests.slice(0, 5).map((row) => (
-                <View
-                  key={row.contest_id}
-                  style={[styles.row, { borderColor: theme.backgroundSelected }]}>
-                  <View style={{ flex: 1, gap: 2 }}>
-                    <ThemedText type="default">{row.contests?.name || 'League'}</ThemedText>
-                    <ThemedText type="small" themeColor="textSecondary">
-                      {(row.role === 'admin' ? 'Admin' : 'Member') +
-                        (row.contests?.is_open === false ? ' · Locked' : '')}
-                    </ThemedText>
-                  </View>
-                  <View style={[styles.pill, { backgroundColor: theme.accentMuted }]}>
-                    <ThemedText type="smallBold" style={{ color: theme.accent }}>
-                      Open
-                    </ThemedText>
-                  </View>
-                </View>
-              ))
-            )}
-          </View>
+          {data ? (
+            <>
+              <HomeWeekList
+                leagues={data.leagues}
+                onJoinPress={() => router.push('/contests' as Href)}
+                onLeaguePress={onLeaguePress}
+              />
 
-          <Pressable
-            style={[styles.hint, { backgroundColor: theme.backgroundElement }]}
-            disabled>
-            <ThemedText type="smallBold">Next up</ThemedText>
-            <ThemedText type="small" themeColor="textSecondary">
-              Matchday predictions will land here. Use Leagues to open a contest and make picks.
-            </ThemedText>
-          </Pressable>
+              <HomeHeroBanner
+                nextMatch={data.nextMatch}
+                recentScores={data.recentScores}
+                predictPath={data.predictPath}
+              />
+
+              <HomeProfileStrip
+                username={data.profile.username}
+                email={data.profile.email}
+                avatarUrl={data.profile.avatarUrl}
+                favoriteTeam={data.profile.favoriteTeam}
+                favoriteCrest={data.profile.favoriteCrest}
+                isGlobalAdmin={data.profile.isGlobalAdmin}
+                bestRank={data.bestRank}
+                onEditPress={() => router.push('/profile' as Href)}
+              />
+            </>
+          ) : null}
         </ScrollView>
       </SafeAreaView>
-    </ThemedView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
-  safe: { flex: 1, alignItems: 'center' },
+  safe: { flex: 1 },
   content: {
     width: '100%',
     maxWidth: MaxContentWidth,
-    paddingHorizontal: Spacing.four,
+    alignSelf: 'center',
+    paddingHorizontal: Spacing.three,
+    paddingTop: Spacing.two,
     paddingBottom: BottomTabInset + Spacing.four,
-    gap: Spacing.four,
+    gap: 12,
   },
-  header: { gap: Spacing.one, paddingTop: Spacing.three },
-  title: { fontSize: 28, lineHeight: 34 },
-  card: { borderRadius: 16, padding: Spacing.four, gap: Spacing.three },
-  sectionLabel: { textTransform: 'uppercase', letterSpacing: 1 },
-  row: {
-    flexDirection: 'row',
+  loadingWrap: {
+    paddingVertical: Spacing.six,
     alignItems: 'center',
-    gap: Spacing.two,
-    paddingVertical: Spacing.two,
-    borderBottomWidth: StyleSheet.hairlineWidth,
   },
-  pill: { borderRadius: 999, paddingHorizontal: 10, paddingVertical: 6 },
-  hint: { borderRadius: 16, padding: Spacing.four, gap: Spacing.two },
+  errorCard: {
+    borderWidth: 1,
+    borderRadius: 16,
+    padding: Spacing.three,
+    gap: 6,
+  },
+  errorText: { fontSize: 14, fontWeight: '700' },
+  errorHint: { fontSize: 12, lineHeight: 18 },
 });
