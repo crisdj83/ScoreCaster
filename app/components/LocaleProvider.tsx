@@ -22,9 +22,7 @@ export function LocaleProvider({ initialLocale, children }: { initialLocale: Loc
   }, [])
 
   useEffect(() => {
-    const saved =
-      window.localStorage.getItem('xactscore_locale') ||
-      window.localStorage.getItem('scorecaster_locale')
+    const saved = window.localStorage.getItem('xactscore_locale')
     if (isLocale(saved) && saved !== initialLocale) {
       window.localStorage.setItem('xactscore_locale', saved)
       document.cookie = `xactscore_locale=${saved};path=/;max-age=31536000;samesite=lax`
