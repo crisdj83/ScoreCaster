@@ -29,14 +29,24 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setError(null);
+    setNotice(null);
     try {
       const dashboard = await fetchHomeDashboard();
       setData(dashboard);
+      if (dashboard.source === 'supabase') {
+        setNotice(
+          'Live fixtures API is not on the website yet. Showing your leagues from your account.'
+        );
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load home');
+      const message = err instanceof Error ? err.message : 'Failed to load home';
+      setError(message.includes('<!DOCTYPE') || message.includes('<html')
+        ? 'Could not load Home. Pull to refresh.'
+        : message);
       setData(null);
     } finally {
       setLoading(false);
@@ -81,6 +91,19 @@ export default function HomeScreen() {
             </View>
           ) : null}
 
+          {notice ? (
+            <View
+              style={[
+                styles.noticeCard,
+                {
+                  backgroundColor: `${theme.accent}18`,
+                  borderColor: theme.accent,
+                },
+              ]}>
+              <Text style={[styles.noticeText, { color: theme.text }]}>{notice}</Text>
+            </View>
+          ) : null}
+
           {error ? (
             <View
               style={[
@@ -91,10 +114,6 @@ export default function HomeScreen() {
                 },
               ]}>
               <Text style={[styles.errorText, { color: theme.danger }]}>{error}</Text>
-              <Text style={[styles.errorHint, { color: theme.textSecondary }]}>
-                Pull to refresh. If this persists, confirm EXPO_PUBLIC_SITE_URL points at a
-                deployment that includes /api/mobile/home.
-              </Text>
             </View>
           ) : null}
 
@@ -146,6 +165,12 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.six,
     alignItems: 'center',
   },
+  noticeCard: {
+    borderWidth: 1,
+    borderRadius: 16,
+    padding: Spacing.three,
+  },
+  noticeText: { fontSize: 13, lineHeight: 18, fontWeight: '600' },
   errorCard: {
     borderWidth: 1,
     borderRadius: 16,
@@ -153,5 +178,4 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   errorText: { fontSize: 14, fontWeight: '700' },
-  errorHint: { fontSize: 12, lineHeight: 18 },
 });
